@@ -1,3 +1,6 @@
+#include "SDL_events.h"
+#include "SDL_gamecontroller.h"
+#include "SDL_keycode.h"
 #include "SDL_render.h"
 #include <SDL.h>
 #include <SDL_image.h>
@@ -10,17 +13,21 @@
 #define SCREEN_WIDTH 480
 #define SCREEN_HEIGHT 272
 
+#define CARD_WIDTH CARD_SPRITE_WIDTH
+#define CARD_HEIGHT CARD_SPRITE_HEIGHT
+
 #else
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
+#define CARD_WIDTH 96
+#define CARD_HEIGHT 128
+
 #endif
 
 #define CARD_SPRITE_WIDTH 48
 #define CARD_SPRITE_HEIGHT 64
-#define CARD_WIDTH 96
-#define CARD_HEIGHT 128
 
 SDL_Texture *cards_atlas;
 
@@ -60,16 +67,29 @@ void draw_card(SDL_Renderer *renderer, Suit suit, Rank rank, SDL_Rect *dst) {
   SDL_RenderCopy(renderer, cards_atlas, &src, dst);
 }
 
-void draw_hand(SDL_Renderer *renderer, const Hand *hand) {
+void draw_hand(SDL_Renderer *renderer, const Hand *hand, int hovered) {
   int hand_width = hand->count * (CARD_WIDTH - 16);
   for (int i = 0; i < hand->count; i++) {
-    draw_card(renderer, hand->cards[i].suit, hand->cards[i].rank,
-              &(SDL_Rect){.x = SCREEN_WIDTH / 2 - hand_width / 2 +
-                               (CARD_WIDTH - 16) * i,
-                          .y = SCREEN_HEIGHT - CARD_HEIGHT - 16,
-                          .w = CARD_WIDTH,
-                          .h = CARD_HEIGHT});
+    if (hovered == i) {
+      continue;
+    }
+
+    SDL_Rect dst = {.x = SCREEN_WIDTH / 2 - hand_width / 2 +
+                         (CARD_WIDTH - 16) * i,
+                    .y = SCREEN_HEIGHT - CARD_HEIGHT - 16,
+                    .w = CARD_WIDTH,
+                    .h = CARD_HEIGHT};
+
+    draw_card(renderer, hand->cards[i].suit, hand->cards[i].rank, &dst);
   }
+
+  draw_card(
+      renderer, hand->cards[hovered].suit, hand->cards[hovered].rank,
+      &(SDL_Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 +
+                       (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
+                  .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 - CARD_HEIGHT * 0.1,
+                  .w = CARD_WIDTH * 1.2,
+                  .h = CARD_HEIGHT * 1.2});
 }
 
 int main(int argc, char *argv[]) {
@@ -101,6 +121,7 @@ int main(int argc, char *argv[]) {
     hand.cards[hand.count] = deck.cards[rand() % 52];
     hand.count++;
   }
+  short hovered = 0;
 
   int running = 1;
   SDL_Event event;
@@ -118,10 +139,32 @@ int main(int argc, char *argv[]) {
         // Connect a controller when it is connected
         SDL_GameControllerOpen(event.cdevice.which);
         break;
+      case SDL_KEYDOWN:
+        if (event.key.keysym.sym == SDLK_RIGHT) {
+          if (hovered < hand.count - 1) {
+            hovered += 1;
+          }
+        }
+        if (event.key.keysym.sym == SDLK_LEFT) {
+          if (hovered > 0) {
+            hovered -= 1;
+          }
+        }
+        break;
       case SDL_CONTROLLERBUTTONDOWN:
         if (event.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
           // Close the program if start is pressed
           running = 0;
+        }
+        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+          if (hovered < hand.count - 1) {
+            hovered += 1;
+          }
+        }
+        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+          if (hovered > 0) {
+            hovered -= 1;
+          }
         }
         break;
       }
@@ -134,7 +177,7 @@ int main(int argc, char *argv[]) {
     // Clear the screen
     SDL_RenderClear(renderer);
 
-    draw_hand(renderer, &hand);
+    draw_hand(renderer, &hand, hovered);
 
     // Draw everything on a white background
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
