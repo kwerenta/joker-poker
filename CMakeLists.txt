@@ -3,13 +3,11 @@ cmake_minimum_required(VERSION 3.5)
 project(joker-poker)
 
 find_package(SDL2 REQUIRED SDL2)
-include_directories(${PROJECT_NAME} ${SDL2_INCLUDE_DIRS})
-
-# target_include_directories(${PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIRS})
+find_package(SDL2_IMAGE REQUIRED SDL2_image)
 
 add_executable(${PROJECT_NAME} main.c)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 m)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2_image::SDL2_image)
 
 if(PSP)
     create_pbp_file(
