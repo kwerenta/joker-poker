@@ -1,9 +1,6 @@
-#include "SDL_events.h"
-#include "SDL_gamecontroller.h"
-#include "SDL_keycode.h"
-#include "SDL_render.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 // #define __PSP__
@@ -48,9 +45,26 @@ typedef enum {
   RANK_KING
 } Rank;
 
+typedef enum {
+  HAND_FLUSH_FIVE,
+  HAND_FLUSH_HOUSE,
+  HAND_FIVE_OF_KIND,
+  HAND_STRAIGHT_FLUSH,
+  HAND_FOUR_OF_KIND,
+  HAND_FULL_HOUSE,
+  HAND_FLUSH,
+  HAND_STRAIGHT,
+  HAND_THREE_OF_KIND,
+  HAND_TWO_PAIR,
+  HAND_PAIR,
+  HAND_HIGH_CARD
+} PokerHand;
+
 typedef struct {
   Suit suit;
   Rank rank;
+  // Since max 5 cards can be selected,
+  // number 5 means not selected
   uint8_t selected;
 } Card;
 
@@ -98,7 +112,7 @@ void draw_hand(SDL_Renderer *renderer, const Hand *hand, uint8_t hovered) {
                         .h = CARD_HEIGHT * 1.2});
 }
 
-void toggle_card_select(Hand *hand, short hovered) {
+void toggle_card_select(Hand *hand, uint8_t hovered) {
   if (hand->cards[hovered].selected == 5) {
     uint8_t selected_count = 0;
     for (uint8_t i = 0; i < hand->count; i++) {
@@ -126,6 +140,106 @@ void toggle_card_select(Hand *hand, short hovered) {
   }
 }
 
+PokerHand evaluate_hand(Hand *hand) {
+  uint8_t rank_counts[13] = {};
+  uint8_t suit_counts[4] = {};
+
+  // 2 of kind, 3 of kind, 4 of kind, 5 of kind
+  uint8_t x_of_kind[4] = {};
+  uint8_t selected_count = 0;
+  uint8_t has_flush = 0;
+  uint8_t has_straight = 0;
+
+  Rank highest_card = RANK_TWO, lowest_card = RANK_ACE;
+
+  for (uint8_t i = 0; i < hand->count; i++) {
+    Card card = hand->cards[i];
+    if (card.selected != 5) {
+      selected_count += 1;
+
+      if ((highest_card != RANK_ACE && card.rank > highest_card) ||
+          card.rank == RANK_ACE) {
+        highest_card = card.rank;
+      }
+      if ((card.rank != RANK_ACE && card.rank < lowest_card) ||
+          lowest_card == RANK_ACE) {
+        lowest_card = card.rank;
+      }
+
+      rank_counts[card.rank] += 1;
+      suit_counts[card.suit] += 1;
+
+      if (rank_counts[card.rank] > 1) {
+        // this means there are duplicates in selected ranks,
+        // so straight is not possible
+        has_straight = 2;
+        x_of_kind[rank_counts[card.rank] - 2] += 1;
+        if (rank_counts[card.rank] > 2) {
+          x_of_kind[rank_counts[card.rank] - 3] -= 1;
+        }
+      }
+
+      if (suit_counts[card.suit] == 5) {
+        has_flush = 1;
+      }
+    }
+  }
+
+  printf("Highest %d\tLowest %d\n", highest_card, lowest_card);
+
+  if (has_straight == 0 && selected_count == 5 &&
+      (highest_card - lowest_card == 4 ||
+       (highest_card == RANK_ACE && 13 - lowest_card == 4))) {
+    has_straight = 1;
+  }
+
+  if (has_flush == 1 && x_of_kind[5 - 2] > 0) {
+    return HAND_FLUSH_FIVE;
+  }
+
+  if (has_flush == 1 && x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1) {
+    return HAND_FLUSH_HOUSE;
+  }
+
+  if (x_of_kind[5 - 2] == 1) {
+    return HAND_FIVE_OF_KIND;
+  }
+
+  if (has_flush == 1 && has_straight == 1) {
+    return HAND_STRAIGHT_FLUSH;
+  }
+
+  if (x_of_kind[4 - 2] == 1) {
+    return HAND_FOUR_OF_KIND;
+  }
+
+  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1) {
+    return HAND_FULL_HOUSE;
+  }
+
+  if (has_flush == 1) {
+    return HAND_FLUSH;
+  }
+
+  if (has_straight == 1) {
+    return HAND_STRAIGHT;
+  }
+
+  if (x_of_kind[3 - 2] == 1) {
+    return HAND_THREE_OF_KIND;
+  }
+
+  if (x_of_kind[2 - 2] >= 2) {
+    return HAND_TWO_PAIR;
+  }
+
+  if (x_of_kind[2 - 2] >= 1) {
+    return HAND_PAIR;
+  }
+
+  return HAND_HIGH_CARD;
+}
+
 int main(int argc, char *argv[]) {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
@@ -151,8 +265,18 @@ int main(int argc, char *argv[]) {
   }
 
   Hand hand = {
-      .size = 5, .cards = (Card *)malloc(5 * sizeof(Card)), .count = 0};
-  for (uint8_t i = 0; i < hand.size; i++) {
+      .size = 8, .cards = (Card *)malloc(8 * sizeof(Card)), .count = 8};
+  hand.cards[0] = (Card){.rank = RANK_ACE, .suit = 1, .selected = 5};
+  hand.cards[1] = (Card){.rank = RANK_TWO, .suit = 1, .selected = 5};
+  // hand.cards[1] = (Card){.rank = RANK_TEN, .suit = 2, .selected = 5};
+  hand.cards[2] = (Card){.rank = RANK_THREE, .suit = 1, .selected = 5};
+  // hand.cards[2] = (Card){.rank = RANK_NINE, .suit = 1, .selected = 5};
+  hand.cards[3] = (Card){.rank = RANK_FOUR, .suit = 1, .selected = 5};
+  hand.cards[4] = (Card){.rank = RANK_FIVE, .suit = 1, .selected = 5};
+  hand.cards[5] = (Card){.rank = RANK_JACK, .suit = 2, .selected = 5};
+  hand.cards[6] = (Card){.rank = RANK_KING, .suit = 2, .selected = 5};
+  hand.cards[7] = (Card){.rank = RANK_QUEEN, .suit = 2, .selected = 5};
+  for (uint8_t i = 8; i < hand.size; i++) {
     hand.cards[hand.count] = deck.cards[rand() % 52];
     hand.count++;
   }
@@ -188,6 +312,7 @@ int main(int argc, char *argv[]) {
           break;
         case SDLK_SPACE:
           toggle_card_select(&hand, hovered);
+          printf("Selected hand: %d\n", evaluate_hand(&hand));
           break;
         }
         break;
