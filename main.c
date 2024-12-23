@@ -51,11 +51,12 @@ typedef enum {
 typedef struct {
   Suit suit;
   Rank rank;
+  uint8_t selected;
 } Card;
 
 typedef struct {
-  short size;
-  short count;
+  uint8_t size;
+  uint8_t count;
   Card *cards;
 } Hand, Deck;
 
@@ -67,9 +68,9 @@ void draw_card(SDL_Renderer *renderer, Suit suit, Rank rank, SDL_Rect *dst) {
   SDL_RenderCopy(renderer, cards_atlas, &src, dst);
 }
 
-void draw_hand(SDL_Renderer *renderer, const Hand *hand, int hovered) {
-  int hand_width = hand->count * (CARD_WIDTH - 16);
-  for (int i = 0; i < hand->count; i++) {
+void draw_hand(SDL_Renderer *renderer, const Hand *hand, uint8_t hovered) {
+  uint32_t hand_width = hand->count * (CARD_WIDTH - 16);
+  for (uint8_t i = 0; i < hand->count; i++) {
     if (hovered == i) {
       continue;
     }
@@ -80,16 +81,49 @@ void draw_hand(SDL_Renderer *renderer, const Hand *hand, int hovered) {
                     .w = CARD_WIDTH,
                     .h = CARD_HEIGHT};
 
+    if (hand->cards[i].selected != 5) {
+      dst.y -= 50;
+    }
+
     draw_card(renderer, hand->cards[i].suit, hand->cards[i].rank, &dst);
   }
 
-  draw_card(
-      renderer, hand->cards[hovered].suit, hand->cards[hovered].rank,
-      &(SDL_Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 +
-                       (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
-                  .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 - CARD_HEIGHT * 0.1,
-                  .w = CARD_WIDTH * 1.2,
-                  .h = CARD_HEIGHT * 1.2});
+  draw_card(renderer, hand->cards[hovered].suit, hand->cards[hovered].rank,
+            &(SDL_Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 +
+                             (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
+                        .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 -
+                             CARD_HEIGHT * 0.1 -
+                             (hand->cards[hovered].selected != 5 ? 50 : 0),
+                        .w = CARD_WIDTH * 1.2,
+                        .h = CARD_HEIGHT * 1.2});
+}
+
+void toggle_card_select(Hand *hand, short hovered) {
+  if (hand->cards[hovered].selected == 5) {
+    uint8_t selected_count = 0;
+    for (uint8_t i = 0; i < hand->count; i++) {
+      if (hand->cards[i].selected != 5) {
+        if (selected_count == 5) {
+          return;
+        }
+
+        selected_count++;
+      }
+    }
+
+    hand->cards[hovered].selected = selected_count;
+    return;
+  }
+
+  uint8_t selected_order = hand->cards[hovered].selected;
+  hand->cards[hovered].selected = 5;
+
+  for (uint8_t i = 0; i < hand->count; i++) {
+    if (hand->cards[i].selected > selected_order &&
+        hand->cards[i].selected < 5) {
+      hand->cards[i].selected--;
+    }
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -110,18 +144,19 @@ int main(int argc, char *argv[]) {
 
   Deck deck = {
       .size = 52, .cards = (Card *)malloc(52 * sizeof(Card)), .count = 0};
-  for (int i = 0; i < 52; i++) {
-    deck.cards[deck.count] = (Card){.suit = i % 4, .rank = i % 13};
+  for (uint8_t i = 0; i < 52; i++) {
+    deck.cards[deck.count] =
+        (Card){.suit = i % 4, .rank = i % 13, .selected = 5};
     deck.count++;
   }
 
   Hand hand = {
       .size = 5, .cards = (Card *)malloc(5 * sizeof(Card)), .count = 0};
-  for (int i = 0; i < hand.size; i++) {
+  for (uint8_t i = 0; i < hand.size; i++) {
     hand.cards[hand.count] = deck.cards[rand() % 52];
     hand.count++;
   }
-  short hovered = 0;
+  uint8_t hovered = 0;
 
   int running = 1;
   SDL_Event event;
@@ -140,31 +175,40 @@ int main(int argc, char *argv[]) {
         SDL_GameControllerOpen(event.cdevice.which);
         break;
       case SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_RIGHT) {
+        switch (event.key.keysym.sym) {
+        case SDLK_RIGHT:
           if (hovered < hand.count - 1) {
             hovered += 1;
           }
-        }
-        if (event.key.keysym.sym == SDLK_LEFT) {
+          break;
+        case SDLK_LEFT:
           if (hovered > 0) {
             hovered -= 1;
           }
+          break;
+        case SDLK_SPACE:
+          toggle_card_select(&hand, hovered);
+          break;
         }
         break;
       case SDL_CONTROLLERBUTTONDOWN:
-        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_START) {
-          // Close the program if start is pressed
+        switch (event.cbutton.button) {
+        case SDL_CONTROLLER_BUTTON_START:
           running = 0;
-        }
-        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+          break;
+        case SDL_CONTROLLER_BUTTON_A:
+          toggle_card_select(&hand, hovered);
+          break;
+        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
           if (hovered < hand.count - 1) {
             hovered += 1;
           }
-        }
-        if (event.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+          break;
+        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
           if (hovered > 0) {
             hovered -= 1;
           }
+          break;
         }
         break;
       }
