@@ -143,53 +143,56 @@ void toggle_card_select(Hand *hand, uint8_t hovered) {
 PokerHand evaluate_hand(Hand *hand) {
   uint8_t rank_counts[13] = {};
   uint8_t suit_counts[4] = {};
+  uint8_t selected_count = 0;
 
   // 2 of kind, 3 of kind, 4 of kind, 5 of kind
   uint8_t x_of_kind[4] = {};
-  uint8_t selected_count = 0;
   uint8_t has_flush = 0;
   uint8_t has_straight = 0;
+  uint8_t has_ace = 0;
 
-  Rank highest_card = RANK_TWO, lowest_card = RANK_ACE;
+  Rank highest_card = RANK_TWO, lowest_card = RANK_KING;
 
   for (uint8_t i = 0; i < hand->count; i++) {
     Card card = hand->cards[i];
-    if (card.selected != 5) {
-      selected_count += 1;
+    if (card.selected == 5) {
+      continue;
+    }
 
-      if ((highest_card != RANK_ACE && card.rank > highest_card) ||
-          card.rank == RANK_ACE) {
-        highest_card = card.rank;
-      }
-      if ((card.rank != RANK_ACE && card.rank < lowest_card) ||
-          lowest_card == RANK_ACE) {
-        lowest_card = card.rank;
-      }
+    selected_count += 1;
 
-      rank_counts[card.rank] += 1;
-      suit_counts[card.suit] += 1;
+    if (card.rank == RANK_ACE) {
+      has_ace = 1;
+    }
+    if (card.rank != RANK_ACE && card.rank > highest_card) {
+      highest_card = card.rank;
+    }
+    if (card.rank != RANK_ACE && card.rank < lowest_card) {
+      lowest_card = card.rank;
+    }
 
-      if (rank_counts[card.rank] > 1) {
-        // this means there are duplicates in selected ranks,
-        // so straight is not possible
-        has_straight = 2;
-        x_of_kind[rank_counts[card.rank] - 2] += 1;
-        if (rank_counts[card.rank] > 2) {
-          x_of_kind[rank_counts[card.rank] - 3] -= 1;
-        }
-      }
+    rank_counts[card.rank] += 1;
+    suit_counts[card.suit] += 1;
 
-      if (suit_counts[card.suit] == 5) {
-        has_flush = 1;
+    if (rank_counts[card.rank] > 1) {
+      // this means there are duplicates in selected ranks,
+      // so straight is not possible
+      has_straight = 2;
+      x_of_kind[rank_counts[card.rank] - 2] += 1;
+      if (rank_counts[card.rank] > 2) {
+        x_of_kind[rank_counts[card.rank] - 3] -= 1;
       }
+    }
+
+    if (suit_counts[card.suit] == 5) {
+      has_flush = 1;
     }
   }
 
-  printf("Highest %d\tLowest %d\n", highest_card, lowest_card);
-
+  // A 2 3 4 5 is also valid straight, so it needs to be checked
   if (has_straight == 0 && selected_count == 5 &&
-      (highest_card - lowest_card == 4 ||
-       (highest_card == RANK_ACE && 13 - lowest_card == 4))) {
+      ((has_ace == 0 && highest_card - lowest_card == 4) ||
+       (has_ace == 1 && (13 - lowest_card == 4 || highest_card == 4)))) {
     has_straight = 1;
   }
 
@@ -265,18 +268,8 @@ int main(int argc, char *argv[]) {
   }
 
   Hand hand = {
-      .size = 8, .cards = (Card *)malloc(8 * sizeof(Card)), .count = 8};
-  hand.cards[0] = (Card){.rank = RANK_ACE, .suit = 1, .selected = 5};
-  hand.cards[1] = (Card){.rank = RANK_TWO, .suit = 1, .selected = 5};
-  // hand.cards[1] = (Card){.rank = RANK_TEN, .suit = 2, .selected = 5};
-  hand.cards[2] = (Card){.rank = RANK_THREE, .suit = 1, .selected = 5};
-  // hand.cards[2] = (Card){.rank = RANK_NINE, .suit = 1, .selected = 5};
-  hand.cards[3] = (Card){.rank = RANK_FOUR, .suit = 1, .selected = 5};
-  hand.cards[4] = (Card){.rank = RANK_FIVE, .suit = 1, .selected = 5};
-  hand.cards[5] = (Card){.rank = RANK_JACK, .suit = 2, .selected = 5};
-  hand.cards[6] = (Card){.rank = RANK_KING, .suit = 2, .selected = 5};
-  hand.cards[7] = (Card){.rank = RANK_QUEEN, .suit = 2, .selected = 5};
-  for (uint8_t i = 8; i < hand.size; i++) {
+      .size = 7, .cards = (Card *)malloc(7 * sizeof(Card)), .count = 0};
+  for (uint8_t i = 0; i < hand.size; i++) {
     hand.cards[hand.count] = deck.cards[rand() % 52];
     hand.count++;
   }
