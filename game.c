@@ -152,3 +152,95 @@ PokerHand evaluate_hand() {
 
   return HAND_HIGH_CARD;
 }
+
+void get_scoring_hand() {
+  PokerHand poker_hand = evaluate_hand();
+
+  const Hand *hand = &state.game.hand;
+  Card *selected_cards[5] = {};
+  Card *scoring_cards[5] = {};
+
+  for (uint8_t i = 0; i < hand->count; i++) {
+    if (hand->cards[i].selected == 5) {
+      continue;
+    }
+
+    selected_cards[hand->cards[i].selected] = &hand->cards[i];
+  }
+
+  // All of those hands require 5 selected cards
+  if (poker_hand == HAND_FLUSH_FIVE || poker_hand == HAND_FLUSH_HOUSE ||
+      poker_hand == HAND_FIVE_OF_KIND || poker_hand == HAND_STRAIGHT_FLUSH ||
+      poker_hand == HAND_FULL_HOUSE || poker_hand == HAND_FLUSH ||
+      poker_hand == HAND_STRAIGHT) {
+    for (uint8_t i = 0; i < 5; i++) {
+      if (selected_cards[i] == NULL) {
+        break;
+      }
+
+      scoring_cards[i] = selected_cards[i];
+    }
+  }
+
+  uint8_t rank_counts[13] = {};
+  uint8_t highest_card_index = 0;
+  Rank scoring_rank = RANK_TWO;
+  uint8_t scoring_count = 0;
+  for (uint8_t i = 0; i < 5; i++) {
+    if (selected_cards[i] == NULL) {
+      break;
+    }
+
+    if ((selected_cards[i]->rank == RANK_ACE &&
+         selected_cards[highest_card_index]->rank != RANK_ACE) ||
+        selected_cards[i]->rank > selected_cards[highest_card_index]->rank) {
+      highest_card_index = i;
+    }
+
+    rank_counts[selected_cards[i]->rank]++;
+    if (rank_counts[selected_cards[i]->rank] > scoring_count) {
+      scoring_rank = selected_cards[i]->rank;
+      scoring_count = rank_counts[scoring_rank];
+    }
+  }
+
+  if (poker_hand == HAND_FOUR_OF_KIND || poker_hand == HAND_THREE_OF_KIND ||
+      poker_hand == HAND_PAIR || poker_hand == HAND_TWO_PAIR) {
+    uint8_t j = 0;
+
+    Rank second_scoring_rank = scoring_rank;
+    if (poker_hand == HAND_TWO_PAIR) {
+      for (uint8_t i = 0; i < 13; i++) {
+        if (rank_counts[i] == 2 && i != scoring_rank) {
+          second_scoring_rank = i;
+          break;
+        }
+      }
+    }
+
+    for (uint8_t i = 0; i < 5; i++) {
+      if (selected_cards[i] == NULL ||
+          (selected_cards[i]->rank != scoring_rank &&
+           selected_cards[i]->rank != second_scoring_rank)) {
+        continue;
+      }
+
+      scoring_cards[j] = selected_cards[i];
+      j++;
+    }
+  }
+
+  if (poker_hand == HAND_HIGH_CARD) {
+    scoring_cards[0] = selected_cards[highest_card_index];
+  }
+
+  printf("Scoring hand: \n");
+  for (uint8_t i = 0; i < 5; i++) {
+    if (scoring_cards[i] == NULL) {
+      break;
+    }
+
+    printf("\t- %d of %d\n", scoring_cards[i]->rank, scoring_cards[i]->suit);
+  }
+  printf("\n");
+}

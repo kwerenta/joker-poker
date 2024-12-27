@@ -58,5 +58,6 @@ void game_init();
 
 void toggle_card_select(uint8_t hovered);
 PokerHand evaluate_hand();
+void get_scoring_hand();
 
 #endif

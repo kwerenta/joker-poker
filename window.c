@@ -56,6 +56,9 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         toggle_card_select(*hovered);
         printf("Selected hand: %d\n", evaluate_hand());
         break;
+      case SDLK_RETURN:
+        get_scoring_hand();
+        break;
       }
       break;
     case SDL_CONTROLLERBUTTONDOWN:
@@ -65,6 +68,9 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         break;
       case SDL_CONTROLLER_BUTTON_A:
         toggle_card_select(*hovered);
+        break;
+      case SDL_CONTROLLER_BUTTON_X:
+        get_scoring_hand();
         break;
       case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
         if (*hovered < state.game.hand.count - 1) {
