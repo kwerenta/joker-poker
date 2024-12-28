@@ -38,8 +38,6 @@ typedef enum {
 typedef struct {
   Suit suit;
   Rank rank;
-  // Since max 5 cards can be selected,
-  // number 5 means not selected
   uint8_t selected;
 } Card;
 
@@ -56,7 +54,9 @@ typedef struct {
 
 void game_init();
 
+void set_hovered_card(uint8_t *hovered, uint8_t new_position);
 void toggle_card_select(uint8_t hovered);
+void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
 PokerHand evaluate_hand();
 void get_scoring_hand();
 

@@ -6,7 +6,7 @@ void game_init() {
       .size = 52, .cards = (Card *)malloc(52 * sizeof(Card)), .count = 0};
   for (uint8_t i = 0; i < 52; i++) {
     state.game.deck.cards[state.game.deck.count] =
-        (Card){.suit = i % 4, .rank = i % 13, .selected = 5};
+        (Card){.suit = i % 4, .rank = i % 13, .selected = 0};
     state.game.deck.count++;
   }
 
@@ -19,33 +19,50 @@ void game_init() {
   }
 }
 
-void toggle_card_select(uint8_t hovered) {
-  Hand *hand = &state.game.hand;
-  if (hand->cards[hovered].selected == 5) {
-    uint8_t selected_count = 0;
-    for (uint8_t i = 0; i < hand->count; i++) {
-      if (hand->cards[i].selected != 5) {
-        if (selected_count == 5) {
-          return;
-        }
-
-        selected_count++;
-      }
-    }
-
-    hand->cards[hovered].selected = selected_count;
+void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
+  if (new_position >= state.game.hand.count) {
     return;
   }
 
-  uint8_t selected_order = hand->cards[hovered].selected;
-  hand->cards[hovered].selected = 5;
+  *hovered = new_position;
+}
 
+void toggle_card_select(uint8_t hovered) {
+  Hand *hand = &state.game.hand;
+
+  if (hand->cards[hovered].selected == 1) {
+    hand->cards[hovered].selected = 0;
+    return;
+  }
+
+  uint8_t selected_count = 0;
   for (uint8_t i = 0; i < hand->count; i++) {
-    if (hand->cards[i].selected > selected_order &&
-        hand->cards[i].selected < 5) {
-      hand->cards[i].selected--;
+    if (hand->cards[i].selected == 0) {
+      continue;
+    }
+
+    selected_count++;
+
+    if (selected_count == 5) {
+      return;
     }
   }
+
+  hand->cards[hovered].selected = 1;
+}
+
+void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
+  Hand *hand = &state.game.hand;
+
+  if (new_position >= hand->count) {
+    return;
+  }
+
+  Card temp = hand->cards[*hovered];
+  hand->cards[*hovered] = hand->cards[new_position];
+  hand->cards[new_position] = temp;
+
+  *hovered = new_position;
 }
 
 PokerHand evaluate_hand() {
@@ -65,7 +82,7 @@ PokerHand evaluate_hand() {
 
   for (uint8_t i = 0; i < hand->count; i++) {
     Card card = hand->cards[i];
-    if (card.selected == 5) {
+    if (card.selected == 0) {
       continue;
     }
 
@@ -160,12 +177,14 @@ void get_scoring_hand() {
   Card *selected_cards[5] = {};
   Card *scoring_cards[5] = {};
 
+  uint8_t j = 0;
   for (uint8_t i = 0; i < hand->count; i++) {
-    if (hand->cards[i].selected == 5) {
+    if (hand->cards[i].selected == 0) {
       continue;
     }
 
-    selected_cards[hand->cards[i].selected] = &hand->cards[i];
+    selected_cards[j] = &hand->cards[i];
+    j++;
   }
 
   // All of those hands require 5 selected cards
@@ -184,16 +203,16 @@ void get_scoring_hand() {
 
   uint8_t rank_counts[13] = {};
   uint8_t highest_card_index = 0;
-  Rank scoring_rank = RANK_TWO;
+  Rank scoring_rank = selected_cards[0]->rank;
   uint8_t scoring_count = 0;
   for (uint8_t i = 0; i < 5; i++) {
     if (selected_cards[i] == NULL) {
       break;
     }
 
-    if ((selected_cards[i]->rank == RANK_ACE &&
-         selected_cards[highest_card_index]->rank != RANK_ACE) ||
-        selected_cards[i]->rank > selected_cards[highest_card_index]->rank) {
+    if (selected_cards[highest_card_index]->rank != RANK_ACE &&
+        (selected_cards[i]->rank == RANK_ACE ||
+         selected_cards[i]->rank > selected_cards[highest_card_index]->rank)) {
       highest_card_index = i;
     }
 

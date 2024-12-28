@@ -34,23 +34,27 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
     case SDL_QUIT:
       state.running = 0;
       break;
+
     case SDL_CONTROLLERDEVICEADDED:
       SDL_GameControllerOpen(event->cdevice.which);
       break;
+
     case SDL_KEYDOWN:
       switch (event->key.keysym.sym) {
       case SDLK_ESCAPE:
         state.running = 0;
         break;
       case SDLK_RIGHT:
-        if (*hovered < state.game.hand.count - 1) {
-          *hovered += 1;
-        }
+        set_hovered_card(hovered, *hovered + 1);
         break;
       case SDLK_LEFT:
-        if (*hovered > 0) {
-          *hovered -= 1;
-        }
+        set_hovered_card(hovered, *hovered - 1);
+        break;
+      case SDLK_LEFTBRACKET:
+        move_card_in_hand(hovered, *hovered - 1);
+        break;
+      case SDLK_RIGHTBRACKET:
+        move_card_in_hand(hovered, *hovered + 1);
         break;
       case SDLK_SPACE:
         toggle_card_select(*hovered);
@@ -61,6 +65,7 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         break;
       }
       break;
+
     case SDL_CONTROLLERBUTTONDOWN:
       switch (event->cbutton.button) {
       case SDL_CONTROLLER_BUTTON_START:
@@ -73,14 +78,16 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         get_scoring_hand();
         break;
       case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-        if (*hovered < state.game.hand.count - 1) {
-          *hovered += 1;
-        }
+        set_hovered_card(hovered, *hovered + 1);
         break;
       case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-        if (*hovered > 0) {
-          *hovered -= 1;
-        }
+        set_hovered_card(hovered, *hovered - 1);
+        break;
+      case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+        move_card_in_hand(hovered, *hovered - 1);
+        break;
+      case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+        move_card_in_hand(hovered, *hovered + 1);
         break;
       }
       break;

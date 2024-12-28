@@ -25,7 +25,7 @@ void draw_hand(uint8_t hovered) {
                     .w = CARD_WIDTH,
                     .h = CARD_HEIGHT};
 
-    if (hand->cards[i].selected != 5) {
+    if (hand->cards[i].selected == 1) {
       dst.y -= 50;
     }
 
@@ -37,7 +37,7 @@ void draw_hand(uint8_t hovered) {
                              (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
                         .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 -
                              CARD_HEIGHT * 0.1 -
-                             (hand->cards[hovered].selected != 5 ? 50 : 0),
+                             (hand->cards[hovered].selected == 1 ? 50 : 0),
                         .w = CARD_WIDTH * 1.2,
                         .h = CARD_HEIGHT * 1.2});
 }
