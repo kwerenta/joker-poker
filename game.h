@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "lib/cvector.h"
 #include <stdint.h>
 
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
@@ -42,9 +43,7 @@ typedef struct {
 } Card;
 
 typedef struct {
-  uint8_t size;
-  uint8_t count;
-  Card *cards;
+  cvector_vector_type(Card) cards;
 } Hand, Deck;
 
 typedef struct {

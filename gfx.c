@@ -13,8 +13,8 @@ void draw_card(Suit suit, Rank rank, SDL_Rect *dst) {
 void draw_hand(uint8_t hovered) {
   const Hand *hand = &state.game.hand;
 
-  uint32_t hand_width = hand->count * (CARD_WIDTH - 16);
-  for (uint8_t i = 0; i < hand->count; i++) {
+  uint32_t hand_width = cvector_size(hand->cards) * (CARD_WIDTH - 16);
+  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
     if (hovered == i) {
       continue;
     }

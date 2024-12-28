@@ -1,31 +1,29 @@
 #include "game.h"
+#include "lib/cvector.h"
 #include "state.h"
 
 void game_init() {
-  state.game.deck = (Deck){
-      .size = 52, .cards = (Card *)malloc(52 * sizeof(Card)), .count = 0};
-  for (uint8_t i = 0; i < 52; i++) {
-    state.game.deck.cards[state.game.deck.count] =
-        (Card){.suit = i % 4, .rank = i % 13, .selected = 0};
-    state.game.deck.count++;
+  cvector_reserve(state.game.deck.cards, 52);
+  for (uint8_t i = 0; i < cvector_capacity(state.game.deck.cards); i++) {
+    Card card = {.suit = i % 4, .rank = i % 13, .selected = 0};
+    cvector_push_back(state.game.deck.cards, card);
   }
 
-  state.game.hand =
-      (Hand){.size = 7, .cards = (Card *)malloc(7 * sizeof(Card)), .count = 0};
-  for (uint8_t i = 0; i < state.game.hand.size; i++) {
-    state.game.hand.cards[state.game.hand.count] =
-        state.game.deck.cards[rand() % 52];
-    state.game.hand.count++;
+  cvector_reserve(state.game.hand.cards, 7);
+  for (uint8_t i = 0; i < cvector_capacity(state.game.hand.cards); i++) {
+    cvector_pop_back(state.game.deck.cards);
+    cvector_push_back(state.game.hand.cards,
+                      state.game.deck.cards[rand() % 52]);
   }
 }
 
 void game_destroy() {
-  free(state.game.deck.cards);
-  free(state.game.hand.cards);
+  cvector_free(state.game.deck.cards);
+  cvector_free(state.game.hand.cards);
 }
 
 void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
-  if (new_position >= state.game.hand.count) {
+  if (new_position >= cvector_size(state.game.hand.cards)) {
     return;
   }
 
@@ -41,7 +39,7 @@ void toggle_card_select(uint8_t hovered) {
   }
 
   uint8_t selected_count = 0;
-  for (uint8_t i = 0; i < hand->count; i++) {
+  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
     if (hand->cards[i].selected == 0) {
       continue;
     }
@@ -59,7 +57,7 @@ void toggle_card_select(uint8_t hovered) {
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
   Hand *hand = &state.game.hand;
 
-  if (new_position >= hand->count) {
+  if (new_position >= cvector_size(hand->cards)) {
     return;
   }
 
@@ -85,7 +83,7 @@ PokerHand evaluate_hand() {
 
   Rank highest_card = RANK_TWO, lowest_card = RANK_KING;
 
-  for (uint8_t i = 0; i < hand->count; i++) {
+  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
     Card card = hand->cards[i];
     if (card.selected == 0) {
       continue;
@@ -183,7 +181,7 @@ void get_scoring_hand() {
   Card *scoring_cards[5] = {};
 
   uint8_t j = 0;
-  for (uint8_t i = 0; i < hand->count; i++) {
+  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
     if (hand->cards[i].selected == 0) {
       continue;
     }
