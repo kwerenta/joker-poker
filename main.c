@@ -24,6 +24,8 @@ void init() {
 }
 
 void destroy() {
+  game_destroy();
+
   SDL_DestroyTexture(state.cards_atlas);
 
   window_destroy(state.window, state.renderer);

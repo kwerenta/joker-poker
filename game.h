@@ -53,6 +53,7 @@ typedef struct {
 } Game;
 
 void game_init();
+void game_destroy();
 
 void set_hovered_card(uint8_t *hovered, uint8_t new_position);
 void toggle_card_select(uint8_t hovered);

@@ -19,6 +19,11 @@ void game_init() {
   }
 }
 
+void game_destroy() {
+  free(state.game.deck.cards);
+  free(state.game.hand.cards);
+}
+
 void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
   if (new_position >= state.game.hand.count) {
     return;
