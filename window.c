@@ -2,6 +2,8 @@
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 
 void window_init(SDL_Window **window, SDL_Renderer **renderer) {
   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
@@ -19,11 +21,24 @@ void window_init(SDL_Window **window, SDL_Renderer **renderer) {
     fprintf(stderr, "Failed to create renderer: %s", SDL_GetError());
     exit(1);
   }
+
+  if (IMG_Init(IMG_INIT_PNG) < 0) {
+    fprintf(stderr, "Failed to initialize SDL2_image: %s", SDL_GetError());
+    exit(1);
+  }
+
+  if (TTF_Init() < 0) {
+    fprintf(stderr, "Failed to initialize SDL2_ttf : %s", SDL_GetError());
+    exit(1);
+  }
 }
 
 void window_destroy(SDL_Window *window, SDL_Renderer *renderer) {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
+
+  TTF_Quit();
+  IMG_Quit();
 
   SDL_Quit();
 }
@@ -98,6 +113,7 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
 void render(uint8_t hovered) {
   SDL_RenderClear(state.renderer);
 
+  render_selected_poker_hand();
   render_hand(hovered);
 
   SDL_SetRenderDrawColor(state.renderer, 255, 255, 255, 255);

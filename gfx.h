@@ -21,5 +21,6 @@
 
 void render_card(Suit suit, Rank rank, SDL_Rect *dst);
 void render_hand(uint8_t hovered);
+void render_selected_poker_hand();
 
 #endif

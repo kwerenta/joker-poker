@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -21,11 +22,13 @@ void init() {
   state.running = 1;
 
   state.cards_atlas = IMG_LoadTexture(state.renderer, "../res/cards.png");
+  state.font = TTF_OpenFont("../res/VT323-Regular.ttf", 64);
 }
 
 void destroy() {
   game_destroy();
 
+  TTF_CloseFont(state.font);
   SDL_DestroyTexture(state.cards_atlas);
 
   window_destroy(state.window, state.renderer);
