@@ -19,7 +19,7 @@
 
 #endif
 
-void draw_card(Suit suit, Rank rank, SDL_Rect *dst);
-void draw_hand(uint8_t hovered);
+void render_card(Suit suit, Rank rank, SDL_Rect *dst);
+void render_hand(uint8_t hovered);
 
 #endif

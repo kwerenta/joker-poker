@@ -61,7 +61,7 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         printf("Selected hand: %d\n", evaluate_hand());
         break;
       case SDLK_RETURN:
-        get_scoring_hand();
+        play_hand();
         break;
       }
       break;
@@ -75,7 +75,7 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         toggle_card_select(*hovered);
         break;
       case SDL_CONTROLLER_BUTTON_X:
-        get_scoring_hand();
+        play_hand();
         break;
       case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
         set_hovered_card(hovered, *hovered + 1);
@@ -98,7 +98,7 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
 void render(uint8_t hovered) {
   SDL_RenderClear(state.renderer);
 
-  draw_hand(hovered);
+  render_hand(hovered);
 
   SDL_SetRenderDrawColor(state.renderer, 255, 255, 255, 255);
   SDL_RenderPresent(state.renderer);

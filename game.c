@@ -3,23 +3,60 @@
 #include "state.h"
 
 void game_init() {
+  // Generate standard deck of 52 cards
   cvector_reserve(state.game.deck.cards, 52);
   for (uint8_t i = 0; i < cvector_capacity(state.game.deck.cards); i++) {
     Card card = {.suit = i % 4, .rank = i % 13, .selected = 0};
     cvector_push_back(state.game.deck.cards, card);
   }
 
+  shuffle_deck();
+
   cvector_reserve(state.game.hand.cards, 7);
   for (uint8_t i = 0; i < cvector_capacity(state.game.hand.cards); i++) {
-    cvector_pop_back(state.game.deck.cards);
-    cvector_push_back(state.game.hand.cards,
-                      state.game.deck.cards[rand() % 52]);
+    draw_card();
   }
 }
 
 void game_destroy() {
   cvector_free(state.game.deck.cards);
   cvector_free(state.game.hand.cards);
+}
+
+void draw_card() {
+  cvector_push_back(
+      state.game.hand.cards,
+      state.game.deck.cards[cvector_size(state.game.deck.cards) - 1]);
+  cvector_pop_back(state.game.deck.cards);
+}
+
+void play_hand() {
+  get_scoring_hand();
+
+  uint8_t i = 0;
+  while (i < cvector_size(state.game.hand.cards)) {
+    if (state.game.hand.cards[i].selected == 1) {
+      cvector_erase(state.game.hand.cards, i);
+      continue;
+    }
+
+    i++;
+  }
+
+  while (cvector_size(state.game.hand.cards) <
+         cvector_capacity(state.game.hand.cards)) {
+    draw_card();
+  }
+}
+
+void shuffle_deck() {
+  const Deck *deck = &state.game.deck;
+  for (uint8_t i = cvector_size(deck->cards) - 1; i > 0; i--) {
+    uint8_t j = rand() % (i + 1);
+    Card temp = deck->cards[i];
+    deck->cards[i] = deck->cards[j];
+    deck->cards[j] = temp;
+  }
 }
 
 void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
@@ -188,6 +225,10 @@ void get_scoring_hand() {
 
     selected_cards[j] = &hand->cards[i];
     j++;
+  }
+
+  if (selected_cards[0] == NULL) {
+    return;
   }
 
   // All of those hands require 5 selected cards
