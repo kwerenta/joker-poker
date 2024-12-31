@@ -47,8 +47,14 @@ typedef struct {
 } Hand, Deck;
 
 typedef struct {
+  uint8_t count;
+  PokerHand poker_hand;
+} SelectedHand;
+
+typedef struct {
   Deck deck;
   Hand hand;
+  SelectedHand selected_hand;
 } Game;
 
 void game_init();
@@ -63,5 +69,7 @@ void toggle_card_select(uint8_t hovered);
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
 PokerHand evaluate_hand();
 void get_scoring_hand();
+
+char *get_poker_hand_name(PokerHand hand);
 
 #endif

@@ -43,6 +43,8 @@ void play_hand() {
     i++;
   }
 
+  state.game.selected_hand.count = 0;
+
   while (cvector_size(state.game.hand.cards) <
          cvector_capacity(state.game.hand.cards)) {
     draw_card();
@@ -72,23 +74,28 @@ void toggle_card_select(uint8_t hovered) {
 
   if (hand->cards[hovered].selected == 1) {
     hand->cards[hovered].selected = 0;
+    state.game.selected_hand.count--;
     return;
   }
 
-  uint8_t selected_count = 0;
+  uint8_t *selected_count = &state.game.selected_hand.count;
+  *selected_count = 0;
   for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
     if (hand->cards[i].selected == 0) {
       continue;
     }
 
-    selected_count++;
+    (*selected_count)++;
 
-    if (selected_count == 5) {
+    if (*selected_count == 5) {
       return;
     }
   }
 
+  (*selected_count)++;
+
   hand->cards[hovered].selected = 1;
+  state.game.selected_hand.poker_hand = evaluate_hand();
 }
 
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
@@ -110,7 +117,7 @@ PokerHand evaluate_hand() {
 
   uint8_t rank_counts[13] = {};
   uint8_t suit_counts[4] = {};
-  uint8_t selected_count = 0;
+  const uint8_t selected_count = state.game.selected_hand.count;
 
   // 2 of kind, 3 of kind, 4 of kind, 5 of kind
   uint8_t x_of_kind[4] = {};
@@ -125,8 +132,6 @@ PokerHand evaluate_hand() {
     if (card.selected == 0) {
       continue;
     }
-
-    selected_count += 1;
 
     if (card.rank == RANK_ACE) {
       has_ace = 1;
@@ -306,4 +311,35 @@ void get_scoring_hand() {
     printf("\t- %d of %d\n", scoring_cards[i]->rank, scoring_cards[i]->suit);
   }
   printf("\n");
+}
+
+char *get_poker_hand_name(PokerHand hand) {
+  switch (hand) {
+  case HAND_FLUSH_FIVE:
+    return "Flush Five";
+  case HAND_FLUSH_HOUSE:
+    return "Flush House";
+  case HAND_FIVE_OF_KIND:
+    return "Five of Kind";
+  case HAND_STRAIGHT_FLUSH:
+    return "Straight Flush";
+  case HAND_FOUR_OF_KIND:
+    return "Four of Kind";
+  case HAND_FULL_HOUSE:
+    return "Full House";
+  case HAND_FLUSH:
+    return "Flush";
+  case HAND_STRAIGHT:
+    return "Straight";
+  case HAND_THREE_OF_KIND:
+    return "Three of Kind";
+  case HAND_TWO_PAIR:
+    return "Two Pair";
+  case HAND_PAIR:
+    return "Pair";
+  case HAND_HIGH_CARD:
+    return "High Card";
+  }
+
+  return "UNDEFINED HAND";
 }

@@ -1,5 +1,5 @@
 #include "gfx.h"
-#include "SDL_ttf.h"
+#include "game.h"
 #include "state.h"
 #include "window.h"
 
@@ -44,13 +44,18 @@ void render_hand(uint8_t hovered) {
 }
 
 void render_selected_poker_hand() {
+  if (state.game.selected_hand.count == 0) {
+    return;
+  }
+
   SDL_Rect text_rect = {.x = 16, .y = 16};
 
   SDL_Color white = {255, 255, 255, 255};
   SDL_Color black = {0, 0, 0, 255};
 
-  SDL_Surface *surface =
-      TTF_RenderUTF8_LCD(state.font, "Poker Hand", black, white);
+  SDL_Surface *surface = TTF_RenderUTF8_LCD(
+      state.font, get_poker_hand_name(state.game.selected_hand.poker_hand),
+      black, white);
 
   SDL_Texture *texture = SDL_CreateTextureFromSurface(state.renderer, surface);
 

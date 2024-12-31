@@ -73,7 +73,6 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         break;
       case SDLK_SPACE:
         toggle_card_select(*hovered);
-        printf("Selected hand: %d\n", evaluate_hand());
         break;
       case SDLK_RETURN:
         play_hand();
