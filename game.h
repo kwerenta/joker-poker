@@ -77,6 +77,8 @@ void play_hand();
 void set_hovered_card(uint8_t *hovered, uint8_t new_position);
 void toggle_card_select(uint8_t hovered);
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
+void deselect_all_cards();
+
 PokerHand evaluate_hand();
 void update_scoring_hand();
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);

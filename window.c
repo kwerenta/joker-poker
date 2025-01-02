@@ -71,6 +71,9 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
       case SDLK_RIGHTBRACKET:
         move_card_in_hand(hovered, *hovered + 1);
         break;
+      case SDLK_BACKSPACE:
+        deselect_all_cards();
+        break;
       case SDLK_SPACE:
         toggle_card_select(*hovered);
         break;
@@ -90,6 +93,9 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         break;
       case SDL_CONTROLLER_BUTTON_X:
         play_hand();
+        break;
+      case SDL_CONTROLLER_BUTTON_Y:
+        deselect_all_cards();
         break;
       case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
         set_hovered_card(hovered, *hovered + 1);

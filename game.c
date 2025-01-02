@@ -108,6 +108,14 @@ void toggle_card_select(uint8_t hovered) {
   update_scoring_hand();
 }
 
+void deselect_all_cards() {
+  Hand *hand = &state.game.hand;
+  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
+    hand->cards[i].selected = 0;
+  }
+  state.game.selected_hand.count = 0;
+}
+
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
   Hand *hand = &state.game.hand;
 
