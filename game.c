@@ -10,15 +10,21 @@ void game_init() {
     cvector_push_back(state.game.deck.cards, create_card(i % 4, i % 13));
   }
 
+  state.game.full_deck.size = state.game.deck.size;
+  cvector_copy(state.game.deck.cards, state.game.full_deck.cards);
+
   shuffle_deck();
 
   state.game.hand.size = 7;
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
   fill_hand();
+
+  state.game.ante = 1;
 }
 
 void game_destroy() {
   cvector_free(state.game.deck.cards);
+  cvector_free(state.game.full_deck.cards);
   cvector_free(state.game.hand.cards);
 }
 
@@ -51,6 +57,33 @@ void play_hand() {
       state.game.selected_hand.chips * state.game.selected_hand.mult;
 
   remove_selected_cards();
+
+  double required_score =
+      get_ante_base_score(state.game.ante) * (state.game.blind == 0   ? 1
+                                              : state.game.blind == 1 ? 1.5
+                                                                      : 2);
+  if (state.game.score >= required_score) {
+    state.game.round++;
+    state.game.blind++;
+
+    if (state.game.blind > 2) {
+      state.game.blind = 0;
+      state.game.ante++;
+    }
+
+    printf("Blind completed!\n\tRequired score: %.0lf\n\tScore: %.0lf\n",
+           required_score, state.game.score);
+    printf("Next round:\n\tRound: %d\n\tBlind: %d\n\tAnte: %d\n",
+           state.game.round, state.game.blind, state.game.ante);
+
+    state.game.score = 0;
+
+    // Reset hand and deck for new blind
+    cvector_clear(state.game.hand.cards);
+    cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
+    shuffle_deck();
+  }
+
   fill_hand();
 }
 
@@ -410,4 +443,29 @@ PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
   }
 
   return (PokerHandScoring){.mult = 0, .chips = 0};
+}
+
+double get_ante_base_score(uint8_t ante) {
+  switch (ante) {
+  case 0:
+    return 100;
+  case 1:
+    return 300;
+  case 2:
+    return 800;
+  case 3:
+    return 2000;
+  case 4:
+    return 5000;
+  case 5:
+    return 11000;
+  case 6:
+    return 20000;
+  case 7:
+    return 35000;
+  case 8:
+    return 50000;
+  }
+
+  return 0;
 }

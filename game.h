@@ -64,10 +64,15 @@ typedef struct {
 } SelectedHand;
 
 typedef struct {
+  Deck full_deck;
   Deck deck;
   Hand hand;
-  uint64_t score;
   SelectedHand selected_hand;
+
+  double score;
+  uint8_t ante;
+  uint8_t round;
+  uint8_t blind;
 } Game;
 
 void game_init();
@@ -88,7 +93,9 @@ void remove_selected_cards();
 
 PokerHand evaluate_hand();
 void update_scoring_hand();
+
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
+double get_ante_base_score(uint8_t ante);
 
 char *get_poker_hand_name(PokerHand hand);
 

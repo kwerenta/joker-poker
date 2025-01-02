@@ -84,7 +84,7 @@ void render_selected_poker_hand() {
 
   SDL_Rect score_rect = {.x = 16, .y = hand_score_rect.y + 48 + 8};
 
-  snprintf(buffer, 64, "Score: %llu", state.game.score);
+  snprintf(buffer, 64, "Score: %.0lf", state.game.score);
   surface = TTF_RenderUTF8_LCD(state.font, buffer, bg_color, fg_color);
   texture = SDL_CreateTextureFromSurface(state.renderer, surface);
   score_rect.w = surface->w;
