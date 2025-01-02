@@ -14,9 +14,7 @@ void game_init() {
 
   state.game.hand.size = 7;
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
-  for (uint8_t i = 0; i < state.game.hand.size; i++) {
-    draw_card();
-  }
+  fill_hand();
 }
 
 void game_destroy() {
@@ -40,12 +38,28 @@ void draw_card() {
   cvector_pop_back(state.game.deck.cards);
 }
 
+void fill_hand() {
+  while (cvector_size(state.game.hand.cards) < state.game.hand.size) {
+    draw_card();
+  }
+}
+
 void play_hand() {
   update_scoring_hand();
 
   state.game.score +=
       state.game.selected_hand.chips * state.game.selected_hand.mult;
 
+  remove_selected_cards();
+  fill_hand();
+}
+
+void discard_hand() {
+  remove_selected_cards();
+  fill_hand();
+}
+
+void remove_selected_cards() {
   uint8_t i = 0;
   while (i < cvector_size(state.game.hand.cards)) {
     if (state.game.hand.cards[i].selected == 1) {
@@ -57,10 +71,6 @@ void play_hand() {
   }
 
   state.game.selected_hand.count = 0;
-
-  while (cvector_size(state.game.hand.cards) < state.game.hand.size) {
-    draw_card();
-  }
 }
 
 void shuffle_deck() {
