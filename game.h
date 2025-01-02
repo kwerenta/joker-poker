@@ -49,6 +49,9 @@ typedef struct {
 } Card;
 
 typedef struct {
+  // Max number of cards in structure that can be obtained naturally
+  // (some bosses/jokers will be able to overflow this value)
+  uint8_t size;
   cvector_vector_type(Card) cards;
 } Hand, Deck;
 
@@ -69,13 +72,14 @@ typedef struct {
 
 void game_init();
 void game_destroy();
+Card create_card(Suit suit, Rank rank);
 
 void shuffle_deck();
 void draw_card();
 void play_hand();
 
 void set_hovered_card(uint8_t *hovered, uint8_t new_position);
-void toggle_card_select(uint8_t hovered);
+void toggle_card_select(uint8_t index);
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
 void deselect_all_cards();
 

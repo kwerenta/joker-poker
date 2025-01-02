@@ -4,21 +4,17 @@
 
 void game_init() {
   // Generate standard deck of 52 cards
-  cvector_reserve(state.game.deck.cards, 52);
-  for (uint8_t i = 0; i < cvector_capacity(state.game.deck.cards); i++) {
-    uint16_t chips = i % 13 == 0 ? 11 : i % 13 + 1;
-    if (i % 13 != 0 && chips > 10) {
-      chips = 10;
-    }
-
-    Card card = {.suit = i % 4, .rank = i % 13, .chips = chips, .selected = 0};
-    cvector_push_back(state.game.deck.cards, card);
+  state.game.deck.size = 52;
+  cvector_reserve(state.game.deck.cards, state.game.deck.size);
+  for (uint8_t i = 0; i < state.game.deck.size; i++) {
+    cvector_push_back(state.game.deck.cards, create_card(i % 4, i % 13));
   }
 
   shuffle_deck();
 
-  cvector_reserve(state.game.hand.cards, 7);
-  for (uint8_t i = 0; i < cvector_capacity(state.game.hand.cards); i++) {
+  state.game.hand.size = 7;
+  cvector_reserve(state.game.hand.cards, state.game.hand.size);
+  for (uint8_t i = 0; i < state.game.hand.size; i++) {
     draw_card();
   }
 }
@@ -26,6 +22,15 @@ void game_init() {
 void game_destroy() {
   cvector_free(state.game.deck.cards);
   cvector_free(state.game.hand.cards);
+}
+
+Card create_card(Suit suit, Rank rank) {
+  uint16_t chips = rank == RANK_ACE ? 11 : rank + 1;
+  if (rank != RANK_ACE && chips > 10) {
+    chips = 10;
+  }
+
+  return (Card){.suit = suit, .rank = rank, .chips = chips, .selected = 0};
 }
 
 void draw_card() {
@@ -53,8 +58,7 @@ void play_hand() {
 
   state.game.selected_hand.count = 0;
 
-  while (cvector_size(state.game.hand.cards) <
-         cvector_capacity(state.game.hand.cards)) {
+  while (cvector_size(state.game.hand.cards) < state.game.hand.size) {
     draw_card();
   }
 }
@@ -77,11 +81,11 @@ void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
   *hovered = new_position;
 }
 
-void toggle_card_select(uint8_t hovered) {
+void toggle_card_select(uint8_t index) {
   Hand *hand = &state.game.hand;
 
-  if (hand->cards[hovered].selected == 1) {
-    hand->cards[hovered].selected = 0;
+  if (hand->cards[index].selected == 1) {
+    hand->cards[index].selected = 0;
     state.game.selected_hand.count--;
     update_scoring_hand();
     return;
@@ -103,7 +107,7 @@ void toggle_card_select(uint8_t hovered) {
 
   (*selected_count)++;
 
-  hand->cards[hovered].selected = 1;
+  hand->cards[index].selected = 1;
 
   update_scoring_hand();
 }
