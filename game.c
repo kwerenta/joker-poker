@@ -6,7 +6,12 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.deck.cards, 52);
   for (uint8_t i = 0; i < cvector_capacity(state.game.deck.cards); i++) {
-    Card card = {.suit = i % 4, .rank = i % 13, .selected = 0};
+    uint16_t chips = i % 13 == 0 ? 11 : i % 13 + 1;
+    if (i % 13 != 0 && chips > 10) {
+      chips = 10;
+    }
+
+    Card card = {.suit = i % 4, .rank = i % 13, .chips = chips, .selected = 0};
     cvector_push_back(state.game.deck.cards, card);
   }
 
@@ -31,7 +36,10 @@ void draw_card() {
 }
 
 void play_hand() {
-  get_scoring_hand();
+  update_scoring_hand();
+
+  state.game.score +=
+      state.game.selected_hand.chips * state.game.selected_hand.mult;
 
   uint8_t i = 0;
   while (i < cvector_size(state.game.hand.cards)) {
@@ -75,6 +83,7 @@ void toggle_card_select(uint8_t hovered) {
   if (hand->cards[hovered].selected == 1) {
     hand->cards[hovered].selected = 0;
     state.game.selected_hand.count--;
+    update_scoring_hand();
     return;
   }
 
@@ -95,7 +104,8 @@ void toggle_card_select(uint8_t hovered) {
   (*selected_count)++;
 
   hand->cards[hovered].selected = 1;
-  state.game.selected_hand.poker_hand = evaluate_hand();
+
+  update_scoring_hand();
 }
 
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
@@ -215,12 +225,16 @@ PokerHand evaluate_hand() {
   return HAND_HIGH_CARD;
 }
 
-void get_scoring_hand() {
+void update_scoring_hand() {
   PokerHand poker_hand = evaluate_hand();
 
+  state.game.selected_hand.poker_hand = poker_hand;
   const Hand *hand = &state.game.hand;
   Card *selected_cards[5] = {};
-  Card *scoring_cards[5] = {};
+  Card **scoring_cards = state.game.selected_hand.scoring_cards;
+
+  // Clear previous scoring cards
+  memset(scoring_cards, 0, 5 * sizeof(Card *));
 
   uint8_t j = 0;
   for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
@@ -243,7 +257,7 @@ void get_scoring_hand() {
       poker_hand == HAND_STRAIGHT) {
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL) {
-        break;
+        return;
       }
 
       scoring_cards[i] = selected_cards[i];
@@ -302,15 +316,16 @@ void get_scoring_hand() {
     scoring_cards[0] = selected_cards[highest_card_index];
   }
 
-  printf("Scoring hand: \n");
+  PokerHandScoring scoring = get_poker_hand_base_scoring(poker_hand);
+  state.game.selected_hand.chips = scoring.chips;
+  state.game.selected_hand.mult = scoring.mult;
   for (uint8_t i = 0; i < 5; i++) {
     if (scoring_cards[i] == NULL) {
-      break;
+      continue;
     }
 
-    printf("\t- %d of %d\n", scoring_cards[i]->rank, scoring_cards[i]->suit);
+    state.game.selected_hand.chips += scoring_cards[i]->chips;
   }
-  printf("\n");
 }
 
 char *get_poker_hand_name(PokerHand hand) {
@@ -342,4 +357,35 @@ char *get_poker_hand_name(PokerHand hand) {
   }
 
   return "UNDEFINED HAND";
+}
+
+PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
+  switch (hand) {
+  case HAND_FLUSH_FIVE:
+    return (PokerHandScoring){.mult = 16, .chips = 160};
+  case HAND_FLUSH_HOUSE:
+    return (PokerHandScoring){.mult = 14, .chips = 140};
+  case HAND_FIVE_OF_KIND:
+    return (PokerHandScoring){.mult = 12, .chips = 120};
+  case HAND_STRAIGHT_FLUSH:
+    return (PokerHandScoring){.mult = 8, .chips = 100};
+  case HAND_FOUR_OF_KIND:
+    return (PokerHandScoring){.mult = 7, .chips = 60};
+  case HAND_FULL_HOUSE:
+    return (PokerHandScoring){.mult = 4, .chips = 40};
+  case HAND_FLUSH:
+    return (PokerHandScoring){.mult = 4, .chips = 35};
+  case HAND_STRAIGHT:
+    return (PokerHandScoring){.mult = 4, .chips = 30};
+  case HAND_THREE_OF_KIND:
+    return (PokerHandScoring){.mult = 3, .chips = 30};
+  case HAND_TWO_PAIR:
+    return (PokerHandScoring){.mult = 2, .chips = 20};
+  case HAND_PAIR:
+    return (PokerHandScoring){.mult = 2, .chips = 10};
+  case HAND_HIGH_CARD:
+    return (PokerHandScoring){.mult = 1, .chips = 5};
+  }
+
+  return (PokerHandScoring){.mult = 0, .chips = 0};
 }

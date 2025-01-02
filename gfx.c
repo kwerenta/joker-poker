@@ -1,4 +1,5 @@
 #include "gfx.h"
+#include "SDL_surface.h"
 #include "game.h"
 #include "state.h"
 #include "window.h"
@@ -44,24 +45,52 @@ void render_hand(uint8_t hovered) {
 }
 
 void render_selected_poker_hand() {
-  if (state.game.selected_hand.count == 0) {
-    return;
+  SDL_Color fg_color = {255, 255, 255, 255};
+  SDL_Color bg_color = {0, 0, 0, 255};
+
+  SDL_Surface *surface;
+  SDL_Texture *texture;
+
+  SDL_Rect hand_rect = {.x = 16, .y = 16};
+  SDL_Rect hand_score_rect = {.x = 16, .y = hand_rect.y + 48 + 8};
+
+  char buffer[64];
+
+  if (state.game.selected_hand.count != 0) {
+    surface = TTF_RenderUTF8_LCD(
+        state.font, get_poker_hand_name(state.game.selected_hand.poker_hand),
+        bg_color, fg_color);
+
+    texture = SDL_CreateTextureFromSurface(state.renderer, surface);
+
+    hand_rect.w = surface->w;
+    hand_rect.h = surface->h;
+
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(state.renderer, texture, NULL, &hand_rect);
+    SDL_DestroyTexture(texture);
+
+    snprintf(buffer, 64, "%llu x %llu", state.game.selected_hand.mult,
+             state.game.selected_hand.chips);
+    surface = TTF_RenderUTF8_LCD(state.font, buffer, bg_color, fg_color);
+    texture = SDL_CreateTextureFromSurface(state.renderer, surface);
+    hand_score_rect.w = surface->w;
+    hand_score_rect.h = surface->h;
+
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(state.renderer, texture, NULL, &hand_score_rect);
+    SDL_DestroyTexture(texture);
   }
 
-  SDL_Rect text_rect = {.x = 16, .y = 16};
+  SDL_Rect score_rect = {.x = 16, .y = hand_score_rect.y + 48 + 8};
 
-  SDL_Color white = {255, 255, 255, 255};
-  SDL_Color black = {0, 0, 0, 255};
-
-  SDL_Surface *surface = TTF_RenderUTF8_LCD(
-      state.font, get_poker_hand_name(state.game.selected_hand.poker_hand),
-      black, white);
-
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(state.renderer, surface);
-
-  text_rect.w = surface->w;
-  text_rect.h = surface->h;
+  snprintf(buffer, 64, "Score: %llu", state.game.score);
+  surface = TTF_RenderUTF8_LCD(state.font, buffer, bg_color, fg_color);
+  texture = SDL_CreateTextureFromSurface(state.renderer, surface);
+  score_rect.w = surface->w;
+  score_rect.h = surface->h;
 
   SDL_FreeSurface(surface);
-  SDL_RenderCopy(state.renderer, texture, NULL, &text_rect);
+  SDL_RenderCopy(state.renderer, texture, NULL, &score_rect);
+  SDL_DestroyTexture(texture);
 }

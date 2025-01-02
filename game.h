@@ -37,9 +37,15 @@ typedef enum {
 } PokerHand;
 
 typedef struct {
+  uint64_t mult;
+  uint64_t chips;
+} PokerHandScoring;
+
+typedef struct {
   Suit suit;
   Rank rank;
   uint8_t selected;
+  uint16_t chips;
 } Card;
 
 typedef struct {
@@ -49,11 +55,15 @@ typedef struct {
 typedef struct {
   uint8_t count;
   PokerHand poker_hand;
+  uint64_t chips;
+  uint64_t mult;
+  Card *scoring_cards[5];
 } SelectedHand;
 
 typedef struct {
   Deck deck;
   Hand hand;
+  uint64_t score;
   SelectedHand selected_hand;
 } Game;
 
@@ -68,7 +78,8 @@ void set_hovered_card(uint8_t *hovered, uint8_t new_position);
 void toggle_card_select(uint8_t hovered);
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
 PokerHand evaluate_hand();
-void get_scoring_hand();
+void update_scoring_hand();
+PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
 
 char *get_poker_hand_name(PokerHand hand);
 
