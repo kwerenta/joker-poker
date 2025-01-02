@@ -73,6 +73,9 @@ typedef struct {
   uint8_t ante;
   uint8_t round;
   uint8_t blind;
+
+  uint8_t hands;
+  uint8_t discards;
 } Game;
 
 void game_init();

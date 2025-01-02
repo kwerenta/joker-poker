@@ -20,6 +20,9 @@ void game_init() {
   fill_hand();
 
   state.game.ante = 1;
+
+  state.game.hands = 4;
+  state.game.discards = 2;
 }
 
 void game_destroy() {
@@ -51,12 +54,17 @@ void fill_hand() {
 }
 
 void play_hand() {
+  if (state.game.hands == 0) {
+    return;
+  }
+
   update_scoring_hand();
 
   state.game.score +=
       state.game.selected_hand.chips * state.game.selected_hand.mult;
 
   remove_selected_cards();
+  state.game.hands--;
 
   double required_score =
       get_ante_base_score(state.game.ante) * (state.game.blind == 0   ? 1
@@ -71,23 +79,35 @@ void play_hand() {
       state.game.ante++;
     }
 
-    printf("Blind completed!\n\tRequired score: %.0lf\n\tScore: %.0lf\n",
-           required_score, state.game.score);
+    printf("Blind completed!\n\tRequired score: %.0lf\n\tScore: %.0lf\n\tHands "
+           "left: %d\n\tDiscards left: %d\n",
+           required_score, state.game.score, state.game.hands,
+           state.game.discards);
     printf("Next round:\n\tRound: %d\n\tBlind: %d\n\tAnte: %d\n",
            state.game.round, state.game.blind, state.game.ante);
 
     state.game.score = 0;
 
     // Reset hand and deck for new blind
+    state.game.hands = 4;
+    state.game.discards = 2;
     cvector_clear(state.game.hand.cards);
     cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
     shuffle_deck();
+  } else if (state.game.hands == 0) {
+    printf("You've lost:(\n\tRequired score: %.0lf\n\tScore: %.0lf\n",
+           required_score, state.game.score);
   }
 
   fill_hand();
 }
 
 void discard_hand() {
+  if (state.game.selected_hand.count == 0 || state.game.discards == 0) {
+    return;
+  }
+
+  state.game.discards--;
   remove_selected_cards();
   fill_hand();
 }
