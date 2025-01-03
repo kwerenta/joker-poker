@@ -1,6 +1,4 @@
 #include "gfx.h"
-#include "SDL_render.h"
-#include "SDL_surface.h"
 #include "game.h"
 #include "state.h"
 #include "window.h"
@@ -74,8 +72,9 @@ void render_sidebar() {
                 get_poker_hand_name(state.game.selected_hand.poker_hand), black,
                 white);
 
-    snprintf(buffer, 64, "%llu x %llu", state.game.selected_hand.chips,
-             state.game.selected_hand.mult);
+    PokerHandScoring score =
+        get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
+    snprintf(buffer, 64, "%llu x %llu", score.chips, score.mult);
     render_text(&hand_score_rect, buffer, black, white);
   }
 
