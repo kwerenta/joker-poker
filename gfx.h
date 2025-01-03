@@ -20,7 +20,9 @@
 #endif
 
 void render_card(Suit suit, Rank rank, SDL_Rect *dst);
+void render_text(SDL_Rect *dst, char *text, SDL_Color bg, SDL_Color fg);
+
 void render_hand(uint8_t hovered);
-void render_selected_poker_hand();
+void render_sidebar();
 
 #endif

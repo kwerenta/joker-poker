@@ -124,7 +124,7 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
 void render(uint8_t hovered) {
   SDL_RenderClear(state.renderer);
 
-  render_selected_poker_hand();
+  render_sidebar();
   render_hand(hovered);
 
   SDL_SetRenderDrawColor(state.renderer, 255, 255, 255, 255);

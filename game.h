@@ -99,6 +99,7 @@ void update_scoring_hand();
 
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
 double get_ante_base_score(uint8_t ante);
+double get_required_score(uint8_t ante, uint8_t blind);
 
 char *get_poker_hand_name(PokerHand hand);
 

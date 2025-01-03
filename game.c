@@ -66,10 +66,8 @@ void play_hand() {
   remove_selected_cards();
   state.game.hands--;
 
-  double required_score =
-      get_ante_base_score(state.game.ante) * (state.game.blind == 0   ? 1
-                                              : state.game.blind == 1 ? 1.5
-                                                                      : 2);
+  double required_score = get_required_score(state.game.ante, state.game.blind);
+
   if (state.game.score >= required_score) {
     state.game.round++;
     state.game.blind++;
@@ -488,4 +486,8 @@ double get_ante_base_score(uint8_t ante) {
   }
 
   return 0;
+}
+
+double get_required_score(uint8_t ante, uint8_t blind) {
+  return get_ante_base_score(ante) * (blind == 0 ? 1 : blind == 1 ? 1.5 : 2);
 }
