@@ -87,6 +87,7 @@ void draw_card();
 void play_hand();
 void discard_hand();
 void fill_hand();
+void sort_hand(uint8_t by_suit);
 
 void set_hovered_card(uint8_t *hovered, uint8_t new_position);
 void toggle_card_select(uint8_t index);

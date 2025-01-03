@@ -195,6 +195,42 @@ void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
   *hovered = new_position;
 }
 
+int compare_by_rank(const void *a, const void *b) {
+  Rank a_rank = ((const Card *)a)->rank, b_rank = ((const Card *)b)->rank;
+  if (a_rank == RANK_ACE) {
+    a_rank = RANK_KING + 1;
+  }
+  if (b_rank == RANK_ACE) {
+    b_rank = RANK_KING + 1;
+  }
+
+  int by_rank = b_rank - a_rank;
+  if (by_rank == 0) {
+    return ((const Card *)a)->suit - ((const Card *)b)->suit;
+  }
+
+  return by_rank;
+}
+int compare_by_suit(const void *a, const void *b) {
+  int by_suit = ((const Card *)a)->suit - ((const Card *)b)->suit;
+  if (by_suit == 0) {
+    return compare_by_rank(a, b);
+  }
+
+  return by_suit;
+}
+
+void sort_hand(uint8_t by_suit) {
+  int (*comparator)(const void *a, const void *b) = compare_by_rank;
+
+  if (by_suit == 1) {
+    comparator = compare_by_suit;
+  }
+
+  qsort(state.game.hand.cards, cvector_size(state.game.hand.cards),
+        sizeof(Card), comparator);
+}
+
 PokerHand evaluate_hand() {
   const Hand *hand = &state.game.hand;
 

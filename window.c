@@ -1,4 +1,5 @@
 #include "window.h"
+#include "SDL_gamecontroller.h"
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
@@ -76,6 +77,12 @@ void handle_events(SDL_Event *event, uint8_t *hovered) {
         break;
       case SDLK_q:
         discard_hand();
+        break;
+      case SDLK_r:
+        sort_hand(0);
+        break;
+      case SDLK_s:
+        sort_hand(1);
         break;
       case SDLK_SPACE:
         toggle_card_select(*hovered);
