@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "game.h"
 #include "lib/cvector.h"
 #include "state.h"
