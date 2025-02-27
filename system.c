@@ -27,7 +27,7 @@ void drawTexture(Texture *texture, Rect *src, Rect *dst) {
   sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
   sceGuTexImage(0, texture->width, texture->height, texture->width,
                 texture->data);
-  sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+  sceGuTexFilter(GU_NEAREST, GU_NEAREST);
   sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
 
   sceGuEnable(GU_TEXTURE_2D);
