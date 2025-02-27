@@ -41,6 +41,27 @@ typedef struct {
   uint64_t chips;
 } PokerHandScoring;
 
+typedef enum {
+  RARITY_COMMON,
+  RARITY_UNCOMMON,
+  RARITY_RARE,
+  RARITY_LEGENDARY
+} Rarity;
+
+typedef enum {
+  ACTIVATION_INDEPENDENT,
+  ACTIVATION_ON_SCORED,
+  ACTIVATION_ON_HELD
+} ActivationType;
+
+typedef struct {
+  uint16_t id;
+  char *name;
+  Rarity rarity;
+  ActivationType activation_type;
+  void (*activate)();
+} Joker;
+
 typedef struct {
   Suit suit;
   Rank rank;
@@ -54,6 +75,11 @@ typedef struct {
   uint8_t size;
   cvector_vector_type(Card) cards;
 } Hand, Deck;
+
+typedef struct {
+  uint8_t size;
+  cvector_vector_type(Joker) cards;
+} JokerHand;
 
 typedef struct {
   uint8_t count;
@@ -76,6 +102,8 @@ typedef struct {
 
   uint8_t hands;
   uint8_t discards;
+
+  JokerHand jokers;
 } Game;
 
 void game_init();

@@ -4,6 +4,12 @@
 #include "lib/cvector.h"
 #include "state.h"
 
+void activate_joker_1() { state.game.selected_hand.mult += 4; }
+void activate_joker_6() {
+  if (state.game.selected_hand.poker_hand == HAND_PAIR)
+    state.game.selected_hand.mult += 8;
+}
+
 void game_init() {
   // Generate standard deck of 52 cards
   state.game.deck.size = 52;
@@ -25,12 +31,28 @@ void game_init() {
 
   state.game.hands = 4;
   state.game.discards = 2;
+
+  state.game.jokers.size = 5;
+  cvector_push_back(state.game.jokers.cards,
+                    ((Joker){.id = 1,
+                             .name = "Joker",
+                             .rarity = RARITY_COMMON,
+                             .activation_type = ACTIVATION_INDEPENDENT,
+                             .activate = activate_joker_1}));
+
+  cvector_push_back(state.game.jokers.cards,
+                    ((Joker){.id = 6,
+                             .name = "Jolly Joker",
+                             .rarity = RARITY_COMMON,
+                             .activation_type = ACTIVATION_INDEPENDENT,
+                             .activate = activate_joker_6}));
 }
 
 void game_destroy() {
   cvector_free(state.game.deck.cards);
   cvector_free(state.game.full_deck.cards);
   cvector_free(state.game.hand.cards);
+  cvector_free(state.game.jokers.cards);
 }
 
 Card create_card(Suit suit, Rank rank) {
@@ -61,6 +83,14 @@ void play_hand() {
   }
 
   update_scoring_hand();
+
+  for (Joker *joker = cvector_begin(state.game.jokers.cards);
+       joker != cvector_end(state.game.jokers.cards); joker++) {
+    if (joker->activation_type == ACTIVATION_INDEPENDENT) {
+      joker->activate();
+      printf("Joker '%s' has been activated\n", joker->name);
+    }
+  }
 
   state.game.score +=
       state.game.selected_hand.chips * state.game.selected_hand.mult;
