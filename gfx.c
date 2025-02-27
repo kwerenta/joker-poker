@@ -47,7 +47,7 @@ void render_hand(uint8_t hovered) {
                       .h = CARD_HEIGHT * 1.2});
 }
 
-void render_text(const char *text, const Vector2 *pos, uint32_t color) {
+Vector2 render_text(const char *text, const Vector2 *pos, uint32_t color) {
   Rect dst = {.x = pos->x, .y = pos->y, .w = 6, .h = 10};
   Rect src = {.x = 0, .y = 0, .w = 6, .h = 10};
 
@@ -103,6 +103,8 @@ void render_text(const char *text, const Vector2 *pos, uint32_t color) {
     dst.x += CHAR_WIDTH;
     text++;
   }
+
+  return (Vector2){.x = dst.x, .y = dst.y};
 }
 
 void render_sidebar() {
@@ -112,6 +114,7 @@ void render_sidebar() {
   uint32_t white = 0xFFFFFFFF;
   uint32_t green = 0xFF00FF00;
   uint32_t red = 0xFF0000FF;
+  uint32_t blue = 0xFFD07F06;
 
   char buffer[64];
 
@@ -121,14 +124,21 @@ void render_sidebar() {
 
     PokerHandScoring score =
         get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
-    snprintf(buffer, 64, "%d x %d", score.chips, score.mult);
-    render_text(buffer, &hand_score_pos, green);
+
+    snprintf(buffer, 64, "%d", score.chips);
+    hand_score_pos = render_text(buffer, &hand_score_pos, blue);
+
+    snprintf(buffer, 64, " x ");
+    hand_score_pos = render_text(buffer, &hand_score_pos, white);
+
+    snprintf(buffer, 64, "%d", score.mult);
+    render_text(buffer, &hand_score_pos, red);
   }
 
   Vector2 score_pos = {.x = 16, .y = hand_score_pos.y + CHAR_HEIGHT + 8};
   snprintf(buffer, 64, "Score: %.0f/%.0f", state.game.score,
            get_required_score(state.game.ante, state.game.blind));
-  render_text(buffer, &score_pos, red);
+  render_text(buffer, &score_pos, green);
 
   Vector2 hands_pos = {.x = 16, .y = score_pos.y + CHAR_HEIGHT + 8};
   snprintf(buffer, 64, "Hands: %d, Discards: %d", state.game.hands,
