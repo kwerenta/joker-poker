@@ -2,8 +2,10 @@
 #define STATE_H
 
 #include "game.h"
+#include "system.h"
 
 typedef struct {
+  Texture *cards_atlas;
   double delta;
   uint8_t running;
 

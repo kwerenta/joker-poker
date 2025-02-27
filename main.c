@@ -12,6 +12,7 @@
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
+#include "system.h"
 
 PSP_MODULE_INFO("joker-poker", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
@@ -92,6 +93,8 @@ void init() {
   setup_callbacks();
   initGu();
 
+  state.cards_atlas = loadTexture("res/cards.png");
+
   game_init();
 
   state.delta = 0;
@@ -101,70 +104,13 @@ void init() {
 void destroy() {
   game_destroy();
   endGu();
-}
 
-typedef struct {
-  float u, v;
-  uint32_t color;
-  float x, y, z;
-} TextureVertex;
-
-typedef struct {
-  int width, height;
-  uint32_t *data;
-} Texture;
-
-Texture *loadTexture(const char *filename) {
-  Texture *texture = (Texture *)calloc(1, sizeof(Texture));
-
-  texture->data = (uint32_t *)stbi_load(
-      filename, &(texture->width), &(texture->height), NULL, STBI_rgb_alpha);
-
-  sceKernelDcacheWritebackInvalidateAll();
-
-  return texture;
-}
-
-void drawTexture(Texture *texture, float x, float y, float w, float h) {
-  static TextureVertex vertices[2];
-
-  vertices[0].u = 0.0f;
-  vertices[0].v = 0.0f;
-  vertices[0].color = 0xFFFFFFFF;
-  vertices[0].x = x;
-  vertices[0].y = y;
-  vertices[0].z = 0.0f;
-
-  vertices[1].u = w;
-  vertices[1].v = h;
-  vertices[1].color = 0xFFFFFFFF;
-  vertices[1].x = x + w;
-  vertices[1].y = y + h;
-  vertices[1].z = 0.0f;
-
-  sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
-  sceGuTexImage(0, texture->width, texture->height, texture->width,
-                texture->data);
-  sceGuTexFilter(GU_LINEAR, GU_LINEAR);
-  sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
-
-  sceGuEnable(GU_TEXTURE_2D);
-  sceGuEnable(GU_BLEND);
-
-  sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-  sceGuDrawArray(GU_SPRITES,
-                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF |
-                     GU_TRANSFORM_2D,
-                 2, 0, vertices);
-
-  sceGuDisable(GU_BLEND);
-  sceGuDisable(GU_TEXTURE_2D);
+  stbi_image_free(state.cards_atlas->data);
+  free(state.cards_atlas);
 }
 
 int main(int argc, char *argv[]) {
   init();
-
-  Texture *texture = loadTexture("res/cards.png");
 
   uint8_t hovered = 0;
 
@@ -177,17 +123,13 @@ int main(int argc, char *argv[]) {
     // last_tick = curr_tick;
 
     startFrame();
-    // render(hovered);
 
-    drawTexture(texture, 50, 50, CARD_WIDTH, CARD_HEIGHT);
+    render_hand(hovered);
 
     endFrame();
   }
 
   destroy();
-
-  stbi_image_free(texture->data);
-  free(texture);
 
   return 0;
 }
