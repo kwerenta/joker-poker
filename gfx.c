@@ -51,65 +51,53 @@ void render_text(const char *text, float x, float y, uint32_t color) {
   Rect dst = {.x = x, .y = y, .w = 6, .h = 10};
   Rect src = {.x = 0, .y = 0, .w = 6, .h = 10};
 
-  uint8_t index = 0;
+  uint8_t xOffset = 0;
+  uint8_t yOffest = 0;
 
   for (; *text;) {
-    src.y = 0;
-
-    // Space
-    if (*text == 32) {
+    if (*text == ' ') {
       dst.x += CHAR_WIDTH;
       text++;
       continue;
     }
 
-    // Capital letters
-    if (*text >= 65 && *text <= 90) {
-      index = *text - 65;
-    }
-    // Lowercase letters
-    else if (*text >= 97 && *text <= 122) {
-      index = *text - 97;
-      src.y += 2 * CHAR_HEIGHT;
-    }
-    // Digits
-    else if (*text >= 48 && *text <= 57) {
-      index = *text - 48;
-      src.y += 4 * CHAR_HEIGHT;
-    }
-    // Special characters
-    else if (*text >= 33 && *text <= 47) {
-      index = *text - 33;
-      src.y += 5 * CHAR_HEIGHT;
-    }
-    // Special characters
-    else if (*text >= 58 && *text <= 64) {
-      index = *text - 58;
-      src.y += 7 * CHAR_HEIGHT;
-    }
-    // Left square bracket
-    else if (*text == 91) {
-      index = 0;
-      src.y += 8 * CHAR_HEIGHT;
-    }
-    // Right square bracket
-    else if (*text == 93) {
-      index = 1;
-      src.y += 8 * CHAR_HEIGHT;
-    }
-    // Left curly bracket
-    else if (*text == 123) {
-      index = 2;
-      src.y += 8 * CHAR_HEIGHT;
-    }
-    // Right curly bracket
-    else if (*text == 125) {
-      index = 3;
-      src.y += 8 * CHAR_HEIGHT;
+    xOffset = 0;
+    yOffest = 0;
+
+    if (*text >= 'A' && *text <= 'Z') {
+      xOffset = *text - 'A';
+    } else if (*text >= 'a' && *text <= 'z') {
+      xOffset = *text - 'a';
+      yOffest = 2;
+    } else if (*text >= '0' && *text <= '9') {
+      xOffset = *text - '0';
+      yOffest = 4;
+    } else if (*text >= '!' && *text <= '/') {
+      xOffset = *text - '!';
+      yOffest = 5;
+    } else if (*text >= ':' && *text <= '@') {
+      xOffset = *text - ':';
+      yOffest = 7;
+    } else {
+      switch (*text) {
+      case '[':
+        xOffset = 0;
+        break;
+      case ']':
+        xOffset = 1;
+        break;
+      case '{':
+        xOffset = 2;
+        break;
+      case '}':
+        xOffset = 3;
+        break;
+      }
+      yOffest = 8;
     }
 
-    src.x = index % 13 * CHAR_WIDTH;
-    src.y += floor(index / 13.0) * CHAR_HEIGHT;
+    src.x = (xOffset % 13) * CHAR_WIDTH;
+    src.y = (floor(xOffset / 13.0) + yOffest) * CHAR_HEIGHT;
 
     draw_tinted_texture(state.font, &src, &dst, color);
     dst.x += CHAR_WIDTH;
