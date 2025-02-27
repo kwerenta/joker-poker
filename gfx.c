@@ -47,7 +47,7 @@ void render_hand(uint8_t hovered) {
                       .h = CARD_HEIGHT * 1.2});
 }
 
-void render_text(const char *text, float x, float y) {
+void render_text(const char *text, float x, float y, uint32_t color) {
   Rect dst = {.x = x, .y = y, .w = 6, .h = 10};
   Rect src = {.x = 0, .y = 0, .w = 6, .h = 10};
 
@@ -111,7 +111,7 @@ void render_text(const char *text, float x, float y) {
     src.x = index % 13 * CHAR_WIDTH;
     src.y += floor(index / 13.0) * CHAR_HEIGHT;
 
-    draw_texture(state.font, &src, &dst);
+    draw_tinted_texture(state.font, &src, &dst, color);
     dst.x += CHAR_WIDTH;
     text++;
   }
@@ -121,30 +121,34 @@ void render_sidebar() {
   Rect hand_rect = {.x = 16, .y = 16};
   Rect hand_score_rect = {.x = 16, .y = hand_rect.y + CHAR_HEIGHT + 8};
 
+  uint32_t white = 0xFFFFFFFF;
+  uint32_t green = 0xFF00FF00;
+  uint32_t red = 0xFF0000FF;
+
   char buffer[64];
 
   if (state.game.selected_hand.count != 0) {
     render_text(get_poker_hand_name(state.game.selected_hand.poker_hand),
-                hand_rect.x, hand_rect.y);
+                hand_rect.x, hand_rect.y, white);
 
     PokerHandScoring score =
         get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
     snprintf(buffer, 64, "%d x %d", score.chips, score.mult);
-    render_text(buffer, hand_score_rect.x, hand_score_rect.y);
+    render_text(buffer, hand_score_rect.x, hand_score_rect.y, green);
   }
 
   Rect score_rect = {.x = 16, .y = hand_score_rect.y + CHAR_HEIGHT + 8};
   snprintf(buffer, 64, "Score: %.0f/%.0f", state.game.score,
            get_required_score(state.game.ante, state.game.blind));
-  render_text(buffer, score_rect.x, score_rect.y);
+  render_text(buffer, score_rect.x, score_rect.y, red);
 
   Rect hands_rect = {.x = 16, .y = score_rect.y + CHAR_HEIGHT + 8};
   snprintf(buffer, 64, "Hands: %d, Discards: %d", state.game.hands,
            state.game.discards);
-  render_text(buffer, hands_rect.x, hands_rect.y);
+  render_text(buffer, hands_rect.x, hands_rect.y, white);
 
   Rect round_rect = {.x = 16, .y = hands_rect.y + CHAR_HEIGHT + 8};
   snprintf(buffer, 64, "Ante: %d/8, Blind: %d/3, Round: %d", state.game.ante,
            state.game.blind + 1, state.game.round);
-  render_text(buffer, round_rect.x, round_rect.y);
+  render_text(buffer, round_rect.x, round_rect.y, white);
 }

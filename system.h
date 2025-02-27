@@ -23,6 +23,8 @@ typedef struct {
 
 Texture *load_texture(const char *filename);
 void draw_texture(Texture *texture, Rect *src, Rect *dst);
+void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst,
+                         uint32_t color);
 
 void handle_controls(uint8_t *hovered);
 

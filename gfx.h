@@ -14,7 +14,7 @@
 #define CHAR_HEIGHT (10)
 
 void render_card(Suit suit, Rank rank, Rect *dst);
-void render_text(const char *text, float x, float y);
+void render_text(const char *text, float x, float y, uint32_t color);
 
 void render_hand(uint8_t hovered);
 void render_sidebar();

@@ -9,19 +9,20 @@
 #include "state.h"
 #include "system.h"
 
-void draw_texture(Texture *texture, Rect *src, Rect *dst) {
+void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst,
+                         uint32_t color) {
   static TextureVertex vertices[2];
 
   vertices[0].u = src->x;
   vertices[0].v = src->y;
-  vertices[0].color = 0xFFFFFFFF;
+  vertices[0].color = color;
   vertices[0].x = dst->x;
   vertices[0].y = dst->y;
   vertices[0].z = 0.0f;
 
   vertices[1].u = src->x + src->w;
   vertices[1].v = src->y + src->h;
-  vertices[1].color = 0xFFFFFFFF;
+  vertices[1].color = color;
   vertices[1].x = dst->x + dst->w;
   vertices[1].y = dst->y + dst->h;
   vertices[1].z = 0.0f;
@@ -30,7 +31,7 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst) {
   sceGuTexImage(0, texture->width, texture->height, texture->width,
                 texture->data);
   sceGuTexFilter(GU_NEAREST, GU_NEAREST);
-  sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
+  sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 
   sceGuEnable(GU_TEXTURE_2D);
   sceGuEnable(GU_BLEND);
@@ -43,6 +44,10 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst) {
 
   sceGuDisable(GU_BLEND);
   sceGuDisable(GU_TEXTURE_2D);
+}
+
+void draw_texture(Texture *texture, Rect *src, Rect *dst) {
+  draw_tinted_texture(texture, src, dst, 0xFFFFFFFF);
 }
 
 Texture *load_texture(const char *filename) {
