@@ -10,7 +10,7 @@ void render_card(Suit suit, Rank rank, Rect *dst) {
               .y = suit * CARD_HEIGHT,
               .w = CARD_WIDTH,
               .h = CARD_HEIGHT};
-  drawTexture(state.cards_atlas, &src, dst);
+  draw_texture(state.cards_atlas, &src, dst);
 }
 
 void render_hand(uint8_t hovered) {

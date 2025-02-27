@@ -1,13 +1,15 @@
 #include <pspctrl.h>
+#include <pspdisplay.h>
 #include <pspgu.h>
 #include <pspkernel.h>
 #include <stb_image.h>
 #include <stdlib.h>
 
+#include "gfx.h"
 #include "state.h"
 #include "system.h"
 
-void drawTexture(Texture *texture, Rect *src, Rect *dst) {
+void draw_texture(Texture *texture, Rect *src, Rect *dst) {
   static TextureVertex vertices[2];
 
   vertices[0].u = src->x;
@@ -43,7 +45,7 @@ void drawTexture(Texture *texture, Rect *src, Rect *dst) {
   sceGuDisable(GU_TEXTURE_2D);
 }
 
-Texture *loadTexture(const char *filename) {
+Texture *load_texture(const char *filename) {
   Texture *texture = (Texture *)calloc(1, sizeof(Texture));
 
   texture->data = (uint32_t *)stbi_load(
@@ -86,4 +88,64 @@ void handle_controls(uint8_t *hovered) {
   }
 
   controls->state = controls->data.Buttons;
+}
+
+void init_gu(void **fbp0, void **fbp1, char list[]) {
+  sceGuInit();
+
+  *fbp0 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
+  *fbp1 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
+
+  sceGuStart(GU_DIRECT, list);
+  sceGuDrawBuffer(GU_PSM_8888, *fbp0, BUFFER_WIDTH);
+  sceGuDispBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, *fbp1, BUFFER_WIDTH);
+
+  sceGuDepthBuffer(*fbp0, 0);
+  sceGuDisable(GU_DEPTH_TEST);
+
+  sceGuOffset(2048 - (SCREEN_WIDTH / 2), 2048 - (SCREEN_HEIGHT / 2));
+  sceGuViewport(2048, 2048, SCREEN_WIDTH, SCREEN_HEIGHT);
+  sceGuEnable(GU_SCISSOR_TEST);
+  sceGuScissor(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+  sceGuFinish();
+  sceGuDisplay(GU_TRUE);
+}
+
+void end_gu() {
+  sceGuDisplay(GU_FALSE);
+  sceGuTerm();
+}
+
+void start_frame(char list[]) {
+  sceGuStart(GU_DIRECT, list);
+  sceGuClearColor(0xFFFFFFFF);
+  sceGuClear(GU_COLOR_BUFFER_BIT);
+}
+
+void end_frame() {
+  sceGuFinish();
+  sceGuSync(0, 0);
+  sceDisplayWaitVblankStart();
+  sceGuSwapBuffers();
+}
+
+int exit_callback(int arg1, int arg2, void *common) {
+  state.running = 0;
+  return 0;
+}
+
+int callback_thread(SceSize args, void *argp) {
+  int cbid = sceKernelCreateCallback("Exit Callback", exit_callback, NULL);
+  sceKernelRegisterExitCallback(cbid);
+  sceKernelSleepThreadCB();
+  return 0;
+}
+
+int setup_callbacks() {
+  int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11,
+                                   0xFA0, 0, 0);
+  if (thid >= 0)
+    sceKernelStartThread(thid, 0, 0);
+  return thid;
 }
