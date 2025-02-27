@@ -95,6 +95,9 @@ void init() {
 
   state.cards_atlas = loadTexture("res/cards.png");
 
+  sceCtrlSetSamplingCycle(0);
+  sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
+
   game_init();
 
   state.delta = 0;
@@ -116,6 +119,7 @@ int main(int argc, char *argv[]) {
 
   uint32_t last_tick = 0;
   while (state.running) {
+    handle_controls(&hovered);
     // handle_events(&event, &hovered);
 
     // uint32_t curr_tick = SDL_GetTicks();

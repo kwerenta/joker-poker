@@ -21,4 +21,6 @@ typedef struct {
 Texture *loadTexture(const char *filename);
 void drawTexture(Texture *texture, Rect *src, Rect *dst);
 
+void handle_controls(uint8_t *hovered);
+
 #endif

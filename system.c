@@ -1,8 +1,10 @@
+#include <pspctrl.h>
 #include <pspgu.h>
 #include <pspkernel.h>
 #include <stb_image.h>
 #include <stdlib.h>
 
+#include "state.h"
 #include "system.h"
 
 void drawTexture(Texture *texture, Rect *src, Rect *dst) {
@@ -50,4 +52,38 @@ Texture *loadTexture(const char *filename) {
   sceKernelDcacheWritebackInvalidateAll();
 
   return texture;
+}
+
+uint8_t button_pressed(unsigned int button) {
+  if ((state.controls.data.Buttons & button) &&
+      (state.controls.state & button) == 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+void handle_controls(uint8_t *hovered) {
+  Controls *controls = &state.controls;
+  sceCtrlReadBufferPositive(&controls->data, 1);
+
+  if (button_pressed(PSP_CTRL_RIGHT)) {
+    set_hovered_card(hovered, *hovered + 1);
+  } else if (button_pressed(PSP_CTRL_LEFT)) {
+    set_hovered_card(hovered, *hovered - 1);
+  } else if (button_pressed(PSP_CTRL_CROSS)) {
+    toggle_card_select(*hovered);
+  } else if (button_pressed(PSP_CTRL_SQUARE)) {
+    play_hand();
+  } else if (button_pressed(PSP_CTRL_CIRCLE)) {
+    deselect_all_cards();
+  } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
+    discard_hand();
+  } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+    move_card_in_hand(hovered, *hovered - 1);
+  } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+    move_card_in_hand(hovered, *hovered + 1);
+  }
+
+  controls->state = controls->data.Buttons;
 }
