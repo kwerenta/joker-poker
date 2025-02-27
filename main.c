@@ -31,6 +31,7 @@ void init() {
   init_gu(&fbp0, &fbp1, list);
 
   state.cards_atlas = load_texture("res/cards.png");
+  state.font = load_texture("res/font.png");
 
   sceCtrlSetSamplingCycle(0);
   sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
@@ -47,6 +48,9 @@ void destroy() {
 
   stbi_image_free(state.cards_atlas->data);
   free(state.cards_atlas);
+
+  stbi_image_free(state.font->data);
+  free(state.font);
 }
 
 int main(int argc, char *argv[]) {
@@ -65,6 +69,7 @@ int main(int argc, char *argv[]) {
     start_frame(list);
 
     render_hand(hovered);
+    render_sidebar();
 
     end_frame();
   }

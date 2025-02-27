@@ -119,7 +119,7 @@ void end_gu() {
 
 void start_frame(char list[]) {
   sceGuStart(GU_DIRECT, list);
-  sceGuClearColor(0xFFFFFFFF);
+  sceGuClearColor(0xFF000000);
   sceGuClear(GU_COLOR_BUFFER_BIT);
 }
 

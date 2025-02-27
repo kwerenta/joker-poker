@@ -13,7 +13,10 @@ typedef struct {
 
 typedef struct {
   Texture *cards_atlas;
+  Texture *font;
+
   Controls controls;
+
   double delta;
   uint8_t running;
 

@@ -1,4 +1,6 @@
+#include <math.h>
 #include <pspgu.h>
+#include <stdio.h>
 
 #include "game.h"
 #include "gfx.h"
@@ -45,57 +47,86 @@ void render_hand(uint8_t hovered) {
                       .h = CARD_HEIGHT * 1.2});
 }
 
-// TODO text surface and texture should only be updated when text has changed,
-// as recreating it every frame can affect performance
-// void render_text(SDL_Rect *dst, char *text, SDL_Color bg, SDL_Color fg) {
-//   SDL_Surface *surface = TTF_RenderUTF8_LCD(state.font, text, bg, fg);
-//   SDL_Texture *texture = SDL_CreateTextureFromSurface(state.renderer,
-//   surface);
+void render_text(const char *text, float x, float y) {
+  Rect dst = {.x = x, .y = y, .w = 6, .h = 10};
+  Rect src = {.x = 0, .y = 0, .w = 6, .h = 10};
 
-//   dst->w = surface->w;
-//   dst->h = surface->h;
+  uint8_t index = 0;
 
-//   SDL_FreeSurface(surface);
-//   SDL_RenderCopy(state.renderer, texture, NULL, dst);
-//   SDL_DestroyTexture(texture);
-// }
+  for (; *text;) {
+    src.y = 0;
 
-// void render_sidebar() {
-//   SDL_Color white = {255, 255, 255, 255};
-//   SDL_Color black = {0, 0, 0, 255};
+    // Space
+    if (*text == 32) {
+      dst.x += CHAR_WIDTH;
+      text++;
+      continue;
+    }
 
-//   SDL_Rect hand_rect = {.x = 16, .y = 16};
-//   SDL_Rect hand_score_rect = {
-//       .x = 16, .y = hand_rect.y + TTF_FontHeight(state.font) + 8};
+    // Capital letters
+    if (*text >= 65 && *text <= 90) {
+      index = *text - 65;
+    }
+    // Lowercase letters
+    else if (*text >= 97 && *text <= 122) {
+      index = *text - 97;
+      src.y += 2 * CHAR_HEIGHT;
+    }
+    // Digits
+    else if (*text >= 48 && *text <= 57) {
+      index = *text - 48;
+      src.y += 4 * CHAR_HEIGHT;
+    }
+    // Colon
+    else if (*text == 58) {
+      index = 75;
+    }
+    // Comma
+    else if (*text == 44) {
+      index = 81;
+    }
+    // Slash
+    else if (*text == 47) {
+      index = 73;
+    }
 
-//   char buffer[64];
+    src.x = index % 13 * CHAR_WIDTH;
+    src.y += floor(index / 13.0) * CHAR_HEIGHT;
 
-//   if (state.game.selected_hand.count != 0) {
-//     render_text(&hand_rect,
-//                 get_poker_hand_name(state.game.selected_hand.poker_hand),
-//                 black, white);
+    draw_texture(state.font, &src, &dst);
+    dst.x += CHAR_WIDTH;
+    text++;
+  }
+}
 
-//     PokerHandScoring score =
-//         get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
-//     snprintf(buffer, 64, "%llu x %llu", score.chips, score.mult);
-//     render_text(&hand_score_rect, buffer, black, white);
-//   }
+void render_sidebar() {
+  Rect hand_rect = {.x = 16, .y = 16};
+  Rect hand_score_rect = {.x = 16, .y = hand_rect.y + CHAR_HEIGHT + 8};
 
-//   SDL_Rect score_rect = {
-//       .x = 16, .y = hand_score_rect.y + TTF_FontHeight(state.font) + 8};
-//   snprintf(buffer, 64, "Score: %.0lf/%.0lf", state.game.score,
-//            get_required_score(state.game.ante, state.game.blind));
-//   render_text(&score_rect, buffer, black, white);
+  char buffer[64];
 
-//   SDL_Rect hands_rect = {.x = 16,
-//                          .y = score_rect.y + TTF_FontHeight(state.font) + 8};
-//   snprintf(buffer, 64, "Hands: %d, Discards: %d", state.game.hands,
-//            state.game.discards);
-//   render_text(&hands_rect, buffer, black, white);
+  if (state.game.selected_hand.count != 0) {
+    render_text(get_poker_hand_name(state.game.selected_hand.poker_hand),
+                hand_rect.x, hand_rect.y);
 
-//   SDL_Rect round_rect = {.x = 16,
-//                          .y = hands_rect.y + TTF_FontHeight(state.font) + 8};
-//   snprintf(buffer, 64, "Ante: %d/8, Blind: %d/3, Round: %d", state.game.ante,
-//            state.game.blind + 1, state.game.round);
-//   render_text(&round_rect, buffer, black, white);
-// }
+    PokerHandScoring score =
+        get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
+    snprintf(buffer, 64, "%llu x %llu", score.chips, score.mult);
+    render_text(buffer, hand_score_rect.x, hand_score_rect.y);
+  }
+
+  Rect score_rect = {.x = 16, .y = hand_score_rect.y + CHAR_HEIGHT + 8};
+  snprintf(buffer, 64, "Score: %.0lf/%.0lf", state.game.score,
+           get_required_score(state.game.ante, state.game.blind));
+  render_text(buffer, score_rect.x, score_rect.y);
+
+  Rect hands_rect = {.x = 16, .y = score_rect.y + CHAR_HEIGHT + 8};
+  snprintf(buffer, 64, "Hands: %d, Discards: %d", state.game.hands,
+           state.game.discards);
+  render_text(buffer, hands_rect.x, hands_rect.y);
+
+  Rect round_rect = {.x = 16, .y = hands_rect.y + CHAR_HEIGHT + 8};
+  snprintf(buffer, 64, "Ante: %d/8, Blind: %d/3, Round: %d", state.game.ante,
+           state.game.blind + 1, state.game.round);
+  render_text(buffer, round_rect.x, round_rect.y);
+}
