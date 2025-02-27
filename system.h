@@ -11,6 +11,10 @@ typedef struct {
 } Rect;
 
 typedef struct {
+  float x, y;
+} Vector2;
+
+typedef struct {
   float u, v;
   uint32_t color;
   float x, y, z;
