@@ -33,19 +33,19 @@ void game_init() {
   state.game.discards = 2;
 
   state.game.jokers.size = 5;
-  cvector_push_back(state.game.jokers.cards,
-                    ((Joker){.id = 1,
-                             .name = "Joker",
-                             .rarity = RARITY_COMMON,
-                             .activation_type = ACTIVATION_INDEPENDENT,
-                             .activate = activate_joker_1}));
+  // cvector_push_back(state.game.jokers.cards,
+  //                   ((Joker){.id = 1,
+  //                            .name = "Joker",
+  //                            .rarity = RARITY_COMMON,
+  //                            .activation_type = ACTIVATION_INDEPENDENT,
+  //                            .activate = activate_joker_1}));
 
-  cvector_push_back(state.game.jokers.cards,
-                    ((Joker){.id = 6,
-                             .name = "Jolly Joker",
-                             .rarity = RARITY_COMMON,
-                             .activation_type = ACTIVATION_INDEPENDENT,
-                             .activate = activate_joker_6}));
+  // cvector_push_back(state.game.jokers.cards,
+  //                   ((Joker){.id = 6,
+  //                            .name = "Jolly Joker",
+  //                            .rarity = RARITY_COMMON,
+  //                            .activation_type = ACTIVATION_INDEPENDENT,
+  //                            .activate = activate_joker_6}));
 }
 
 void game_destroy() {

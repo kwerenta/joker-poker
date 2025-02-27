@@ -37,8 +37,8 @@ typedef enum {
 } PokerHand;
 
 typedef struct {
-  uint64_t mult;
-  uint64_t chips;
+  uint32_t mult;
+  uint32_t chips;
 } PokerHandScoring;
 
 typedef enum {
@@ -84,8 +84,8 @@ typedef struct {
 typedef struct {
   uint8_t count;
   PokerHand poker_hand;
-  uint64_t chips;
-  uint64_t mult;
+  uint32_t chips;
+  uint32_t mult;
   Card *scoring_cards[5];
 } SelectedHand;
 

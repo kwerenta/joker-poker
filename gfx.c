@@ -8,8 +8,8 @@
 #include "system.h"
 
 void render_card(Suit suit, Rank rank, Rect *dst) {
-  Rect src = {.x = rank * CARD_WIDTH,
-              .y = suit * CARD_HEIGHT,
+  Rect src = {.x = (rank % 10) * CARD_WIDTH,
+              .y = (2 * suit + floor(rank / 10.0)) * CARD_HEIGHT,
               .w = CARD_WIDTH,
               .h = CARD_HEIGHT};
   draw_texture(state.cards_atlas, &src, dst);
@@ -77,17 +77,35 @@ void render_text(const char *text, float x, float y) {
       index = *text - 48;
       src.y += 4 * CHAR_HEIGHT;
     }
-    // Colon
-    else if (*text == 58) {
-      index = 75;
+    // Special characters
+    else if (*text >= 33 && *text <= 47) {
+      index = *text - 33;
+      src.y += 5 * CHAR_HEIGHT;
     }
-    // Comma
-    else if (*text == 44) {
-      index = 81;
+    // Special characters
+    else if (*text >= 58 && *text <= 64) {
+      index = *text - 58;
+      src.y += 7 * CHAR_HEIGHT;
     }
-    // Slash
-    else if (*text == 47) {
-      index = 73;
+    // Left square bracket
+    else if (*text == 91) {
+      index = 0;
+      src.y += 8 * CHAR_HEIGHT;
+    }
+    // Right square bracket
+    else if (*text == 93) {
+      index = 1;
+      src.y += 8 * CHAR_HEIGHT;
+    }
+    // Left curly bracket
+    else if (*text == 123) {
+      index = 2;
+      src.y += 8 * CHAR_HEIGHT;
+    }
+    // Right curly bracket
+    else if (*text == 125) {
+      index = 3;
+      src.y += 8 * CHAR_HEIGHT;
     }
 
     src.x = index % 13 * CHAR_WIDTH;
@@ -111,12 +129,12 @@ void render_sidebar() {
 
     PokerHandScoring score =
         get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
-    snprintf(buffer, 64, "%llu x %llu", score.chips, score.mult);
+    snprintf(buffer, 64, "%d x %d", score.chips, score.mult);
     render_text(buffer, hand_score_rect.x, hand_score_rect.y);
   }
 
   Rect score_rect = {.x = 16, .y = hand_score_rect.y + CHAR_HEIGHT + 8};
-  snprintf(buffer, 64, "Score: %.0lf/%.0lf", state.game.score,
+  snprintf(buffer, 64, "Score: %.0f/%.0f", state.game.score,
            get_required_score(state.game.ante, state.game.blind));
   render_text(buffer, score_rect.x, score_rect.y);
 
