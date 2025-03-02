@@ -5,6 +5,7 @@
 #include <stb_image.h>
 #include <stdlib.h>
 
+#include "game.h"
 #include "gfx.h"
 #include "state.h"
 #include "system.h"
@@ -90,6 +91,10 @@ void handle_controls(uint8_t *hovered) {
     move_card_in_hand(hovered, *hovered - 1);
   } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
     move_card_in_hand(hovered, *hovered + 1);
+  } else if (button_pressed(PSP_CTRL_UP)) {
+    sort_hand(0);
+  } else if (button_pressed(PSP_CTRL_DOWN)) {
+    sort_hand(1);
   }
 
   controls->state = controls->data.Buttons;
