@@ -88,7 +88,7 @@ void fill_hand() {
 }
 
 void play_hand() {
-  if (state.game.hands == 0) {
+  if (state.game.hands == 0 || state.game.selected_hand.count == 0) {
     return;
   }
 
