@@ -4,6 +4,11 @@
 #include "lib/cvector.h"
 #include <stdint.h>
 
+typedef enum {
+  STAGE_GAME,
+  STAGE_SHOP,
+} Stage;
+
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
@@ -56,7 +61,9 @@ typedef enum {
 
 typedef struct {
   uint16_t id;
-  char *name;
+  const char *name;
+  const char *description;
+  uint8_t base_price;
   Rarity rarity;
   ActivationType activation_type;
   void (*activate)();
@@ -90,10 +97,16 @@ typedef struct {
 } SelectedHand;
 
 typedef struct {
+  cvector_vector_type(Joker) jokers;
+  uint8_t selected_card;
+} Shop;
+
+typedef struct {
   Deck full_deck;
   Deck deck;
   Hand hand;
   SelectedHand selected_hand;
+  JokerHand jokers;
 
   double score;
   uint8_t ante;
@@ -103,7 +116,10 @@ typedef struct {
   uint8_t hands;
   uint8_t discards;
 
-  JokerHand jokers;
+  uint16_t money;
+  Shop shop;
+
+  Stage stage;
 } Game;
 
 void game_init();
@@ -129,6 +145,7 @@ void update_scoring_hand();
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
 double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
+uint8_t get_blind_money(uint8_t blind);
 
 char *get_poker_hand_name(PokerHand hand);
 

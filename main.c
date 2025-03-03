@@ -68,8 +68,15 @@ int main(int argc, char *argv[]) {
 
     start_frame(list);
 
-    render_hand(hovered);
-    render_sidebar();
+    switch (state.game.stage) {
+    case STAGE_GAME:
+      render_hand(hovered);
+      render_sidebar();
+      break;
+    case STAGE_SHOP:
+      render_shop();
+      break;
+    }
 
     end_frame();
   }

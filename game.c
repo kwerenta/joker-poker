@@ -27,25 +27,33 @@ void game_init() {
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
   fill_hand();
 
+  state.game.stage = STAGE_GAME;
+  state.game.money = 4;
+
   state.game.ante = 1;
 
   state.game.hands = 4;
   state.game.discards = 2;
 
   state.game.jokers.size = 5;
-  // cvector_push_back(state.game.jokers.cards,
-  //                   ((Joker){.id = 1,
-  //                            .name = "Joker",
-  //                            .rarity = RARITY_COMMON,
-  //                            .activation_type = ACTIVATION_INDEPENDENT,
-  //                            .activate = activate_joker_1}));
-
-  // cvector_push_back(state.game.jokers.cards,
-  //                   ((Joker){.id = 6,
-  //                            .name = "Jolly Joker",
-  //                            .rarity = RARITY_COMMON,
-  //                            .activation_type = ACTIVATION_INDEPENDENT,
-  //                            .activate = activate_joker_6}));
+  cvector_push_back(state.game.shop.jokers,
+                    ((Joker){.id = 1,
+                             .name = "Joker",
+                             .description = "+4 mult when scored",
+                             .base_price = 3,
+                             .rarity = RARITY_COMMON,
+                             .activation_type = ACTIVATION_INDEPENDENT,
+                             .activate = activate_joker_1}));
+  cvector_push_back(
+      state.game.shop.jokers,
+      ((Joker){.id = 6,
+               .name = "Jolly Joker",
+               .description = "+8 mult when scored hand is two pair",
+               .base_price = 5,
+               .rarity = RARITY_COMMON,
+               .activation_type = ACTIVATION_INDEPENDENT,
+               .activate = activate_joker_6}));
+  state.game.shop.selected_card = 0;
 }
 
 void game_destroy() {
@@ -53,6 +61,8 @@ void game_destroy() {
   cvector_free(state.game.full_deck.cards);
   cvector_free(state.game.hand.cards);
   cvector_free(state.game.jokers.cards);
+
+  cvector_free(state.game.shop.jokers);
 }
 
 Card create_card(Suit suit, Rank rank) {
@@ -101,6 +111,11 @@ void play_hand() {
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
   if (state.game.score >= required_score) {
+    state.game.stage = STAGE_SHOP;
+    state.game.money += 1 * state.game.hands +
+                        get_blind_money(state.game.blind) +
+                        (state.game.money) / 5;
+
     state.game.round++;
     state.game.blind++;
 
@@ -108,13 +123,6 @@ void play_hand() {
       state.game.blind = 0;
       state.game.ante++;
     }
-
-    printf("Blind completed!\n\tRequired score: %.0lf\n\tScore: %.0lf\n\tHands "
-           "left: %d\n\tDiscards left: %d\n",
-           required_score, state.game.score, state.game.hands,
-           state.game.discards);
-    printf("Next round:\n\tRound: %d\n\tBlind: %d\n\tAnte: %d\n",
-           state.game.round, state.game.blind, state.game.ante);
 
     state.game.score = 0;
 
@@ -558,4 +566,8 @@ double get_ante_base_score(uint8_t ante) {
 
 double get_required_score(uint8_t ante, uint8_t blind) {
   return get_ante_base_score(ante) * (blind == 0 ? 1 : blind == 1 ? 1.5 : 2);
+}
+
+uint8_t get_blind_money(uint8_t blind) {
+  return blind == 0 ? 3 : blind == 1 ? 4 : 5;
 }

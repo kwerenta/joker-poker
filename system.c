@@ -7,6 +7,7 @@
 
 #include "game.h"
 #include "gfx.h"
+#include "lib/cvector.h"
 #include "state.h"
 #include "system.h"
 
@@ -75,26 +76,54 @@ void handle_controls(uint8_t *hovered) {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
-  if (button_pressed(PSP_CTRL_RIGHT)) {
-    set_hovered_card(hovered, *hovered + 1);
-  } else if (button_pressed(PSP_CTRL_LEFT)) {
-    set_hovered_card(hovered, *hovered - 1);
-  } else if (button_pressed(PSP_CTRL_CROSS)) {
-    toggle_card_select(*hovered);
-  } else if (button_pressed(PSP_CTRL_SQUARE)) {
-    play_hand();
-  } else if (button_pressed(PSP_CTRL_CIRCLE)) {
-    deselect_all_cards();
-  } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
-    discard_hand();
-  } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-    move_card_in_hand(hovered, *hovered - 1);
-  } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-    move_card_in_hand(hovered, *hovered + 1);
-  } else if (button_pressed(PSP_CTRL_UP)) {
-    sort_hand(0);
-  } else if (button_pressed(PSP_CTRL_DOWN)) {
-    sort_hand(1);
+  switch (state.game.stage) {
+  case STAGE_GAME:
+    if (button_pressed(PSP_CTRL_RIGHT)) {
+      set_hovered_card(hovered, *hovered + 1);
+    } else if (button_pressed(PSP_CTRL_LEFT)) {
+      set_hovered_card(hovered, *hovered - 1);
+    } else if (button_pressed(PSP_CTRL_CROSS)) {
+      toggle_card_select(*hovered);
+    } else if (button_pressed(PSP_CTRL_SQUARE)) {
+      play_hand();
+    } else if (button_pressed(PSP_CTRL_CIRCLE)) {
+      deselect_all_cards();
+    } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
+      discard_hand();
+    } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+      move_card_in_hand(hovered, *hovered - 1);
+    } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+      move_card_in_hand(hovered, *hovered + 1);
+    } else if (button_pressed(PSP_CTRL_UP)) {
+      sort_hand(0);
+    } else if (button_pressed(PSP_CTRL_DOWN)) {
+      sort_hand(1);
+    }
+    break;
+
+  case STAGE_SHOP:
+    if (button_pressed(PSP_CTRL_CIRCLE)) {
+      state.game.stage = STAGE_GAME;
+    } else if (button_pressed(PSP_CTRL_UP)) {
+      if (state.game.shop.selected_card > 0)
+        state.game.shop.selected_card--;
+    } else if (button_pressed(PSP_CTRL_DOWN)) {
+      if (state.game.shop.selected_card < cvector_size(state.game.shop.jokers))
+        state.game.shop.selected_card++;
+    } else if (button_pressed(PSP_CTRL_CROSS)) {
+      Joker joker = state.game.shop.jokers[state.game.shop.selected_card];
+      if (state.game.money >= joker.base_price &&
+          cvector_size(state.game.jokers.cards) < state.game.jokers.size) {
+        state.game.money -= joker.base_price;
+        cvector_push_back(state.game.jokers.cards, joker);
+        cvector_erase(state.game.shop.jokers, state.game.shop.selected_card);
+
+        if (state.game.shop.selected_card >
+            cvector_size(state.game.shop.jokers)) {
+          state.game.shop.selected_card = cvector_size(state.game.shop.jokers);
+        }
+      }
+    }
   }
 
   controls->state = controls->data.Buttons;

@@ -150,3 +150,27 @@ void render_sidebar() {
            state.game.blind + 1, state.game.round);
   render_text(buffer, &round_pos, white);
 }
+
+void render_shop() {
+  char buffer[64];
+  Vector2 pos = {.x = 10, .y = 10};
+
+  snprintf(buffer, 64, "Money: $%d", state.game.money);
+  render_text(buffer, &pos, 0xFFFFFFFF);
+
+  for (uint8_t i = 0; i < cvector_size(state.game.shop.jokers); i++) {
+    Joker *joker = &state.game.shop.jokers[i];
+    uint32_t color =
+        state.game.shop.selected_card == i ? 0xFF00FF00 : 0xFFFFFFFF;
+
+    pos.y += 16;
+    render_text(joker->name, &pos, color);
+
+    pos.y += 8;
+    render_text(joker->description, &pos, color);
+
+    pos.y += 8;
+    snprintf(buffer, 64, "$%d", joker->base_price);
+    render_text(buffer, &pos, color);
+  }
+}

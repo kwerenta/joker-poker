@@ -19,4 +19,6 @@ Vector2 render_text(const char *text, const Vector2 *pos, uint32_t color);
 void render_hand(uint8_t hovered);
 void render_sidebar();
 
+void render_shop();
+
 #endif
