@@ -4,12 +4,6 @@
 #include "lib/cvector.h"
 #include <stdint.h>
 
-typedef enum {
-  STAGE_GAME,
-  STAGE_SHOP,
-  STAGE_GAME_OVER,
-} Stage;
-
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
@@ -119,8 +113,6 @@ typedef struct {
 
   uint16_t money;
   Shop shop;
-
-  Stage stage;
 } Game;
 
 void game_init();

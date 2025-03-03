@@ -76,7 +76,7 @@ void handle_controls(uint8_t *hovered) {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
-  switch (state.game.stage) {
+  switch (state.stage) {
   case STAGE_GAME:
     if (button_pressed(PSP_CTRL_RIGHT)) {
       set_hovered_card(hovered, *hovered + 1);
@@ -103,7 +103,7 @@ void handle_controls(uint8_t *hovered) {
 
   case STAGE_SHOP:
     if (button_pressed(PSP_CTRL_CIRCLE)) {
-      state.game.stage = STAGE_GAME;
+      state.stage = STAGE_GAME;
     } else if (button_pressed(PSP_CTRL_UP)) {
       if (state.game.shop.selected_card > 0)
         state.game.shop.selected_card--;

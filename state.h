@@ -6,6 +6,12 @@
 #include "game.h"
 #include "system.h"
 
+typedef enum {
+  STAGE_GAME,
+  STAGE_SHOP,
+  STAGE_GAME_OVER,
+} Stage;
+
 typedef struct {
   SceCtrlData data;
   unsigned int state;
@@ -20,6 +26,7 @@ typedef struct {
   double delta;
   uint8_t running;
 
+  Stage stage;
   Game game;
 } State;
 

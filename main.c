@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
     start_frame(list);
 
-    switch (state.game.stage) {
+    switch (state.stage) {
     case STAGE_GAME:
       render_hand(hovered);
       render_sidebar();

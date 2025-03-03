@@ -27,7 +27,6 @@ void game_init() {
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
   fill_hand();
 
-  state.game.stage = STAGE_GAME;
   state.game.money = 4;
 
   state.game.ante = 1;
@@ -54,6 +53,8 @@ void game_init() {
                .activation_type = ACTIVATION_INDEPENDENT,
                .activate = activate_joker_6}));
   state.game.shop.selected_card = 0;
+
+  state.stage = STAGE_GAME;
 }
 
 void game_destroy() {
@@ -111,7 +112,7 @@ void play_hand() {
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
   if (state.game.score >= required_score) {
-    state.game.stage = STAGE_SHOP;
+    state.stage = STAGE_SHOP;
     state.game.money += 1 * state.game.hands +
                         get_blind_money(state.game.blind) +
                         (state.game.money) / 5;
@@ -133,7 +134,7 @@ void play_hand() {
     cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
     shuffle_deck();
   } else if (state.game.hands == 0) {
-    state.game.stage = STAGE_GAME_OVER;
+    state.stage = STAGE_GAME_OVER;
   }
 
   fill_hand();
