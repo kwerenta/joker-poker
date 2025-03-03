@@ -1,3 +1,4 @@
+#include <math.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <pspgu.h>
@@ -70,6 +71,66 @@ uint8_t button_pressed(unsigned int button) {
   }
 
   return 0;
+}
+
+Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color) {
+  Rect dst = {.x = pos->x, .y = pos->y, .w = 6, .h = 10};
+  Rect src = {.x = 0, .y = 0, .w = 6, .h = 10};
+
+  uint8_t xOffset = 0;
+  uint8_t yOffest = 0;
+
+  for (; *text;) {
+    if (*text == ' ') {
+      dst.x += CHAR_WIDTH;
+      text++;
+      continue;
+    }
+
+    xOffset = 0;
+    yOffest = 0;
+
+    if (*text >= 'A' && *text <= 'Z') {
+      xOffset = *text - 'A';
+    } else if (*text >= 'a' && *text <= 'z') {
+      xOffset = *text - 'a';
+      yOffest = 2;
+    } else if (*text >= '0' && *text <= '9') {
+      xOffset = *text - '0';
+      yOffest = 4;
+    } else if (*text >= '!' && *text <= '/') {
+      xOffset = *text - '!';
+      yOffest = 5;
+    } else if (*text >= ':' && *text <= '@') {
+      xOffset = *text - ':';
+      yOffest = 7;
+    } else {
+      switch (*text) {
+      case '[':
+        xOffset = 0;
+        break;
+      case ']':
+        xOffset = 1;
+        break;
+      case '{':
+        xOffset = 2;
+        break;
+      case '}':
+        xOffset = 3;
+        break;
+      }
+      yOffest = 8;
+    }
+
+    src.x = (xOffset % 13) * CHAR_WIDTH;
+    src.y = (floor(xOffset / 13.0) + yOffest) * CHAR_HEIGHT;
+
+    draw_tinted_texture(state.font, &src, &dst, color);
+    dst.x += CHAR_WIDTH;
+    text++;
+  }
+
+  return (Vector2){.x = dst.x, .y = dst.y};
 }
 
 void handle_controls(uint8_t *hovered) {

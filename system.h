@@ -29,6 +29,7 @@ Texture *load_texture(const char *filename);
 void draw_texture(Texture *texture, Rect *src, Rect *dst);
 void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst,
                          uint32_t color);
+Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color);
 
 void handle_controls(uint8_t *hovered);
 
