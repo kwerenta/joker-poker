@@ -153,7 +153,7 @@ void render_sidebar() {
 
 void render_shop() {
   char buffer[64];
-  Vector2 pos = {.x = 10, .y = 10};
+  Vector2 pos = {10, 10};
 
   snprintf(buffer, 64, "Money: $%d", state.game.money);
   render_text(buffer, &pos, 0xFFFFFFFF);
@@ -173,4 +173,9 @@ void render_shop() {
     snprintf(buffer, 64, "$%d", joker->base_price);
     render_text(buffer, &pos, color);
   }
+}
+
+void render_game_over() {
+  Vector2 pos = {10, 10};
+  render_text("You've lost:(", &pos, 0xFFFFFFFF);
 }

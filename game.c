@@ -133,8 +133,7 @@ void play_hand() {
     cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
     shuffle_deck();
   } else if (state.game.hands == 0) {
-    printf("You've lost:(\n\tRequired score: %.0lf\n\tScore: %.0lf\n",
-           required_score, state.game.score);
+    state.game.stage = STAGE_GAME_OVER;
   }
 
   fill_hand();

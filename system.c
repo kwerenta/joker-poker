@@ -124,6 +124,9 @@ void handle_controls(uint8_t *hovered) {
         }
       }
     }
+
+  case STAGE_GAME_OVER:
+    break;
   }
 
   controls->state = controls->data.Buttons;

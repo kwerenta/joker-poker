@@ -76,6 +76,9 @@ int main(int argc, char *argv[]) {
     case STAGE_SHOP:
       render_shop();
       break;
+    case STAGE_GAME_OVER:
+      render_game_over();
+      break;
     }
 
     end_frame();

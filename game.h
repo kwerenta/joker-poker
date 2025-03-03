@@ -7,6 +7,7 @@
 typedef enum {
   STAGE_GAME,
   STAGE_SHOP,
+  STAGE_GAME_OVER,
 } Stage;
 
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
