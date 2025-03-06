@@ -169,19 +169,24 @@ void handle_controls(uint8_t *hovered) {
       if (state.game.shop.selected_card > 0)
         state.game.shop.selected_card--;
     } else if (button_pressed(PSP_CTRL_DOWN)) {
-      if (state.game.shop.selected_card < cvector_size(state.game.shop.jokers))
+      if (state.game.shop.selected_card <
+          cvector_size(state.game.shop.jokers) - 1)
         state.game.shop.selected_card++;
     } else if (button_pressed(PSP_CTRL_CROSS)) {
+      uint8_t shopCount = cvector_size(state.game.shop.jokers);
+      if (state.game.shop.selected_card >= shopCount)
+        break;
+
       Joker joker = state.game.shop.jokers[state.game.shop.selected_card];
       if (state.game.money >= joker.base_price &&
           cvector_size(state.game.jokers.cards) < state.game.jokers.size) {
         state.game.money -= joker.base_price;
         cvector_push_back(state.game.jokers.cards, joker);
         cvector_erase(state.game.shop.jokers, state.game.shop.selected_card);
+        shopCount--;
 
-        if (state.game.shop.selected_card >
-            cvector_size(state.game.shop.jokers)) {
-          state.game.shop.selected_card = cvector_size(state.game.shop.jokers);
+        if (state.game.shop.selected_card >= shopCount) {
+          state.game.shop.selected_card = shopCount - 1;
         }
       }
     }
