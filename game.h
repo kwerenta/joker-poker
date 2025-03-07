@@ -25,6 +25,7 @@ typedef enum {
   HAND_FLUSH_FIVE,
   HAND_FLUSH_HOUSE,
   HAND_FIVE_OF_KIND,
+
   HAND_STRAIGHT_FLUSH,
   HAND_FOUR_OF_KIND,
   HAND_FULL_HOUSE,
@@ -35,6 +36,23 @@ typedef enum {
   HAND_PAIR,
   HAND_HIGH_CARD
 } PokerHand;
+
+typedef enum {
+  // Secret planets
+  PLANET_ERIS,
+  PLANET_CERES,
+  PLANET_X,
+
+  PLANET_NEPTUNE,
+  PLANET_MARS,
+  PLANET_EARTH,
+  PLANET_JUPITER,
+  PLANET_SATURN,
+  PLANET_VENUS,
+  PLANET_URANUS,
+  PLANET_MERCURY,
+  PLANET_PLUTO,
+} Planet;
 
 typedef struct {
   uint32_t mult;
@@ -94,10 +112,15 @@ typedef struct {
 typedef enum {
   SHOP_ITEM_JOKER,
   SHOP_ITEM_CARD,
+  SHOP_ITEM_PLANET,
   SHOP_ITEM_BOOSTER_PACK
 } ShopItemType;
 
-typedef enum { BOOSTER_PACK_BUFFON, BOOSTER_PACK_STANDARD } BoosterPackType;
+typedef enum {
+  BOOSTER_PACK_BUFFON,
+  BOOSTER_PACK_CELESTIAL,
+  BOOSTER_PACK_STANDARD
+} BoosterPackType;
 
 typedef enum {
   BOOSTER_PACK_NORMAL,
@@ -113,6 +136,7 @@ typedef struct {
 typedef union {
   Card card;
   Joker joker;
+  Planet planet;
 } BoosterPackContent;
 
 typedef struct {
@@ -128,6 +152,7 @@ typedef struct {
   union {
     Joker joker;
     Card card;
+    Planet planet;
     BoosterPackItem booster_pack;
   };
 } ShopItem;
@@ -151,6 +176,8 @@ typedef struct {
 
   uint8_t hands;
   uint8_t discards;
+
+  uint8_t poker_hands[12];
 
   uint16_t money;
   Shop shop;
@@ -178,6 +205,8 @@ PokerHand evaluate_hand();
 void update_scoring_hand();
 
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
+PokerHandScoring get_planet_card_base_scoring(PokerHand hand);
+PokerHandScoring get_poker_hand_total_scoring(PokerHand hand);
 double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
 uint8_t get_blind_money(uint8_t blind);

@@ -63,7 +63,7 @@ void render_sidebar() {
               &hand_pos, white);
 
     PokerHandScoring score =
-        get_poker_hand_base_scoring(state.game.selected_hand.poker_hand);
+        get_poker_hand_total_scoring(state.game.selected_hand.poker_hand);
 
     snprintf(buffer, 64, "%d", score.chips);
     hand_score_pos = draw_text(buffer, &hand_score_pos, blue);
@@ -123,6 +123,10 @@ void render_shop() {
       draw_text(buffer, &pos, color);
       break;
 
+    case SHOP_ITEM_PLANET:
+      draw_text("Pluto Planet", &pos, color);
+      break;
+
     case SHOP_ITEM_BOOSTER_PACK:
       draw_text("Jumbo Standard Pack", &pos, color);
       break;
@@ -159,6 +163,11 @@ void render_booster_pack() {
     case BOOSTER_PACK_STANDARD:
       snprintf(buffer, 64, "Card(Suit=%d, Rank=%d)", item.card.suit,
                item.card.rank);
+      draw_text(buffer, &pos, color);
+      break;
+
+    case BOOSTER_PACK_CELESTIAL:
+      snprintf(buffer, 64, "Planet(%d)", item.planet);
       draw_text(buffer, &pos, color);
       break;
     }

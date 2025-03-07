@@ -68,6 +68,10 @@ void game_init() {
                               (BoosterPackItem){.type = BOOSTER_PACK_STANDARD,
                                                 .size = BOOSTER_PACK_JUMBO}};
   cvector_push_back(state.game.shop.items, shop_item_4);
+
+  ShopItem shop_item_5 = {
+      .type = SHOP_ITEM_PLANET, .price = 3, .planet = PLANET_PLUTO};
+  cvector_push_back(state.game.shop.items, shop_item_5);
   state.game.shop.selected_card = 0;
 
   state.stage = STAGE_GAME;
@@ -463,15 +467,14 @@ void update_scoring_hand() {
     scoring_cards[0] = selected_cards[highest_card_index];
   }
 
-  PokerHandScoring scoring = get_poker_hand_base_scoring(poker_hand);
+  PokerHandScoring scoring = get_poker_hand_total_scoring(poker_hand);
   state.game.selected_hand.chips = scoring.chips;
   state.game.selected_hand.mult = scoring.mult;
-  for (uint8_t i = 0; i < 5; i++) {
-    if (scoring_cards[i] == NULL) {
-      continue;
-    }
 
-    state.game.selected_hand.chips += scoring_cards[i]->chips;
+  for (uint8_t i = 0; i < 5; i++) {
+    if (scoring_cards[i] != NULL) {
+      state.game.selected_hand.chips += scoring_cards[i]->chips;
+    }
   }
 }
 
@@ -537,6 +540,45 @@ PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
   return (PokerHandScoring){.mult = 0, .chips = 0};
 }
 
+PokerHandScoring get_planet_card_base_scoring(PokerHand hand) {
+  switch (hand) {
+  case HAND_FLUSH_FIVE:
+    return (PokerHandScoring){.mult = 3, .chips = 50};
+  case HAND_FLUSH_HOUSE:
+    return (PokerHandScoring){.mult = 4, .chips = 40};
+  case HAND_FIVE_OF_KIND:
+    return (PokerHandScoring){.mult = 3, .chips = 35};
+  case HAND_STRAIGHT_FLUSH:
+    return (PokerHandScoring){.mult = 4, .chips = 40};
+  case HAND_FOUR_OF_KIND:
+    return (PokerHandScoring){.mult = 3, .chips = 30};
+  case HAND_FULL_HOUSE:
+    return (PokerHandScoring){.mult = 2, .chips = 25};
+  case HAND_FLUSH:
+    return (PokerHandScoring){.mult = 2, .chips = 15};
+  case HAND_STRAIGHT:
+    return (PokerHandScoring){.mult = 3, .chips = 30};
+  case HAND_THREE_OF_KIND:
+    return (PokerHandScoring){.mult = 2, .chips = 20};
+  case HAND_TWO_PAIR:
+    return (PokerHandScoring){.mult = 1, .chips = 20};
+  case HAND_PAIR:
+    return (PokerHandScoring){.mult = 1, .chips = 15};
+  case HAND_HIGH_CARD:
+    return (PokerHandScoring){.mult = 1, .chips = 10};
+  }
+}
+
+PokerHandScoring get_poker_hand_total_scoring(PokerHand poker_hand) {
+  PokerHandScoring scoring = get_poker_hand_base_scoring(poker_hand);
+  PokerHandScoring planet_scoring = get_planet_card_base_scoring(poker_hand);
+
+  scoring.chips += planet_scoring.chips * state.game.poker_hands[poker_hand];
+  scoring.mult += planet_scoring.mult * state.game.poker_hands[poker_hand];
+
+  return scoring;
+}
+
 double get_ante_base_score(uint8_t ante) {
   switch (ante) {
   case 0:
@@ -584,6 +626,10 @@ uint8_t add_item_to_player(ShopItem *item) {
     cvector_push_back(state.game.full_deck, item->card);
     break;
 
+  case SHOP_ITEM_PLANET:
+    state.game.poker_hands[item->planet] += 1;
+    break;
+
   case SHOP_ITEM_BOOSTER_PACK:
     open_booster_pack(item->booster_pack);
     break;
@@ -626,6 +672,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
     case BOOSTER_PACK_STANDARD:
       content.card = create_card(SUIT_CLUBS, RANK_TWO);
       break;
+
     case BOOSTER_PACK_BUFFON:
       content.joker = (Joker){.id = 1,
                               .name = "Joker",
@@ -634,6 +681,9 @@ void open_booster_pack(BoosterPackItem booster_pack) {
                               .rarity = RARITY_COMMON,
                               .activation_type = ACTIVATION_INDEPENDENT,
                               .activate = activate_joker_1};
+
+    case BOOSTER_PACK_CELESTIAL:
+      content.planet = PLANET_PLUTO;
     }
 
     cvector_push_back(state.game.booster_pack.content, content);
@@ -650,9 +700,15 @@ void submit_booster_pack() {
     item.type = SHOP_ITEM_CARD;
     item.card = content.card;
     break;
+
   case BOOSTER_PACK_BUFFON:
     item.type = SHOP_ITEM_JOKER;
     item.joker = content.joker;
+    break;
+
+  case BOOSTER_PACK_CELESTIAL:
+    item.type = SHOP_ITEM_PLANET;
+    item.planet = content.planet;
     break;
   }
 
