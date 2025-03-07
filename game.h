@@ -155,5 +155,6 @@ uint8_t get_blind_money(uint8_t blind);
 char *get_poker_hand_name(PokerHand hand);
 
 void buy_shop_item();
+void exit_shop();
 
 #endif

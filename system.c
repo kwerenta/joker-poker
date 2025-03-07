@@ -165,7 +165,7 @@ void handle_controls(uint8_t *hovered) {
 
   case STAGE_SHOP:
     if (button_pressed(PSP_CTRL_CIRCLE)) {
-      state.stage = STAGE_GAME;
+      exit_shop();
     } else if (button_pressed(PSP_CTRL_UP)) {
       if (state.game.shop.selected_card > 0)
         state.game.shop.selected_card--;

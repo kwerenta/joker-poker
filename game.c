@@ -126,28 +126,9 @@ void play_hand() {
     state.game.money += 1 * state.game.hands +
                         get_blind_money(state.game.blind) +
                         (state.game.money) / 5;
-
-    state.game.round++;
-    state.game.blind++;
-
-    if (state.game.blind > 2) {
-      state.game.blind = 0;
-      state.game.ante++;
-    }
-
-    state.game.score = 0;
-
-    // Reset hand and deck for new blind
-    state.game.hands = 4;
-    state.game.discards = 2;
-    cvector_clear(state.game.hand.cards);
-    cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
-    shuffle_deck();
   } else if (state.game.hands == 0) {
     state.stage = STAGE_GAME_OVER;
   }
-
-  fill_hand();
 }
 
 void discard_hand() {
@@ -610,4 +591,27 @@ void buy_shop_item() {
   if (state.game.shop.selected_card >= shopCount) {
     state.game.shop.selected_card = shopCount - 1;
   }
+}
+
+void exit_shop() {
+  state.game.round++;
+  state.game.blind++;
+
+  if (state.game.blind > 2) {
+    state.game.blind = 0;
+    state.game.ante++;
+  }
+
+  state.game.score = 0;
+
+  // Reset hand and deck for new blind
+  state.game.hands = 4;
+  state.game.discards = 2;
+  cvector_clear(state.game.hand.cards);
+  cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
+  shuffle_deck();
+
+  fill_hand();
+
+  state.stage = STAGE_GAME;
 }
