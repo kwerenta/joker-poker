@@ -12,14 +12,12 @@ void activate_joker_6() {
 
 void game_init() {
   // Generate standard deck of 52 cards
-  state.game.deck.size = 52;
-  cvector_reserve(state.game.deck.cards, state.game.deck.size);
-  for (uint8_t i = 0; i < state.game.deck.size; i++) {
-    cvector_push_back(state.game.deck.cards, create_card(i % 4, i % 13));
+  cvector_reserve(state.game.full_deck, 52);
+  for (uint8_t i = 0; i < 52; i++) {
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13));
   }
 
-  state.game.full_deck.size = state.game.deck.size;
-  cvector_copy(state.game.deck.cards, state.game.full_deck.cards);
+  cvector_copy(state.game.full_deck, state.game.deck);
 
   shuffle_deck();
 
@@ -68,8 +66,8 @@ void game_init() {
 }
 
 void game_destroy() {
-  cvector_free(state.game.deck.cards);
-  cvector_free(state.game.full_deck.cards);
+  cvector_free(state.game.deck);
+  cvector_free(state.game.full_deck);
   cvector_free(state.game.hand.cards);
   cvector_free(state.game.jokers.cards);
 
@@ -86,10 +84,9 @@ Card create_card(Suit suit, Rank rank) {
 }
 
 void draw_card() {
-  cvector_push_back(
-      state.game.hand.cards,
-      state.game.deck.cards[cvector_size(state.game.deck.cards) - 1]);
-  cvector_pop_back(state.game.deck.cards);
+  cvector_push_back(state.game.hand.cards,
+                    state.game.deck[cvector_size(state.game.deck) - 1]);
+  cvector_pop_back(state.game.deck);
 }
 
 void fill_hand() {
@@ -156,12 +153,11 @@ void remove_selected_cards() {
 }
 
 void shuffle_deck() {
-  const Deck *deck = &state.game.deck;
-  for (uint8_t i = cvector_size(deck->cards) - 1; i > 0; i--) {
+  for (uint8_t i = cvector_size(state.game.deck) - 1; i > 0; i--) {
     uint8_t j = rand() % (i + 1);
-    Card temp = deck->cards[i];
-    deck->cards[i] = deck->cards[j];
-    deck->cards[j] = temp;
+    Card temp = state.game.deck[i];
+    state.game.deck[i] = state.game.deck[j];
+    state.game.deck[j] = temp;
   }
 }
 
@@ -580,7 +576,7 @@ void buy_shop_item() {
     break;
 
   case SHOP_ITEM_CARD:
-    cvector_push_back(state.game.full_deck.cards, item.card);
+    cvector_push_back(state.game.full_deck, item.card);
     break;
   }
 
@@ -608,7 +604,7 @@ void exit_shop() {
   state.game.hands = 4;
   state.game.discards = 2;
   cvector_clear(state.game.hand.cards);
-  cvector_copy(state.game.full_deck.cards, state.game.deck.cards);
+  cvector_copy(state.game.full_deck, state.game.deck);
   shuffle_deck();
 
   fill_hand();

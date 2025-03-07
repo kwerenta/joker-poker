@@ -76,7 +76,7 @@ typedef struct {
   // (some bosses/jokers will be able to overflow this value)
   uint8_t size;
   cvector_vector_type(Card) cards;
-} Hand, Deck;
+} Hand;
 
 typedef struct {
   uint8_t size;
@@ -109,8 +109,8 @@ typedef struct {
 } Shop;
 
 typedef struct {
-  Deck full_deck;
-  Deck deck;
+  cvector_vector_type(Card) full_deck;
+  cvector_vector_type(Card) deck;
   Hand hand;
   SelectedHand selected_hand;
   JokerHand jokers;
