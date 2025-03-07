@@ -125,6 +125,8 @@ void play_hand() {
                         (state.game.money) / 5;
   } else if (state.game.hands == 0) {
     state.stage = STAGE_GAME_OVER;
+  } else {
+    fill_hand();
   }
 }
 
