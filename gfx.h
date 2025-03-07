@@ -20,6 +20,8 @@ void render_sidebar();
 
 void render_shop();
 
+void render_booster_pack();
+
 void render_game_over();
 
 #endif

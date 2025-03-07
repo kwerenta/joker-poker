@@ -33,6 +33,7 @@ void game_init() {
   state.game.discards = 2;
 
   state.game.jokers.size = 5;
+
   ShopItem shop_item_1 = {.type = SHOP_ITEM_JOKER,
                           .price = 3,
                           .joker = {.id = 1,
@@ -60,6 +61,13 @@ void game_init() {
                           .price = 1,
                           .card = create_card(SUIT_DIAMONDS, RANK_SEVEN)};
   cvector_push_back(state.game.shop.items, shop_item_3);
+
+  ShopItem shop_item_4 = {.type = SHOP_ITEM_BOOSTER_PACK,
+                          .price = 6,
+                          .booster_pack =
+                              (BoosterPackItem){.type = BOOSTER_PACK_STANDARD,
+                                                .size = BOOSTER_PACK_JUMBO}};
+  cvector_push_back(state.game.shop.items, shop_item_4);
   state.game.shop.selected_card = 0;
 
   state.stage = STAGE_GAME;
@@ -72,6 +80,7 @@ void game_destroy() {
   cvector_free(state.game.jokers.cards);
 
   cvector_free(state.game.shop.items);
+  cvector_free(state.game.booster_pack.content);
 }
 
 Card create_card(Suit suit, Rank rank) {
@@ -561,34 +570,94 @@ uint8_t get_blind_money(uint8_t blind) {
   return blind == 0 ? 3 : blind == 1 ? 4 : 5;
 }
 
-void buy_shop_item() {
-  uint8_t shopCount = cvector_size(state.game.shop.items);
-  ShopItem item = state.game.shop.items[state.game.shop.selected_card];
-
-  if (state.game.shop.selected_card >= shopCount ||
-      state.game.money < item.price)
-    return;
-
-  switch (item.type) {
+uint8_t add_item_to_player(ShopItem *item) {
+  switch (item->type) {
   case SHOP_ITEM_JOKER:
-    if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size)
-      return;
+    if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) {
+      return 0;
+    }
 
-    cvector_push_back(state.game.jokers.cards, item.joker);
+    cvector_push_back(state.game.jokers.cards, item->joker);
     break;
 
   case SHOP_ITEM_CARD:
-    cvector_push_back(state.game.full_deck, item.card);
+    cvector_push_back(state.game.full_deck, item->card);
+    break;
+
+  case SHOP_ITEM_BOOSTER_PACK:
+    open_booster_pack(item->booster_pack);
     break;
   }
 
-  state.game.money -= item.price;
+  return 1;
+}
+
+void buy_shop_item() {
+  uint8_t shopCount = cvector_size(state.game.shop.items);
+  ShopItem *item = &state.game.shop.items[state.game.shop.selected_card];
+
+  if (state.game.shop.selected_card >= shopCount ||
+      state.game.money < item->price)
+    return;
+
+  if (add_item_to_player(item) == 0) {
+    return;
+  }
+
+  state.game.money -= item->price;
   cvector_erase(state.game.shop.items, state.game.shop.selected_card);
   shopCount--;
 
   if (state.game.shop.selected_card >= shopCount) {
     state.game.shop.selected_card = shopCount - 1;
   }
+}
+
+void open_booster_pack(BoosterPackItem booster_pack) {
+  cvector_clear(state.game.booster_pack.content);
+  state.game.booster_pack.item = booster_pack;
+  state.stage = STAGE_BOOSTER_PACK;
+
+  uint8_t count = booster_pack.size == BOOSTER_PACK_NORMAL ? 3 : 5;
+  for (uint8_t i = 0; i < count; i++) {
+    BoosterPackContent content;
+
+    switch (booster_pack.type) {
+    case BOOSTER_PACK_STANDARD:
+      content.card = create_card(SUIT_CLUBS, RANK_TWO);
+      break;
+    case BOOSTER_PACK_BUFFON:
+      content.joker = (Joker){.id = 1,
+                              .name = "Joker",
+                              .description = "+4 mult when scored",
+                              .base_price = 3,
+                              .rarity = RARITY_COMMON,
+                              .activation_type = ACTIVATION_INDEPENDENT,
+                              .activate = activate_joker_1};
+    }
+
+    cvector_push_back(state.game.booster_pack.content, content);
+  }
+}
+
+void submit_booster_pack() {
+  ShopItem item;
+  BoosterPack *pack = &state.game.booster_pack;
+  BoosterPackContent content = pack->content[pack->selected_item];
+
+  switch (pack->item.type) {
+  case BOOSTER_PACK_STANDARD:
+    item.type = SHOP_ITEM_CARD;
+    item.card = content.card;
+    break;
+  case BOOSTER_PACK_BUFFON:
+    item.type = SHOP_ITEM_JOKER;
+    item.joker = content.joker;
+    break;
+  }
+
+  add_item_to_player(&item);
+  state.stage = STAGE_SHOP;
 }
 
 void exit_shop() {

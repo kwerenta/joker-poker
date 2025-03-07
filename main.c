@@ -79,6 +79,8 @@ int main(int argc, char *argv[]) {
     case STAGE_GAME_OVER:
       render_game_over();
       break;
+    case STAGE_BOOSTER_PACK:
+      render_booster_pack();
     }
 
     end_frame();

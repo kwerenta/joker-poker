@@ -9,6 +9,7 @@
 typedef enum {
   STAGE_GAME,
   STAGE_SHOP,
+  STAGE_BOOSTER_PACK,
   STAGE_GAME_OVER,
 } Stage;
 

@@ -122,11 +122,46 @@ void render_shop() {
                item.card.rank);
       draw_text(buffer, &pos, color);
       break;
+
+    case SHOP_ITEM_BOOSTER_PACK:
+      draw_text("Jumbo Standard Pack", &pos, color);
+      break;
     }
 
     pos.y += 8;
     snprintf(buffer, 64, "$%d", item.price);
     draw_text(buffer, &pos, color);
+  }
+}
+
+void render_booster_pack() {
+  char buffer[64];
+  Vector2 pos = {10, 10};
+
+  snprintf(buffer, 64, "Money: $%d", state.game.money);
+  draw_text(buffer, &pos, 0xFFFFFFFF);
+
+  for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
+    uint32_t color =
+        state.game.booster_pack.selected_item == i ? 0xFF00FF00 : 0xFFFFFFFF;
+    BoosterPackContent item = state.game.booster_pack.content[i];
+
+    pos.y += 16;
+
+    switch (state.game.booster_pack.item.type) {
+    case BOOSTER_PACK_BUFFON:
+      draw_text(item.joker.name, &pos, color);
+
+      pos.y += 8;
+      draw_text(item.joker.description, &pos, color);
+      break;
+
+    case BOOSTER_PACK_STANDARD:
+      snprintf(buffer, 64, "Card(Suit=%d, Rank=%d)", item.card.suit,
+               item.card.rank);
+      draw_text(buffer, &pos, color);
+      break;
+    }
   }
 }
 
