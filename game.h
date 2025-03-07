@@ -91,8 +91,20 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
+typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD } ShopItemType;
+
 typedef struct {
-  cvector_vector_type(Joker) jokers;
+  uint8_t price;
+
+  ShopItemType type;
+  union {
+    Joker joker;
+    Card card;
+  };
+} ShopItem;
+
+typedef struct {
+  cvector_vector_type(ShopItem) items;
   uint8_t selected_card;
 } Shop;
 
@@ -141,5 +153,7 @@ double get_required_score(uint8_t ante, uint8_t blind);
 uint8_t get_blind_money(uint8_t blind);
 
 char *get_poker_hand_name(PokerHand hand);
+
+void buy_shop_item();
 
 #endif

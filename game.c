@@ -35,23 +35,33 @@ void game_init() {
   state.game.discards = 2;
 
   state.game.jokers.size = 5;
-  cvector_push_back(state.game.shop.jokers,
-                    ((Joker){.id = 1,
-                             .name = "Joker",
-                             .description = "+4 mult when scored",
-                             .base_price = 3,
-                             .rarity = RARITY_COMMON,
-                             .activation_type = ACTIVATION_INDEPENDENT,
-                             .activate = activate_joker_1}));
-  cvector_push_back(
-      state.game.shop.jokers,
-      ((Joker){.id = 6,
-               .name = "Jolly Joker",
-               .description = "+8 mult when scored hand is two pair",
-               .base_price = 5,
-               .rarity = RARITY_COMMON,
-               .activation_type = ACTIVATION_INDEPENDENT,
-               .activate = activate_joker_6}));
+  ShopItem shop_item_1 = {.type = SHOP_ITEM_JOKER,
+                          .price = 3,
+                          .joker = {.id = 1,
+                                    .name = "Joker",
+                                    .description = "+4 mult when scored",
+                                    .base_price = 3,
+                                    .rarity = RARITY_COMMON,
+                                    .activation_type = ACTIVATION_INDEPENDENT,
+                                    .activate = activate_joker_1}};
+  cvector_push_back(state.game.shop.items, shop_item_1);
+
+  ShopItem shop_item_2 = {
+      .type = SHOP_ITEM_JOKER,
+      .price = 5,
+      .joker = {.id = 6,
+                .name = "Jolly Joker",
+                .description = "+8 mult when scored hand is two pair",
+                .base_price = 5,
+                .rarity = RARITY_COMMON,
+                .activation_type = ACTIVATION_INDEPENDENT,
+                .activate = activate_joker_6}};
+  cvector_push_back(state.game.shop.items, shop_item_2);
+
+  ShopItem shop_item_3 = {.type = SHOP_ITEM_CARD,
+                          .price = 1,
+                          .card = create_card(SUIT_DIAMONDS, RANK_SEVEN)};
+  cvector_push_back(state.game.shop.items, shop_item_3);
   state.game.shop.selected_card = 0;
 
   state.stage = STAGE_GAME;
@@ -63,7 +73,7 @@ void game_destroy() {
   cvector_free(state.game.hand.cards);
   cvector_free(state.game.jokers.cards);
 
-  cvector_free(state.game.shop.jokers);
+  cvector_free(state.game.shop.items);
 }
 
 Card create_card(Suit suit, Rank rank) {
@@ -570,4 +580,34 @@ double get_required_score(uint8_t ante, uint8_t blind) {
 
 uint8_t get_blind_money(uint8_t blind) {
   return blind == 0 ? 3 : blind == 1 ? 4 : 5;
+}
+
+void buy_shop_item() {
+  uint8_t shopCount = cvector_size(state.game.shop.items);
+  ShopItem item = state.game.shop.items[state.game.shop.selected_card];
+
+  if (state.game.shop.selected_card >= shopCount ||
+      state.game.money < item.price)
+    return;
+
+  switch (item.type) {
+  case SHOP_ITEM_JOKER:
+    if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size)
+      return;
+
+    cvector_push_back(state.game.jokers.cards, item.joker);
+    break;
+
+  case SHOP_ITEM_CARD:
+    cvector_push_back(state.game.full_deck.cards, item.card);
+    break;
+  }
+
+  state.game.money -= item.price;
+  cvector_erase(state.game.shop.items, state.game.shop.selected_card);
+  shopCount--;
+
+  if (state.game.shop.selected_card >= shopCount) {
+    state.game.shop.selected_card = shopCount - 1;
+  }
 }
