@@ -89,6 +89,10 @@ void render_sidebar() {
   snprintf(buffer, 64, "Ante: %d/8, Blind: %d/3, Round: %d", state.game.ante,
            state.game.blind + 1, state.game.round);
   draw_text(buffer, &round_pos, white);
+
+  snprintf(buffer, 64, "Deck: %zu/%zu", cvector_size(state.game.deck.cards),
+           cvector_size(state.game.full_deck.cards));
+  draw_text(buffer, &(Vector2){400, 254}, white);
 }
 
 void render_shop() {
