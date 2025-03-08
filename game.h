@@ -104,8 +104,7 @@ typedef struct {
 typedef struct {
   uint8_t count;
   PokerHand poker_hand;
-  uint32_t chips;
-  uint32_t mult;
+  PokerHandScoring scoring;
   Card *scoring_cards[5];
 } SelectedHand;
 

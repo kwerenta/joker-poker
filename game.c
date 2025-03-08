@@ -4,10 +4,10 @@
 #include "lib/cvector.h"
 #include "state.h"
 
-void activate_joker_1() { state.game.selected_hand.mult += 4; }
+void activate_joker_1() { state.game.selected_hand.scoring.mult += 4; }
 void activate_joker_6() {
-  if (state.game.selected_hand.poker_hand == HAND_PAIR)
-    state.game.selected_hand.mult += 8;
+  if (state.game.selected_hand.poker_hand == HAND_TWO_PAIR)
+    state.game.selected_hand.scoring.mult += 8;
 }
 
 void game_init() {
@@ -115,6 +115,13 @@ void play_hand() {
 
   update_scoring_hand();
 
+  for (uint8_t i = 0; i < 5; i++) {
+    if (state.game.selected_hand.scoring_cards[i] != NULL) {
+      state.game.selected_hand.scoring.chips +=
+          state.game.selected_hand.scoring_cards[i]->chips;
+    }
+  }
+
   for (Joker *joker = cvector_begin(state.game.jokers.cards);
        joker != cvector_end(state.game.jokers.cards); joker++) {
     if (joker->activation_type == ACTIVATION_INDEPENDENT) {
@@ -123,8 +130,8 @@ void play_hand() {
     }
   }
 
-  state.game.score +=
-      state.game.selected_hand.chips * state.game.selected_hand.mult;
+  state.game.score += state.game.selected_hand.scoring.chips *
+                      state.game.selected_hand.scoring.mult;
 
   remove_selected_cards();
   state.game.hands--;
@@ -467,15 +474,7 @@ void update_scoring_hand() {
     scoring_cards[0] = selected_cards[highest_card_index];
   }
 
-  PokerHandScoring scoring = get_poker_hand_total_scoring(poker_hand);
-  state.game.selected_hand.chips = scoring.chips;
-  state.game.selected_hand.mult = scoring.mult;
-
-  for (uint8_t i = 0; i < 5; i++) {
-    if (scoring_cards[i] != NULL) {
-      state.game.selected_hand.chips += scoring_cards[i]->chips;
-    }
-  }
+  state.game.selected_hand.scoring = get_poker_hand_total_scoring(poker_hand);
 }
 
 char *get_poker_hand_name(PokerHand hand) {

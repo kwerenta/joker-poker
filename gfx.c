@@ -62,16 +62,15 @@ void render_sidebar() {
     draw_text(get_poker_hand_name(state.game.selected_hand.poker_hand),
               &hand_pos, white);
 
-    PokerHandScoring score =
-        get_poker_hand_total_scoring(state.game.selected_hand.poker_hand);
+    PokerHandScoring *score = &state.game.selected_hand.scoring;
 
-    snprintf(buffer, 64, "%d", score.chips);
+    snprintf(buffer, 64, "%d", score->chips);
     hand_score_pos = draw_text(buffer, &hand_score_pos, blue);
 
     snprintf(buffer, 64, " x ");
     hand_score_pos = draw_text(buffer, &hand_score_pos, white);
 
-    snprintf(buffer, 64, "%d", score.mult);
+    snprintf(buffer, 64, "%d", score->mult);
     draw_text(buffer, &hand_score_pos, red);
   }
 
