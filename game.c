@@ -123,8 +123,7 @@ void play_hand() {
     }
   }
 
-  for (Joker *joker = cvector_begin(state.game.jokers.cards);
-       joker != cvector_end(state.game.jokers.cards); joker++) {
+  cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (joker->activation_type == ACTIVATION_INDEPENDENT) {
       joker->activate();
       printf("Joker '%s' has been activated\n", joker->name);
@@ -693,10 +692,8 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 void submit_booster_pack() {
   ShopItem item = {};
 
-  for (BoosterPackContent *content =
-           cvector_begin(state.game.booster_pack.content);
-       content != cvector_end(state.game.booster_pack.content); content++) {
-
+  cvector_for_each(state.game.booster_pack.content, BoosterPackContent,
+                   content) {
     if (content->selected == 0)
       continue;
 
@@ -736,8 +733,7 @@ void toggle_booster_pack_item_select() {
   const uint8_t max_count =
       state.game.booster_pack.item.size == BOOSTER_PACK_MEGA ? 2 : 1;
 
-  for (BoosterPackContent *c = cvector_begin(state.game.booster_pack.content);
-       c != cvector_end(state.game.booster_pack.content); c++) {
+  cvector_for_each(state.game.booster_pack.content, BoosterPackContent, c) {
     if (c->selected == 1)
       selected_count++;
   }

@@ -486,4 +486,21 @@ typedef struct cvector_metadata_t {
     }                                                                          \
   } while (0)
 
+/**
+ * BELOW CODE IS NOT PART OF THE ORIGINAL LIBRARY
+ *
+ * It was written by myself
+ */
+
+/**
+ * @brief cvector_for_each - loops over each element inside vector.
+ * @param vec - the vector
+ * @param type - type of vector element
+ * @param it - iterator name
+ * @return void
+ */
+#define cvector_for_each(vec, type, it)                                        \
+  for (cvector_iterator(type) it = cvector_begin(vec); it != cvector_end(vec); \
+       it++)
+
 #endif /* CVECTOR_H_ */
