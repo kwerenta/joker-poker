@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 
 #include "game.h"
@@ -66,7 +67,7 @@ void game_init() {
                           .price = 6,
                           .booster_pack =
                               (BoosterPackItem){.type = BOOSTER_PACK_STANDARD,
-                                                .size = BOOSTER_PACK_JUMBO}};
+                                                .size = BOOSTER_PACK_MEGA}};
   cvector_push_back(state.game.shop.items, shop_item_4);
 
   ShopItem shop_item_5 = {
@@ -665,7 +666,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 
   uint8_t count = booster_pack.size == BOOSTER_PACK_NORMAL ? 3 : 5;
   for (uint8_t i = 0; i < count; i++) {
-    BoosterPackContent content;
+    BoosterPackContent content = {.selected = 0};
 
     switch (booster_pack.type) {
     case BOOSTER_PACK_STANDARD:
@@ -690,29 +691,60 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 }
 
 void submit_booster_pack() {
-  ShopItem item;
-  BoosterPack *pack = &state.game.booster_pack;
-  BoosterPackContent content = pack->content[pack->selected_item];
+  ShopItem item = {};
 
-  switch (pack->item.type) {
-  case BOOSTER_PACK_STANDARD:
-    item.type = SHOP_ITEM_CARD;
-    item.card = content.card;
-    break;
+  for (BoosterPackContent *content =
+           cvector_begin(state.game.booster_pack.content);
+       content != cvector_end(state.game.booster_pack.content); content++) {
 
-  case BOOSTER_PACK_BUFFON:
-    item.type = SHOP_ITEM_JOKER;
-    item.joker = content.joker;
-    break;
+    if (content->selected == 0)
+      continue;
 
-  case BOOSTER_PACK_CELESTIAL:
-    item.type = SHOP_ITEM_PLANET;
-    item.planet = content.planet;
-    break;
+    switch (state.game.booster_pack.item.type) {
+    case BOOSTER_PACK_STANDARD:
+      item.type = SHOP_ITEM_CARD;
+      item.card = content->card;
+      break;
+
+    case BOOSTER_PACK_BUFFON:
+      item.type = SHOP_ITEM_JOKER;
+      item.joker = content->joker;
+      break;
+
+    case BOOSTER_PACK_CELESTIAL:
+      item.type = SHOP_ITEM_PLANET;
+      item.planet = content->planet;
+      break;
+    }
+
+    add_item_to_player(&item);
   }
 
-  add_item_to_player(&item);
   state.stage = STAGE_SHOP;
+}
+
+void toggle_booster_pack_item_select() {
+  BoosterPackContent *content =
+      &state.game.booster_pack.content[state.game.booster_pack.hovered_item];
+
+  if (content->selected == 1) {
+    content->selected = 0;
+    return;
+  }
+
+  uint8_t selected_count = 0;
+  const uint8_t max_count =
+      state.game.booster_pack.item.size == BOOSTER_PACK_MEGA ? 2 : 1;
+
+  for (BoosterPackContent *c = cvector_begin(state.game.booster_pack.content);
+       c != cvector_end(state.game.booster_pack.content); c++) {
+    if (c->selected == 1)
+      selected_count++;
+  }
+
+  if (selected_count < max_count) {
+    content->selected = 1;
+  }
 }
 
 void exit_shop() {

@@ -132,16 +132,19 @@ typedef struct {
   BoosterPackSize size;
 } BoosterPackItem;
 
-typedef union {
-  Card card;
-  Joker joker;
-  Planet planet;
+typedef struct {
+  uint8_t selected;
+  union {
+    Card card;
+    Joker joker;
+    Planet planet;
+  };
 } BoosterPackContent;
 
 typedef struct {
   BoosterPackItem item;
   cvector_vector_type(BoosterPackContent) content;
-  uint8_t selected_item;
+  uint8_t hovered_item;
 } BoosterPack;
 
 typedef struct {
@@ -215,6 +218,7 @@ char *get_poker_hand_name(PokerHand hand);
 void buy_shop_item();
 void open_booster_pack(BoosterPackItem booster_pack);
 void submit_booster_pack();
+void toggle_booster_pack_item_select();
 void exit_shop();
 
 #endif

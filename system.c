@@ -183,13 +183,15 @@ void handle_controls(uint8_t *hovered) {
     if (button_pressed(PSP_CTRL_CIRCLE)) {
       state.stage = STAGE_SHOP;
     } else if (button_pressed(PSP_CTRL_UP)) {
-      if (state.game.booster_pack.selected_item > 0)
-        state.game.booster_pack.selected_item--;
+      if (state.game.booster_pack.hovered_item > 0)
+        state.game.booster_pack.hovered_item--;
     } else if (button_pressed(PSP_CTRL_DOWN)) {
-      if (state.game.booster_pack.selected_item <
+      if (state.game.booster_pack.hovered_item <
           cvector_size(state.game.booster_pack.content) - 1)
-        state.game.booster_pack.selected_item++;
+        state.game.booster_pack.hovered_item++;
     } else if (button_pressed(PSP_CTRL_CROSS)) {
+      toggle_booster_pack_item_select();
+    } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
       submit_booster_pack();
     }
 

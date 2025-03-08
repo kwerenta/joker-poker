@@ -127,7 +127,7 @@ void render_shop() {
       break;
 
     case SHOP_ITEM_BOOSTER_PACK:
-      draw_text("Jumbo Standard Pack", &pos, color);
+      draw_text("Mega Standard Pack", &pos, color);
       break;
     }
 
@@ -145,9 +145,10 @@ void render_booster_pack() {
   draw_text(buffer, &pos, 0xFFFFFFFF);
 
   for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
-    uint32_t color =
-        state.game.booster_pack.selected_item == i ? 0xFF00FF00 : 0xFFFFFFFF;
     BoosterPackContent item = state.game.booster_pack.content[i];
+    uint32_t color = state.game.booster_pack.hovered_item == i ? 0xFF00FF00
+                     : item.selected == 1                      ? 0xFFFF0000
+                                                               : 0xFFFFFFFF;
 
     pos.y += 16;
 
