@@ -98,8 +98,7 @@ Card create_card(Suit suit, Rank rank) {
 }
 
 void draw_card() {
-  cvector_push_back(state.game.hand.cards,
-                    state.game.deck[cvector_size(state.game.deck) - 1]);
+  cvector_push_back(state.game.hand.cards, cvector_back(state.game.deck));
   cvector_pop_back(state.game.deck);
 }
 
@@ -203,16 +202,14 @@ void toggle_card_select(uint8_t index) {
 
   uint8_t *selected_count = &state.game.selected_hand.count;
   *selected_count = 0;
-  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
-    if (hand->cards[i].selected == 0) {
+  cvector_for_each(hand->cards, Card, card) {
+    if (card->selected == 0)
       continue;
-    }
 
     (*selected_count)++;
 
-    if (*selected_count == 5) {
+    if (*selected_count == 5)
       return;
-    }
   }
 
   (*selected_count)++;
@@ -223,10 +220,7 @@ void toggle_card_select(uint8_t index) {
 }
 
 void deselect_all_cards() {
-  Hand *hand = &state.game.hand;
-  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
-    hand->cards[i].selected = 0;
-  }
+  cvector_for_each(state.game.hand.cards, Card, card) { card->selected = 0; }
   state.game.selected_hand.count = 0;
 }
 
@@ -295,90 +289,73 @@ PokerHand evaluate_hand() {
 
   Rank highest_card = RANK_TWO, lowest_card = RANK_KING;
 
-  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
-    Card card = hand->cards[i];
-    if (card.selected == 0) {
+  cvector_for_each(hand->cards, Card, card) {
+    if (card->selected == 0)
       continue;
-    }
 
-    if (card.rank == RANK_ACE) {
+    if (card->rank == RANK_ACE)
       has_ace = 1;
-    }
-    if (card.rank != RANK_ACE && card.rank > highest_card) {
-      highest_card = card.rank;
-    }
-    if (card.rank != RANK_ACE && card.rank < lowest_card) {
-      lowest_card = card.rank;
-    }
 
-    rank_counts[card.rank] += 1;
-    suit_counts[card.suit] += 1;
+    if (card->rank != RANK_ACE && card->rank > highest_card)
+      highest_card = card->rank;
 
-    if (rank_counts[card.rank] > 1) {
+    if (card->rank != RANK_ACE && card->rank < lowest_card)
+      lowest_card = card->rank;
+
+    rank_counts[card->rank] += 1;
+    suit_counts[card->suit] += 1;
+
+    if (rank_counts[card->rank] > 1) {
       // this means there are duplicates in selected ranks,
       // so straight is not possible
       has_straight = 2;
-      x_of_kind[rank_counts[card.rank] - 2] += 1;
-      if (rank_counts[card.rank] > 2) {
-        x_of_kind[rank_counts[card.rank] - 3] -= 1;
-      }
+      x_of_kind[rank_counts[card->rank] - 2] += 1;
+      if (rank_counts[card->rank] > 2)
+        x_of_kind[rank_counts[card->rank] - 3] -= 1;
     }
 
-    if (suit_counts[card.suit] == 5) {
+    if (suit_counts[card->suit] == 5)
       has_flush = 1;
-    }
   }
 
   // A 2 3 4 5 is also valid straight, so it needs to be checked
   if (has_straight == 0 && selected_count == 5 &&
       ((has_ace == 0 && highest_card - lowest_card == 4) ||
-       (has_ace == 1 && (13 - lowest_card == 4 || highest_card == 4)))) {
+       (has_ace == 1 && (13 - lowest_card == 4 || highest_card == 4))))
     has_straight = 1;
-  }
 
-  if (has_flush == 1 && x_of_kind[5 - 2] > 0) {
+  if (has_flush == 1 && x_of_kind[5 - 2] > 0)
     return HAND_FLUSH_FIVE;
-  }
 
-  if (has_flush == 1 && x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1) {
+  if (has_flush == 1 && x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1)
     return HAND_FLUSH_HOUSE;
-  }
 
-  if (x_of_kind[5 - 2] == 1) {
+  if (x_of_kind[5 - 2] == 1)
     return HAND_FIVE_OF_KIND;
-  }
 
-  if (has_flush == 1 && has_straight == 1) {
+  if (has_flush == 1 && has_straight == 1)
     return HAND_STRAIGHT_FLUSH;
-  }
 
-  if (x_of_kind[4 - 2] == 1) {
+  if (x_of_kind[4 - 2] == 1)
     return HAND_FOUR_OF_KIND;
-  }
 
-  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1) {
+  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1)
     return HAND_FULL_HOUSE;
-  }
 
-  if (has_flush == 1) {
+  if (has_flush == 1)
     return HAND_FLUSH;
-  }
 
-  if (has_straight == 1) {
+  if (has_straight == 1)
     return HAND_STRAIGHT;
-  }
 
-  if (x_of_kind[3 - 2] == 1) {
+  if (x_of_kind[3 - 2] == 1)
     return HAND_THREE_OF_KIND;
-  }
 
-  if (x_of_kind[2 - 2] >= 2) {
+  if (x_of_kind[2 - 2] >= 2)
     return HAND_TWO_PAIR;
-  }
 
-  if (x_of_kind[2 - 2] >= 1) {
+  if (x_of_kind[2 - 2] >= 1)
     return HAND_PAIR;
-  }
 
   return HAND_HIGH_CARD;
 }
@@ -395,12 +372,11 @@ void update_scoring_hand() {
   memset(scoring_cards, 0, 5 * sizeof(Card *));
 
   uint8_t j = 0;
-  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
-    if (hand->cards[i].selected == 0) {
+  cvector_for_each(hand->cards, Card, card) {
+    if (card->selected == 0)
       continue;
-    }
 
-    selected_cards[j] = &hand->cards[i];
+    selected_cards[j] = card;
     j++;
   }
 
@@ -414,9 +390,8 @@ void update_scoring_hand() {
       poker_hand == HAND_FULL_HOUSE || poker_hand == HAND_FLUSH ||
       poker_hand == HAND_STRAIGHT) {
     for (uint8_t i = 0; i < 5; i++) {
-      if (selected_cards[i] == NULL) {
+      if (selected_cards[i] == NULL)
         return;
-      }
 
       scoring_cards[i] = selected_cards[i];
     }
@@ -427,17 +402,16 @@ void update_scoring_hand() {
   Rank scoring_rank = selected_cards[0]->rank;
   uint8_t scoring_count = 0;
   for (uint8_t i = 0; i < 5; i++) {
-    if (selected_cards[i] == NULL) {
+    if (selected_cards[i] == NULL)
       break;
-    }
 
     if (selected_cards[highest_card_index]->rank != RANK_ACE &&
         (selected_cards[i]->rank == RANK_ACE ||
-         selected_cards[i]->rank > selected_cards[highest_card_index]->rank)) {
+         selected_cards[i]->rank > selected_cards[highest_card_index]->rank))
       highest_card_index = i;
-    }
 
     rank_counts[selected_cards[i]->rank]++;
+
     if (rank_counts[selected_cards[i]->rank] > scoring_count) {
       scoring_rank = selected_cards[i]->rank;
       scoring_count = rank_counts[scoring_rank];
@@ -461,18 +435,16 @@ void update_scoring_hand() {
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL ||
           (selected_cards[i]->rank != scoring_rank &&
-           selected_cards[i]->rank != second_scoring_rank)) {
+           selected_cards[i]->rank != second_scoring_rank))
         continue;
-      }
 
       scoring_cards[j] = selected_cards[i];
       j++;
     }
   }
 
-  if (poker_hand == HAND_HIGH_CARD) {
+  if (poker_hand == HAND_HIGH_CARD)
     scoring_cards[0] = selected_cards[highest_card_index];
-  }
 
   state.game.selected_hand.scoring = get_poker_hand_total_scoring(poker_hand);
 }
