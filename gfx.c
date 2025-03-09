@@ -6,6 +6,7 @@
 #include "gfx.h"
 #include "state.h"
 #include "system.h"
+#include "text.h"
 
 void render_card(Suit suit, Rank rank, Rect *dst) {
   Rect src = {.x = (rank % 10) * CARD_WIDTH,
@@ -117,17 +118,18 @@ void render_shop() {
       break;
 
     case SHOP_ITEM_CARD:
-      snprintf(buffer, 64, "Card(Suit=%d, Rank=%d)", item.card.suit,
-               item.card.rank);
+      get_full_card_name(buffer, item.card.suit, item.card.rank);
       draw_text(buffer, &pos, color);
       break;
 
     case SHOP_ITEM_PLANET:
-      draw_text("Pluto Planet", &pos, color);
+      draw_text(get_planet_card_name(item.planet), &pos, color);
       break;
 
     case SHOP_ITEM_BOOSTER_PACK:
-      draw_text("Mega Standard Pack", &pos, color);
+      get_full_booster_pack_name(buffer, item.booster_pack.size,
+                                 item.booster_pack.type);
+      draw_text(buffer, &pos, color);
       break;
     }
 
@@ -161,14 +163,12 @@ void render_booster_pack() {
       break;
 
     case BOOSTER_PACK_STANDARD:
-      snprintf(buffer, 64, "Card(Suit=%d, Rank=%d)", item.card.suit,
-               item.card.rank);
+      get_full_card_name(buffer, item.card.suit, item.card.rank);
       draw_text(buffer, &pos, color);
       break;
 
     case BOOSTER_PACK_CELESTIAL:
-      snprintf(buffer, 64, "Planet(%d)", item.planet);
-      draw_text(buffer, &pos, color);
+      draw_text(get_planet_card_name(item.planet), &pos, color);
       break;
     }
   }

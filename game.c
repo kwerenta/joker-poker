@@ -449,37 +449,6 @@ void update_scoring_hand() {
   state.game.selected_hand.scoring = get_poker_hand_total_scoring(poker_hand);
 }
 
-char *get_poker_hand_name(PokerHand hand) {
-  switch (hand) {
-  case HAND_FLUSH_FIVE:
-    return "Flush Five";
-  case HAND_FLUSH_HOUSE:
-    return "Flush House";
-  case HAND_FIVE_OF_KIND:
-    return "Five of Kind";
-  case HAND_STRAIGHT_FLUSH:
-    return "Straight Flush";
-  case HAND_FOUR_OF_KIND:
-    return "Four of Kind";
-  case HAND_FULL_HOUSE:
-    return "Full House";
-  case HAND_FLUSH:
-    return "Flush";
-  case HAND_STRAIGHT:
-    return "Straight";
-  case HAND_THREE_OF_KIND:
-    return "Three of Kind";
-  case HAND_TWO_PAIR:
-    return "Two Pair";
-  case HAND_PAIR:
-    return "Pair";
-  case HAND_HIGH_CARD:
-    return "High Card";
-  }
-
-  return "UNDEFINED HAND";
-}
-
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
   switch (hand) {
   case HAND_FLUSH_FIVE:
@@ -586,9 +555,8 @@ uint8_t get_blind_money(uint8_t blind) {
 uint8_t add_item_to_player(ShopItem *item) {
   switch (item->type) {
   case SHOP_ITEM_JOKER:
-    if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) {
+    if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size)
       return 0;
-    }
 
     cvector_push_back(state.game.jokers.cards, item->joker);
     break;
@@ -617,17 +585,15 @@ void buy_shop_item() {
       state.game.money < item->price)
     return;
 
-  if (add_item_to_player(item) == 0) {
+  if (add_item_to_player(item) == 0)
     return;
-  }
 
   state.game.money -= item->price;
   cvector_erase(state.game.shop.items, state.game.shop.selected_card);
   shopCount--;
 
-  if (state.game.shop.selected_card >= shopCount) {
+  if (state.game.shop.selected_card >= shopCount)
     state.game.shop.selected_card = shopCount - 1;
-  }
 }
 
 void open_booster_pack(BoosterPackItem booster_pack) {
