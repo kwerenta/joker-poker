@@ -35,44 +35,6 @@ void game_init() {
 
   state.game.jokers.size = 5;
 
-  ShopItem shop_item_1 = {.type = SHOP_ITEM_JOKER,
-                          .price = 3,
-                          .joker = {.id = 1,
-                                    .name = "Joker",
-                                    .description = "+4 mult when scored",
-                                    .base_price = 3,
-                                    .rarity = RARITY_COMMON,
-                                    .activation_type = ACTIVATION_INDEPENDENT,
-                                    .activate = activate_joker_1}};
-  cvector_push_back(state.game.shop.items, shop_item_1);
-
-  ShopItem shop_item_2 = {
-      .type = SHOP_ITEM_JOKER,
-      .price = 5,
-      .joker = {.id = 6,
-                .name = "Jolly Joker",
-                .description = "+8 mult when scored hand is two pair",
-                .base_price = 5,
-                .rarity = RARITY_COMMON,
-                .activation_type = ACTIVATION_INDEPENDENT,
-                .activate = activate_joker_6}};
-  cvector_push_back(state.game.shop.items, shop_item_2);
-
-  ShopItem shop_item_3 = {.type = SHOP_ITEM_CARD,
-                          .price = 1,
-                          .card = create_card(SUIT_DIAMONDS, RANK_SEVEN)};
-  cvector_push_back(state.game.shop.items, shop_item_3);
-
-  ShopItem shop_item_4 = {.type = SHOP_ITEM_BOOSTER_PACK,
-                          .price = 6,
-                          .booster_pack =
-                              (BoosterPackItem){.type = BOOSTER_PACK_STANDARD,
-                                                .size = BOOSTER_PACK_MEGA}};
-  cvector_push_back(state.game.shop.items, shop_item_4);
-
-  ShopItem shop_item_5 = {
-      .type = SHOP_ITEM_PLANET, .price = 3, .planet = PLANET_PLUTO};
-  cvector_push_back(state.game.shop.items, shop_item_5);
   state.game.shop.selected_card = 0;
 
   state.stage = STAGE_GAME;
@@ -139,6 +101,8 @@ void play_hand() {
 
   if (state.game.score >= required_score) {
     state.stage = STAGE_SHOP;
+    restock_shop();
+
     state.game.money += 1 * state.game.hands +
                         get_blind_money(state.game.blind) +
                         (state.game.money) / 5;
@@ -679,6 +643,48 @@ void toggle_booster_pack_item_select() {
   if (selected_count < max_count) {
     content->selected = 1;
   }
+}
+
+void restock_shop() {
+  cvector_clear(state.game.shop.items);
+  state.game.shop.selected_card = 0;
+
+  ShopItem card = {.type = SHOP_ITEM_CARD,
+                   .price = 2,
+                   .card = create_card(rand() % 4, rand() % 13)};
+  cvector_push_back(state.game.shop.items, card);
+
+  ShopItem joker1 = {.type = SHOP_ITEM_JOKER,
+                     .price = 3,
+                     .joker = {.id = 1,
+                               .name = "Joker",
+                               .description = "+4 mult when scored",
+                               .base_price = 3,
+                               .rarity = RARITY_COMMON,
+                               .activation_type = ACTIVATION_INDEPENDENT,
+                               .activate = activate_joker_1}};
+  cvector_push_back(state.game.shop.items, joker1);
+
+  ShopItem joker2 = {
+      .type = SHOP_ITEM_JOKER,
+      .price = 5,
+      .joker = {.id = 6,
+                .name = "Jolly Joker",
+                .description = "+8 mult when scored hand is two pair",
+                .base_price = 5,
+                .rarity = RARITY_COMMON,
+                .activation_type = ACTIVATION_INDEPENDENT,
+                .activate = activate_joker_6}};
+  cvector_push_back(state.game.shop.items, joker2);
+
+  ShopItem planet = {
+      .type = SHOP_ITEM_PLANET, .price = 3, .planet = rand() % 12};
+  cvector_push_back(state.game.shop.items, planet);
+
+  ShopItem pack = {.type = SHOP_ITEM_BOOSTER_PACK,
+                   .price = 4,
+                   .booster_pack = {.type = rand() % 3, .size = rand() % 3}};
+  cvector_push_back(state.game.shop.items, pack);
 }
 
 void exit_shop() {
