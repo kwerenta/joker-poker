@@ -105,8 +105,7 @@ char *get_card_rank_name(Rank rank) {
 }
 
 int get_full_card_name(char *out, Suit suit, Rank rank) {
-  return snprintf(out, 17, "%s of %s", get_card_rank_name(rank),
-                  get_card_suit_name(suit));
+  return snprintf(out, 17, "%s of %s", get_card_rank_name(rank), get_card_suit_name(suit));
 }
 
 char *get_booster_pack_size_name(BoosterPackSize size) {
@@ -131,9 +130,7 @@ char *get_booster_pack_type_name(BoosterPackType type) {
   }
 }
 
-int get_full_booster_pack_name(char *out, BoosterPackSize size,
-                               BoosterPackType type) {
-  return snprintf(out, 64, "%s%s%s Pack", get_booster_pack_size_name(size),
-                  size == BOOSTER_PACK_NORMAL ? "" : " ",
+int get_full_booster_pack_name(char *out, BoosterPackSize size, BoosterPackType type) {
+  return snprintf(out, 64, "%s%s%s Pack", get_booster_pack_size_name(size), size == BOOSTER_PACK_NORMAL ? "" : " ",
                   get_booster_pack_type_name(type));
 }

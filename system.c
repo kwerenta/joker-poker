@@ -12,8 +12,7 @@
 #include "state.h"
 #include "system.h"
 
-void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst,
-                         uint32_t color) {
+void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color) {
   static TextureVertex vertices[2];
 
   vertices[0].u = src->x;
@@ -31,8 +30,7 @@ void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst,
   vertices[1].z = 0.0f;
 
   sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
-  sceGuTexImage(0, texture->width, texture->height, texture->width,
-                texture->data);
+  sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
   sceGuTexFilter(GU_NEAREST, GU_NEAREST);
   sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 
@@ -40,24 +38,18 @@ void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst,
   sceGuEnable(GU_BLEND);
 
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-  sceGuDrawArray(GU_SPRITES,
-                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF |
-                     GU_TRANSFORM_2D,
-                 2, 0, vertices);
+  sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 
   sceGuDisable(GU_BLEND);
   sceGuDisable(GU_TEXTURE_2D);
 }
 
-void draw_texture(Texture *texture, Rect *src, Rect *dst) {
-  draw_tinted_texture(texture, src, dst, 0xFFFFFFFF);
-}
+void draw_texture(Texture *texture, Rect *src, Rect *dst) { draw_tinted_texture(texture, src, dst, 0xFFFFFFFF); }
 
 Texture *load_texture(const char *filename) {
   Texture *texture = (Texture *)calloc(1, sizeof(Texture));
 
-  texture->data = (uint32_t *)stbi_load(
-      filename, &(texture->width), &(texture->height), NULL, STBI_rgb_alpha);
+  texture->data = (uint32_t *)stbi_load(filename, &(texture->width), &(texture->height), NULL, STBI_rgb_alpha);
 
   sceKernelDcacheWritebackInvalidateAll();
 
@@ -65,8 +57,7 @@ Texture *load_texture(const char *filename) {
 }
 
 uint8_t button_pressed(unsigned int button) {
-  if ((state.controls.data.Buttons & button) &&
-      (state.controls.state & button) == 0) {
+  if ((state.controls.data.Buttons & button) && (state.controls.state & button) == 0) {
     return 1;
   }
 
@@ -170,8 +161,7 @@ void handle_controls(uint8_t *hovered) {
       if (state.game.shop.selected_card > 0)
         state.game.shop.selected_card--;
     } else if (button_pressed(PSP_CTRL_DOWN)) {
-      if (state.game.shop.selected_card <
-          cvector_size(state.game.shop.items) - 1)
+      if (state.game.shop.selected_card < cvector_size(state.game.shop.items) - 1)
         state.game.shop.selected_card++;
     } else if (button_pressed(PSP_CTRL_CROSS)) {
       buy_shop_item();
@@ -186,8 +176,7 @@ void handle_controls(uint8_t *hovered) {
       if (state.game.booster_pack.hovered_item > 0)
         state.game.booster_pack.hovered_item--;
     } else if (button_pressed(PSP_CTRL_DOWN)) {
-      if (state.game.booster_pack.hovered_item <
-          cvector_size(state.game.booster_pack.content) - 1)
+      if (state.game.booster_pack.hovered_item < cvector_size(state.game.booster_pack.content) - 1)
         state.game.booster_pack.hovered_item++;
     } else if (button_pressed(PSP_CTRL_CROSS)) {
       toggle_booster_pack_item_select();
@@ -255,8 +244,7 @@ int callback_thread(SceSize args, void *argp) {
 }
 
 int setup_callbacks() {
-  int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11,
-                                   0xFA0, 0, 0);
+  int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11, 0xFA0, 0, 0);
   if (thid >= 0)
     sceKernelStartThread(thid, 0, 0);
   return thid;

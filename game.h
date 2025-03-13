@@ -59,18 +59,9 @@ typedef struct {
   uint32_t chips;
 } PokerHandScoring;
 
-typedef enum {
-  RARITY_COMMON,
-  RARITY_UNCOMMON,
-  RARITY_RARE,
-  RARITY_LEGENDARY
-} Rarity;
+typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
 
-typedef enum {
-  ACTIVATION_INDEPENDENT,
-  ACTIVATION_ON_SCORED,
-  ACTIVATION_ON_HELD
-} ActivationType;
+typedef enum { ACTIVATION_INDEPENDENT, ACTIVATION_ON_SCORED, ACTIVATION_ON_HELD } ActivationType;
 
 typedef struct {
   uint16_t id;
@@ -111,18 +102,9 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum {
-  SHOP_ITEM_JOKER,
-  SHOP_ITEM_CARD,
-  SHOP_ITEM_PLANET,
-  SHOP_ITEM_BOOSTER_PACK
-} ShopItemType;
+typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_BOOSTER_PACK } ShopItemType;
 
-typedef enum {
-  BOOSTER_PACK_BUFFON,
-  BOOSTER_PACK_CELESTIAL,
-  BOOSTER_PACK_STANDARD
-} BoosterPackType;
+typedef enum { BOOSTER_PACK_BUFFON, BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_STANDARD } BoosterPackType;
 
 typedef enum {
   BOOSTER_PACK_NORMAL,

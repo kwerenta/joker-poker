@@ -12,7 +12,6 @@ int get_full_card_name(char *out, Suit suit, Rank rank);
 
 char *get_booster_pack_size_name(BoosterPackSize size);
 char *get_booster_pack_type_name(BoosterPackType type);
-int get_full_booster_pack_name(char *out, BoosterPackSize size,
-                               BoosterPackType type);
+int get_full_booster_pack_name(char *out, BoosterPackSize size, BoosterPackType type);
 
 #endif

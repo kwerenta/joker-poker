@@ -73,8 +73,7 @@ void play_hand() {
 
   for (uint8_t i = 0; i < 5; i++) {
     if (state.game.selected_hand.scoring_cards[i] != NULL) {
-      state.game.selected_hand.scoring.chips +=
-          state.game.selected_hand.scoring_cards[i]->chips;
+      state.game.selected_hand.scoring.chips += state.game.selected_hand.scoring_cards[i]->chips;
     }
   }
 
@@ -83,8 +82,7 @@ void play_hand() {
       joker->activate();
   }
 
-  state.game.score += state.game.selected_hand.scoring.chips *
-                      state.game.selected_hand.scoring.mult;
+  state.game.score += state.game.selected_hand.scoring.chips * state.game.selected_hand.scoring.mult;
 
   remove_selected_cards();
   state.game.hands--;
@@ -95,9 +93,7 @@ void play_hand() {
     state.stage = STAGE_SHOP;
     restock_shop();
 
-    state.game.money += 1 * state.game.hands +
-                        get_blind_money(state.game.blind) +
-                        (state.game.money) / 5;
+    state.game.money += 1 * state.game.hands + get_blind_money(state.game.blind) + (state.game.money) / 5;
   } else if (state.game.hands == 0) {
     state.stage = STAGE_GAME_OVER;
   } else {
@@ -223,8 +219,7 @@ void sort_hand(uint8_t by_suit) {
     comparator = compare_by_suit;
   }
 
-  qsort(state.game.hand.cards, cvector_size(state.game.hand.cards),
-        sizeof(Card), comparator);
+  qsort(state.game.hand.cards, cvector_size(state.game.hand.cards), sizeof(Card), comparator);
 }
 
 PokerHand evaluate_hand() {
@@ -337,9 +332,8 @@ void update_scoring_hand() {
     return;
 
   // All of those hands require 5 selected cards
-  if (poker_hand == HAND_FLUSH_FIVE || poker_hand == HAND_FLUSH_HOUSE ||
-      poker_hand == HAND_FIVE_OF_KIND || poker_hand == HAND_STRAIGHT_FLUSH ||
-      poker_hand == HAND_FULL_HOUSE || poker_hand == HAND_FLUSH ||
+  if (poker_hand == HAND_FLUSH_FIVE || poker_hand == HAND_FLUSH_HOUSE || poker_hand == HAND_FIVE_OF_KIND ||
+      poker_hand == HAND_STRAIGHT_FLUSH || poker_hand == HAND_FULL_HOUSE || poker_hand == HAND_FLUSH ||
       poker_hand == HAND_STRAIGHT) {
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL)
@@ -358,8 +352,7 @@ void update_scoring_hand() {
       break;
 
     if (selected_cards[highest_card_index]->rank != RANK_ACE &&
-        (selected_cards[i]->rank == RANK_ACE ||
-         selected_cards[i]->rank > selected_cards[highest_card_index]->rank))
+        (selected_cards[i]->rank == RANK_ACE || selected_cards[i]->rank > selected_cards[highest_card_index]->rank))
       highest_card_index = i;
 
     rank_counts[selected_cards[i]->rank]++;
@@ -370,8 +363,8 @@ void update_scoring_hand() {
     }
   }
 
-  if (poker_hand == HAND_FOUR_OF_KIND || poker_hand == HAND_THREE_OF_KIND ||
-      poker_hand == HAND_PAIR || poker_hand == HAND_TWO_PAIR) {
+  if (poker_hand == HAND_FOUR_OF_KIND || poker_hand == HAND_THREE_OF_KIND || poker_hand == HAND_PAIR ||
+      poker_hand == HAND_TWO_PAIR) {
     uint8_t j = 0;
 
     Rank second_scoring_rank = scoring_rank;
@@ -386,8 +379,7 @@ void update_scoring_hand() {
 
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL ||
-          (selected_cards[i]->rank != scoring_rank &&
-           selected_cards[i]->rank != second_scoring_rank))
+          (selected_cards[i]->rank != scoring_rank && selected_cards[i]->rank != second_scoring_rank))
         continue;
 
       scoring_cards[j] = selected_cards[i];
@@ -498,9 +490,7 @@ double get_required_score(uint8_t ante, uint8_t blind) {
   return get_ante_base_score(ante) * (blind == 0 ? 1 : blind == 1 ? 1.5 : 2);
 }
 
-uint8_t get_blind_money(uint8_t blind) {
-  return blind == 0 ? 3 : blind == 1 ? 4 : 5;
-}
+uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
 
 uint8_t add_item_to_player(ShopItem *item) {
   switch (item->type) {
@@ -589,8 +579,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 void submit_booster_pack() {
   ShopItem item = {};
 
-  cvector_for_each(state.game.booster_pack.content, BoosterPackContent,
-                   content) {
+  cvector_for_each(state.game.booster_pack.content, BoosterPackContent, content) {
     if (content->selected == 0)
       continue;
 
@@ -618,8 +607,7 @@ void submit_booster_pack() {
 }
 
 void toggle_booster_pack_item_select() {
-  BoosterPackContent *content =
-      &state.game.booster_pack.content[state.game.booster_pack.hovered_item];
+  BoosterPackContent *content = &state.game.booster_pack.content[state.game.booster_pack.hovered_item];
 
   if (content->selected == 1) {
     content->selected = 0;
@@ -627,8 +615,7 @@ void toggle_booster_pack_item_select() {
   }
 
   uint8_t selected_count = 0;
-  const uint8_t max_count =
-      state.game.booster_pack.item.size == BOOSTER_PACK_MEGA ? 2 : 1;
+  const uint8_t max_count = state.game.booster_pack.item.size == BOOSTER_PACK_MEGA ? 2 : 1;
 
   cvector_for_each(state.game.booster_pack.content, BoosterPackContent, c) {
     if (c->selected == 1)
@@ -643,19 +630,16 @@ void restock_shop() {
   cvector_clear(state.game.shop.items);
   state.game.shop.selected_card = 0;
 
-  ShopItem card = {.type = SHOP_ITEM_CARD,
-                   .card = create_card(rand() % 4, rand() % 13)};
+  ShopItem card = {.type = SHOP_ITEM_CARD, .card = create_card(rand() % 4, rand() % 13)};
   cvector_push_back(state.game.shop.items, card);
 
-  ShopItem joker = {.type = SHOP_ITEM_JOKER,
-                    .joker = JOKERS[rand() % JOKER_COUNT]};
+  ShopItem joker = {.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};
   cvector_push_back(state.game.shop.items, joker);
 
   ShopItem planet = {.type = SHOP_ITEM_PLANET, .planet = rand() % 12};
   cvector_push_back(state.game.shop.items, planet);
 
-  ShopItem pack = {.type = SHOP_ITEM_BOOSTER_PACK,
-                   .booster_pack = {.type = rand() % 3, .size = rand() % 3}};
+  ShopItem pack = {.type = SHOP_ITEM_BOOSTER_PACK, .booster_pack = {.type = rand() % 3, .size = rand() % 3}};
   cvector_push_back(state.game.shop.items, pack);
 }
 

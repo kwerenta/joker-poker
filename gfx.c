@@ -25,8 +25,7 @@ void render_hand(uint8_t hovered) {
       continue;
     }
 
-    Rect dst = {.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 +
-                     (CARD_WIDTH - 16) * i,
+    Rect dst = {.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 + (CARD_WIDTH - 16) * i,
                 .y = SCREEN_HEIGHT - CARD_HEIGHT - 16,
                 .w = CARD_WIDTH,
                 .h = CARD_HEIGHT};
@@ -38,14 +37,12 @@ void render_hand(uint8_t hovered) {
     render_card(hand->cards[i].suit, hand->cards[i].rank, &dst);
   }
 
-  render_card(hand->cards[hovered].suit, hand->cards[hovered].rank,
-              &(Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 +
-                           (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
-                      .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 -
-                           CARD_HEIGHT * 0.1 -
-                           (hand->cards[hovered].selected == 1 ? 50 : 0),
-                      .w = CARD_WIDTH * 1.2,
-                      .h = CARD_HEIGHT * 1.2});
+  render_card(
+      hand->cards[hovered].suit, hand->cards[hovered].rank,
+      &(Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 + (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
+              .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 - CARD_HEIGHT * 0.1 - (hand->cards[hovered].selected == 1 ? 50 : 0),
+              .w = CARD_WIDTH * 1.2,
+              .h = CARD_HEIGHT * 1.2});
 }
 
 void render_sidebar() {
@@ -60,8 +57,7 @@ void render_sidebar() {
   char buffer[64];
 
   if (state.game.selected_hand.count != 0) {
-    draw_text(get_poker_hand_name(state.game.selected_hand.poker_hand),
-              &hand_pos, white);
+    draw_text(get_poker_hand_name(state.game.selected_hand.poker_hand), &hand_pos, white);
 
     PokerHandScoring *score = &state.game.selected_hand.scoring;
 
@@ -76,22 +72,18 @@ void render_sidebar() {
   }
 
   Vector2 score_pos = {.x = 16, .y = hand_score_pos.y + CHAR_HEIGHT + 8};
-  snprintf(buffer, 64, "Score: %.0f/%.0f", state.game.score,
-           get_required_score(state.game.ante, state.game.blind));
+  snprintf(buffer, 64, "Score: %.0f/%.0f", state.game.score, get_required_score(state.game.ante, state.game.blind));
   draw_text(buffer, &score_pos, green);
 
   Vector2 hands_pos = {.x = 16, .y = score_pos.y + CHAR_HEIGHT + 8};
-  snprintf(buffer, 64, "Hands: %d, Discards: %d", state.game.hands,
-           state.game.discards);
+  snprintf(buffer, 64, "Hands: %d, Discards: %d", state.game.hands, state.game.discards);
   draw_text(buffer, &hands_pos, white);
 
   Vector2 round_pos = {.x = 16, .y = hands_pos.y + CHAR_HEIGHT + 8};
-  snprintf(buffer, 64, "Ante: %d/8, Blind: %d/3, Round: %d", state.game.ante,
-           state.game.blind + 1, state.game.round);
+  snprintf(buffer, 64, "Ante: %d/8, Blind: %d/3, Round: %d", state.game.ante, state.game.blind + 1, state.game.round);
   draw_text(buffer, &round_pos, white);
 
-  snprintf(buffer, 64, "Deck: %zu/%zu", cvector_size(state.game.deck),
-           cvector_size(state.game.full_deck));
+  snprintf(buffer, 64, "Deck: %zu/%zu", cvector_size(state.game.deck), cvector_size(state.game.full_deck));
   draw_text(buffer, &(Vector2){400, 254}, white);
 }
 
@@ -103,8 +95,7 @@ void render_shop() {
   draw_text(buffer, &pos, 0xFFFFFFFF);
 
   for (uint8_t i = 0; i < cvector_size(state.game.shop.items); i++) {
-    uint32_t color =
-        state.game.shop.selected_card == i ? 0xFF00FF00 : 0xFFFFFFFF;
+    uint32_t color = state.game.shop.selected_card == i ? 0xFF00FF00 : 0xFFFFFFFF;
     ShopItem *item = &state.game.shop.items[i];
 
     pos.y += 16;
@@ -127,8 +118,7 @@ void render_shop() {
       break;
 
     case SHOP_ITEM_BOOSTER_PACK:
-      get_full_booster_pack_name(buffer, item->booster_pack.size,
-                                 item->booster_pack.type);
+      get_full_booster_pack_name(buffer, item->booster_pack.size, item->booster_pack.type);
       draw_text(buffer, &pos, color);
       break;
     }
