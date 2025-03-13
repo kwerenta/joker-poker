@@ -5,12 +5,6 @@
 #include "lib/cvector.h"
 #include "state.h"
 
-void activate_joker_1() { state.game.selected_hand.scoring.mult += 4; }
-void activate_joker_6() {
-  if (state.game.selected_hand.poker_hand == HAND_TWO_PAIR)
-    state.game.selected_hand.scoring.mult += 8;
-}
-
 void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
@@ -588,16 +582,12 @@ void open_booster_pack(BoosterPackItem booster_pack) {
       break;
 
     case BOOSTER_PACK_BUFFON:
-      content.joker = (Joker){.id = 1,
-                              .name = "Joker",
-                              .description = "+4 mult when scored",
-                              .base_price = 3,
-                              .rarity = RARITY_COMMON,
-                              .activation_type = ACTIVATION_INDEPENDENT,
-                              .activate = activate_joker_1};
+      content.joker = JOKERS[rand() % JOKER_COUNT];
+      break;
 
     case BOOSTER_PACK_CELESTIAL:
       content.planet = rand() % 12;
+      break;
     }
 
     cvector_push_back(state.game.booster_pack.content, content);
@@ -666,26 +656,9 @@ void restock_shop() {
                    .card = create_card(rand() % 4, rand() % 13)};
   cvector_push_back(state.game.shop.items, card);
 
-  ShopItem joker1 = {.type = SHOP_ITEM_JOKER,
-                     .joker = {.id = 1,
-                               .name = "Joker",
-                               .description = "+4 mult when scored",
-                               .base_price = 3,
-                               .rarity = RARITY_COMMON,
-                               .activation_type = ACTIVATION_INDEPENDENT,
-                               .activate = activate_joker_1}};
-  cvector_push_back(state.game.shop.items, joker1);
-
-  ShopItem joker2 = {
-      .type = SHOP_ITEM_JOKER,
-      .joker = {.id = 6,
-                .name = "Jolly Joker",
-                .description = "+8 mult when scored hand is two pair",
-                .base_price = 5,
-                .rarity = RARITY_COMMON,
-                .activation_type = ACTIVATION_INDEPENDENT,
-                .activate = activate_joker_6}};
-  cvector_push_back(state.game.shop.items, joker2);
+  ShopItem joker = {.type = SHOP_ITEM_JOKER,
+                    .joker = JOKERS[rand() % JOKER_COUNT]};
+  cvector_push_back(state.game.shop.items, joker);
 
   ShopItem planet = {.type = SHOP_ITEM_PLANET, .planet = rand() % 12};
   cvector_push_back(state.game.shop.items, planet);

@@ -82,6 +82,9 @@ typedef struct {
   void (*activate)();
 } Joker;
 
+extern const Joker JOKERS[];
+extern const uint8_t JOKER_COUNT;
+
 typedef struct {
   Suit suit;
   Rank rank;
