@@ -584,7 +584,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 
     switch (booster_pack.type) {
     case BOOSTER_PACK_STANDARD:
-      content.card = create_card(SUIT_CLUBS, RANK_TWO);
+      content.card = create_card(rand() % 4, rand() % 13);
       break;
 
     case BOOSTER_PACK_BUFFON:
@@ -597,7 +597,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
                               .activate = activate_joker_1};
 
     case BOOSTER_PACK_CELESTIAL:
-      content.planet = PLANET_PLUTO;
+      content.planet = rand() % 12;
     }
 
     cvector_push_back(state.game.booster_pack.content, content);
