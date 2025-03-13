@@ -9,7 +9,7 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE));
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE));
   }
 
   cvector_copy(state.game.full_deck, state.game.deck);
@@ -44,13 +44,14 @@ void game_destroy() {
   cvector_free(state.game.booster_pack.content);
 }
 
-Card create_card(Suit suit, Rank rank, Edition edition) {
+Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
   uint16_t chips = rank == RANK_ACE ? 11 : rank + 1;
   if (rank != RANK_ACE && chips > 10) {
     chips = 10;
   }
 
-  return (Card){.suit = suit, .rank = rank, .chips = chips, .edition = edition, .selected = 0};
+  return (Card){
+      .suit = suit, .rank = rank, .chips = chips, .edition = edition, .enhancement = enhancement, .selected = 0};
 }
 
 void draw_card() {
@@ -65,18 +66,62 @@ void fill_hand() {
 }
 
 void play_hand() {
-  if (state.game.hands == 0 || state.game.selected_hand.count == 0) {
+  if (state.game.hands == 0 || state.game.selected_hand.count == 0)
     return;
-  }
 
   update_scoring_hand();
 
   for (uint8_t i = 0; i < 5; i++) {
     Card *card = state.game.selected_hand.scoring_cards[i];
-    if (card != NULL) {
+    if (card == NULL)
+      continue;
+
+    if (card->enhancement != ENHANCEMENT_STONE)
       state.game.selected_hand.scoring.chips += card->chips;
 
-      update_scoring_edition(card->edition);
+    update_scoring_edition(card->edition);
+
+    switch (card->enhancement) {
+    case ENHANCEMENT_NONE:
+    case ENHANCEMENT_GOLD:
+    case ENHANCEMENT_WILD:
+    case ENHANCEMENT_STEEL:
+      break;
+
+    case ENHANCEMENT_BONUS:
+      state.game.selected_hand.scoring.chips += 30;
+      break;
+
+    case ENHANCEMENT_MULT:
+      state.game.selected_hand.scoring.mult += 4;
+      break;
+
+    case ENHANCEMENT_GLASS:
+      state.game.selected_hand.scoring.mult *= 2;
+
+      if (rand() % 4 == 0) {
+        for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
+          Card *other = &state.game.full_deck[i];
+          if (card->chips == other->chips && card->enhancement == other->enhancement &&
+              card->edition == other->edition && card->rank == other->rank && card->suit == other->suit) {
+            cvector_erase(state.game.full_deck, i);
+            break;
+          }
+        }
+      }
+      break;
+
+    case ENHANCEMENT_STONE:
+      state.game.selected_hand.scoring.chips += 50;
+      break;
+
+    case ENHANCEMENT_LUCKY:
+      if (rand() % 5 == 0)
+        state.game.selected_hand.scoring.mult += 20;
+
+      if (rand() % 15 == 0)
+        state.game.money += 20;
+      break;
     }
   }
 
@@ -87,18 +132,31 @@ void play_hand() {
     update_scoring_edition(joker->edition);
   }
 
-  state.game.score += state.game.selected_hand.scoring.chips * state.game.selected_hand.scoring.mult;
-
   remove_selected_cards();
   state.game.hands--;
+
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->enhancement == ENHANCEMENT_STEEL)
+      state.game.selected_hand.scoring.mult *= 1.5;
+  }
+
+  state.game.score += state.game.selected_hand.scoring.chips * state.game.selected_hand.scoring.mult;
 
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
   if (state.game.score >= required_score) {
+    // interest
+    state.game.money += (state.game.money) / 5;
+
+    cvector_for_each(state.game.hand.cards, Card, card) {
+      if (card->enhancement == ENHANCEMENT_GOLD)
+        state.game.money += 3;
+    }
+
     state.stage = STAGE_SHOP;
     restock_shop();
 
-    state.game.money += 1 * state.game.hands + get_blind_money(state.game.blind) + (state.game.money) / 5;
+    state.game.money += 1 * state.game.hands + get_blind_money(state.game.blind);
   } else if (state.game.hands == 0) {
     state.stage = STAGE_GAME_OVER;
   } else {
@@ -262,7 +320,7 @@ PokerHand evaluate_hand() {
   Rank highest_card = RANK_TWO, lowest_card = RANK_KING;
 
   cvector_for_each(hand->cards, Card, card) {
-    if (card->selected == 0)
+    if (card->selected == 0 || card->enhancement == ENHANCEMENT_STONE)
       continue;
 
     if (card->rank == RANK_ACE)
@@ -274,16 +332,21 @@ PokerHand evaluate_hand() {
     if (card->rank != RANK_ACE && card->rank < lowest_card)
       lowest_card = card->rank;
 
-    rank_counts[card->rank] += 1;
-    suit_counts[card->suit] += 1;
+    rank_counts[card->rank]++;
+
+    if (card->enhancement == ENHANCEMENT_WILD)
+      for (uint8_t i = 0; i < 4; i++)
+        suit_counts[i]++;
+    else
+      suit_counts[card->suit]++;
 
     if (rank_counts[card->rank] > 1) {
       // this means there are duplicates in selected ranks,
       // so straight is not possible
       has_straight = 2;
-      x_of_kind[rank_counts[card->rank] - 2] += 1;
+      x_of_kind[rank_counts[card->rank] - 2]++;
       if (rank_counts[card->rank] > 2)
-        x_of_kind[rank_counts[card->rank] - 3] -= 1;
+        x_of_kind[rank_counts[card->rank] - 3]--;
     }
 
     if (suit_counts[card->suit] == 5)
@@ -368,15 +431,19 @@ void update_scoring_hand() {
   }
 
   uint8_t rank_counts[13] = {};
-  uint8_t highest_card_index = 0;
+  uint8_t highest_card_index = 0xFF;
   Rank scoring_rank = selected_cards[0]->rank;
   uint8_t scoring_count = 0;
   for (uint8_t i = 0; i < 5; i++) {
     if (selected_cards[i] == NULL)
       break;
 
-    if (selected_cards[highest_card_index]->rank != RANK_ACE &&
-        (selected_cards[i]->rank == RANK_ACE || selected_cards[i]->rank > selected_cards[highest_card_index]->rank))
+    if (selected_cards[i]->enhancement == ENHANCEMENT_STONE)
+      continue;
+
+    if (highest_card_index == 0xFF ||
+        (selected_cards[highest_card_index]->rank != RANK_ACE &&
+         (selected_cards[i]->rank == RANK_ACE || selected_cards[i]->rank > selected_cards[highest_card_index]->rank)))
       highest_card_index = i;
 
     rank_counts[selected_cards[i]->rank]++;
@@ -403,7 +470,8 @@ void update_scoring_hand() {
 
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL ||
-          (selected_cards[i]->rank != scoring_rank && selected_cards[i]->rank != second_scoring_rank))
+          (selected_cards[i]->rank != scoring_rank && selected_cards[i]->rank != second_scoring_rank &&
+           selected_cards[i]->enhancement != ENHANCEMENT_STONE))
         continue;
 
       scoring_cards[j] = selected_cards[i];
@@ -411,8 +479,16 @@ void update_scoring_hand() {
     }
   }
 
-  if (poker_hand == HAND_HIGH_CARD)
-    scoring_cards[0] = selected_cards[highest_card_index];
+  j = 0;
+  if (poker_hand == HAND_HIGH_CARD) {
+    for (uint8_t i = 0; i < 5; i++) {
+      if (selected_cards[i] == NULL || (i != highest_card_index && selected_cards[i]->enhancement != ENHANCEMENT_STONE))
+        continue;
+
+      scoring_cards[j] = selected_cards[i];
+      j++;
+    }
+  }
 
   state.game.selected_hand.scoring = get_poker_hand_total_scoring(poker_hand);
 }
@@ -584,7 +660,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 
     switch (booster_pack.type) {
     case BOOSTER_PACK_STANDARD:
-      content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE);
+      content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE);
       break;
 
     case BOOSTER_PACK_BUFFON:
@@ -654,7 +730,8 @@ void restock_shop() {
   cvector_clear(state.game.shop.items);
   state.game.shop.selected_card = 0;
 
-  ShopItem card = {.type = SHOP_ITEM_CARD, .card = create_card(rand() % 4, rand() % 13, EDITION_BASE)};
+  ShopItem card = {.type = SHOP_ITEM_CARD,
+                   .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE)};
   cvector_push_back(state.game.shop.items, card);
 
   ShopItem joker = {.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};

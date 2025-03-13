@@ -24,6 +24,18 @@ typedef enum {
 typedef enum { EDITION_BASE, EDITION_FOIL, EDITION_HOLOGRAPHIC, EDITION_POLYCHROME, EDITION_NEGATIVE } Edition;
 
 typedef enum {
+  ENHANCEMENT_NONE,
+  ENHANCEMENT_BONUS,
+  ENHANCEMENT_MULT,
+  ENHANCEMENT_WILD,
+  ENHANCEMENT_GLASS,
+  ENHANCEMENT_STEEL,
+  ENHANCEMENT_STONE,
+  ENHANCEMENT_GOLD,
+  ENHANCEMENT_LUCKY
+} Enhancement;
+
+typedef enum {
   HAND_FLUSH_FIVE,
   HAND_FLUSH_HOUSE,
   HAND_FIVE_OF_KIND,
@@ -84,7 +96,9 @@ extern const uint8_t JOKER_COUNT;
 typedef struct {
   Suit suit;
   Rank rank;
+
   Edition edition;
+  Enhancement enhancement;
 
   uint16_t chips;
   uint8_t selected;
@@ -179,7 +193,7 @@ typedef struct {
 void game_init();
 void game_destroy();
 
-Card create_card(Suit suit, Rank rank, Edition edition);
+Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement);
 void shuffle_deck();
 void draw_card();
 void play_hand();
