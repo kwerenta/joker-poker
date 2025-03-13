@@ -541,18 +541,31 @@ uint8_t add_item_to_player(ShopItem *item) {
   return 1;
 }
 
+uint8_t get_shop_item_price(ShopItem *item) {
+  switch (item->type) {
+  case SHOP_ITEM_CARD:
+    return 1;
+  case SHOP_ITEM_PLANET:
+    return 3;
+  case SHOP_ITEM_BOOSTER_PACK:
+    return 4 + item->booster_pack.size * 2;
+  case SHOP_ITEM_JOKER:
+    return item->joker.base_price;
+  }
+}
+
 void buy_shop_item() {
   uint8_t shopCount = cvector_size(state.game.shop.items);
   ShopItem *item = &state.game.shop.items[state.game.shop.selected_card];
+  uint8_t price = get_shop_item_price(item);
 
-  if (state.game.shop.selected_card >= shopCount ||
-      state.game.money < item->price)
+  if (state.game.shop.selected_card >= shopCount || state.game.money < price)
     return;
 
   if (add_item_to_player(item) == 0)
     return;
 
-  state.game.money -= item->price;
+  state.game.money -= price;
   cvector_erase(state.game.shop.items, state.game.shop.selected_card);
   shopCount--;
 
@@ -650,12 +663,10 @@ void restock_shop() {
   state.game.shop.selected_card = 0;
 
   ShopItem card = {.type = SHOP_ITEM_CARD,
-                   .price = 2,
                    .card = create_card(rand() % 4, rand() % 13)};
   cvector_push_back(state.game.shop.items, card);
 
   ShopItem joker1 = {.type = SHOP_ITEM_JOKER,
-                     .price = 3,
                      .joker = {.id = 1,
                                .name = "Joker",
                                .description = "+4 mult when scored",
@@ -667,7 +678,6 @@ void restock_shop() {
 
   ShopItem joker2 = {
       .type = SHOP_ITEM_JOKER,
-      .price = 5,
       .joker = {.id = 6,
                 .name = "Jolly Joker",
                 .description = "+8 mult when scored hand is two pair",
@@ -677,12 +687,10 @@ void restock_shop() {
                 .activate = activate_joker_6}};
   cvector_push_back(state.game.shop.items, joker2);
 
-  ShopItem planet = {
-      .type = SHOP_ITEM_PLANET, .price = 3, .planet = rand() % 12};
+  ShopItem planet = {.type = SHOP_ITEM_PLANET, .planet = rand() % 12};
   cvector_push_back(state.game.shop.items, planet);
 
   ShopItem pack = {.type = SHOP_ITEM_BOOSTER_PACK,
-                   .price = 4,
                    .booster_pack = {.type = rand() % 3, .size = rand() % 3}};
   cvector_push_back(state.game.shop.items, pack);
 }

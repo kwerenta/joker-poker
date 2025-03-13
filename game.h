@@ -148,8 +148,6 @@ typedef struct {
 } BoosterPack;
 
 typedef struct {
-  uint8_t price;
-
   ShopItemType type;
   union {
     Joker joker;
@@ -213,6 +211,7 @@ double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
 uint8_t get_blind_money(uint8_t blind);
 
+uint8_t get_shop_item_price(ShopItem *item);
 void buy_shop_item();
 void open_booster_pack(BoosterPackItem booster_pack);
 void submit_booster_pack();

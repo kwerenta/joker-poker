@@ -105,36 +105,36 @@ void render_shop() {
   for (uint8_t i = 0; i < cvector_size(state.game.shop.items); i++) {
     uint32_t color =
         state.game.shop.selected_card == i ? 0xFF00FF00 : 0xFFFFFFFF;
-    ShopItem item = state.game.shop.items[i];
+    ShopItem *item = &state.game.shop.items[i];
 
     pos.y += 16;
 
-    switch (item.type) {
+    switch (item->type) {
     case SHOP_ITEM_JOKER:
-      draw_text(item.joker.name, &pos, color);
+      draw_text(item->joker.name, &pos, color);
 
       pos.y += 8;
-      draw_text(item.joker.description, &pos, color);
+      draw_text(item->joker.description, &pos, color);
       break;
 
     case SHOP_ITEM_CARD:
-      get_full_card_name(buffer, item.card.suit, item.card.rank);
+      get_full_card_name(buffer, item->card.suit, item->card.rank);
       draw_text(buffer, &pos, color);
       break;
 
     case SHOP_ITEM_PLANET:
-      draw_text(get_planet_card_name(item.planet), &pos, color);
+      draw_text(get_planet_card_name(item->planet), &pos, color);
       break;
 
     case SHOP_ITEM_BOOSTER_PACK:
-      get_full_booster_pack_name(buffer, item.booster_pack.size,
-                                 item.booster_pack.type);
+      get_full_booster_pack_name(buffer, item->booster_pack.size,
+                                 item->booster_pack.type);
       draw_text(buffer, &pos, color);
       break;
     }
 
     pos.y += 8;
-    snprintf(buffer, 64, "$%d", item.price);
+    snprintf(buffer, 64, "$%d", get_shop_item_price(item));
     draw_text(buffer, &pos, color);
   }
 }
