@@ -21,6 +21,8 @@ typedef enum {
   RANK_KING
 } Rank;
 
+typedef enum { EDITION_BASE, EDITION_FOIL, EDITION_HOLOGRAPHIC, EDITION_POLYCHROME, EDITION_NEGATIVE } Edition;
+
 typedef enum {
   HAND_FLUSH_FIVE,
   HAND_FLUSH_HOUSE,
@@ -55,7 +57,7 @@ typedef enum {
 } Planet;
 
 typedef struct {
-  uint32_t mult;
+  double mult;
   uint32_t chips;
 } PokerHandScoring;
 
@@ -68,7 +70,10 @@ typedef struct {
   const char *name;
   const char *description;
   uint8_t base_price;
+
   Rarity rarity;
+  Edition edition;
+
   ActivationType activation_type;
   void (*activate)();
 } Joker;
@@ -79,8 +84,10 @@ extern const uint8_t JOKER_COUNT;
 typedef struct {
   Suit suit;
   Rank rank;
-  uint8_t selected;
+  Edition edition;
+
   uint16_t chips;
+  uint8_t selected;
 } Card;
 
 typedef struct {
@@ -171,8 +178,8 @@ typedef struct {
 
 void game_init();
 void game_destroy();
-Card create_card(Suit suit, Rank rank);
 
+Card create_card(Suit suit, Rank rank, Edition edition);
 void shuffle_deck();
 void draw_card();
 void play_hand();
@@ -188,6 +195,7 @@ void remove_selected_cards();
 
 PokerHand evaluate_hand();
 void update_scoring_hand();
+void update_scoring_edition(Edition edition);
 
 PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
 PokerHandScoring get_planet_card_base_scoring(PokerHand hand);

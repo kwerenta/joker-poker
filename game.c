@@ -9,7 +9,7 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13));
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE));
   }
 
   cvector_copy(state.game.full_deck, state.game.deck);
@@ -44,13 +44,13 @@ void game_destroy() {
   cvector_free(state.game.booster_pack.content);
 }
 
-Card create_card(Suit suit, Rank rank) {
+Card create_card(Suit suit, Rank rank, Edition edition) {
   uint16_t chips = rank == RANK_ACE ? 11 : rank + 1;
   if (rank != RANK_ACE && chips > 10) {
     chips = 10;
   }
 
-  return (Card){.suit = suit, .rank = rank, .chips = chips, .selected = 0};
+  return (Card){.suit = suit, .rank = rank, .chips = chips, .edition = edition, .selected = 0};
 }
 
 void draw_card() {
@@ -72,14 +72,19 @@ void play_hand() {
   update_scoring_hand();
 
   for (uint8_t i = 0; i < 5; i++) {
-    if (state.game.selected_hand.scoring_cards[i] != NULL) {
-      state.game.selected_hand.scoring.chips += state.game.selected_hand.scoring_cards[i]->chips;
+    Card *card = state.game.selected_hand.scoring_cards[i];
+    if (card != NULL) {
+      state.game.selected_hand.scoring.chips += card->chips;
+
+      update_scoring_edition(card->edition);
     }
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (joker->activation_type == ACTIVATION_INDEPENDENT)
       joker->activate();
+
+    update_scoring_edition(joker->edition);
   }
 
   state.game.score += state.game.selected_hand.scoring.chips * state.game.selected_hand.scoring.mult;
@@ -98,6 +103,25 @@ void play_hand() {
     state.stage = STAGE_GAME_OVER;
   } else {
     fill_hand();
+  }
+}
+
+void update_scoring_edition(Edition edition) {
+  switch (edition) {
+  case EDITION_BASE:
+    break;
+  case EDITION_FOIL:
+    state.game.selected_hand.scoring.chips += 50;
+    break;
+  case EDITION_HOLOGRAPHIC:
+    state.game.selected_hand.scoring.mult += 10;
+    break;
+  case EDITION_POLYCHROME:
+    state.game.selected_hand.scoring.mult *= 1.5;
+    break;
+  case EDITION_NEGATIVE:
+    // TODO implement negative jokers and cards when consumable slots will be added
+    break;
   }
 }
 
@@ -560,7 +584,7 @@ void open_booster_pack(BoosterPackItem booster_pack) {
 
     switch (booster_pack.type) {
     case BOOSTER_PACK_STANDARD:
-      content.card = create_card(rand() % 4, rand() % 13);
+      content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE);
       break;
 
     case BOOSTER_PACK_BUFFON:
@@ -630,7 +654,7 @@ void restock_shop() {
   cvector_clear(state.game.shop.items);
   state.game.shop.selected_card = 0;
 
-  ShopItem card = {.type = SHOP_ITEM_CARD, .card = create_card(rand() % 4, rand() % 13)};
+  ShopItem card = {.type = SHOP_ITEM_CARD, .card = create_card(rand() % 4, rand() % 13, EDITION_BASE)};
   cvector_push_back(state.game.shop.items, card);
 
   ShopItem joker = {.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};

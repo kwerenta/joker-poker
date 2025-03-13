@@ -67,7 +67,7 @@ void render_sidebar() {
     snprintf(buffer, 64, " x ");
     hand_score_pos = draw_text(buffer, &hand_score_pos, white);
 
-    snprintf(buffer, 64, "%d", score->mult);
+    snprintf(buffer, 64, "%.0lf", score->mult);
     draw_text(buffer, &hand_score_pos, red);
   }
 
