@@ -79,10 +79,8 @@ void play_hand() {
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
-    if (joker->activation_type == ACTIVATION_INDEPENDENT) {
+    if (joker->activation_type == ACTIVATION_INDEPENDENT)
       joker->activate();
-      printf("Joker '%s' has been activated\n", joker->name);
-    }
   }
 
   state.game.score += state.game.selected_hand.scoring.chips *
@@ -108,9 +106,8 @@ void play_hand() {
 }
 
 void discard_hand() {
-  if (state.game.selected_hand.count == 0 || state.game.discards == 0) {
+  if (state.game.selected_hand.count == 0 || state.game.discards == 0)
     return;
-  }
 
   state.game.discards--;
   remove_selected_cards();
@@ -141,9 +138,8 @@ void shuffle_deck() {
 }
 
 void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
-  if (new_position >= cvector_size(state.game.hand.cards)) {
+  if (new_position >= cvector_size(state.game.hand.cards))
     return;
-  }
 
   *hovered = new_position;
 }
@@ -185,9 +181,8 @@ void deselect_all_cards() {
 void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
   Hand *hand = &state.game.hand;
 
-  if (new_position >= cvector_size(hand->cards)) {
+  if (new_position >= cvector_size(hand->cards))
     return;
-  }
 
   Card temp = hand->cards[*hovered];
   hand->cards[*hovered] = hand->cards[new_position];
@@ -338,9 +333,8 @@ void update_scoring_hand() {
     j++;
   }
 
-  if (selected_cards[0] == NULL) {
+  if (selected_cards[0] == NULL)
     return;
-  }
 
   // All of those hands require 5 selected cards
   if (poker_hand == HAND_FLUSH_FIVE || poker_hand == HAND_FLUSH_HOUSE ||
@@ -434,8 +428,6 @@ PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
   case HAND_HIGH_CARD:
     return (PokerHandScoring){.mult = 1, .chips = 5};
   }
-
-  return (PokerHandScoring){.mult = 0, .chips = 0};
 }
 
 PokerHandScoring get_planet_card_base_scoring(PokerHand hand) {
@@ -643,9 +635,8 @@ void toggle_booster_pack_item_select() {
       selected_count++;
   }
 
-  if (selected_count < max_count) {
+  if (selected_count < max_count)
     content->selected = 1;
-  }
 }
 
 void restock_shop() {
