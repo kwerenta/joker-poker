@@ -6,6 +6,9 @@
 #define BUFFER_WIDTH (512)
 #define BUFFER_HEIGHT SCREEN_HEIGHT
 
+#define RGB(r, g, b) RGBA(r, g, b, 255)
+#define RGBA(r, g, b, a) ((a << 24) | (b << 16) | (g << 8) | r)
+
 typedef struct {
   float x, y, w, h;
 } Rect;
