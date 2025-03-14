@@ -12,6 +12,19 @@
 #include "state.h"
 #include "system.h"
 
+void draw_rectangle(Rect *rect, uint32_t color) {
+  Vertex *vertices = (Vertex *)sceGuGetMemory(2 * sizeof(Vertex));
+
+  vertices[0].x = rect->x;
+  vertices[0].y = rect->y;
+
+  vertices[1].x = rect->x + rect->w;
+  vertices[1].y = rect->y + rect->h;
+
+  sceGuColor(color);
+  sceGuDrawArray(GU_SPRITES, GU_TEXTURE_16BIT | GU_VERTEX_16BIT | GU_TRANSFORM_2D, 2, 0, vertices);
+}
+
 void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color) {
   static TextureVertex vertices[2];
 
