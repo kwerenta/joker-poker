@@ -348,10 +348,11 @@ PokerHand evaluate_hand() {
       if (rank_counts[card->rank] > 2)
         x_of_kind[rank_counts[card->rank] - 3]--;
     }
-
-    if (suit_counts[card->suit] == 5)
-      has_flush = 1;
   }
+
+  for (uint8_t i = 0; i < 4; i++)
+    if (suit_counts[i] == 5)
+      has_flush = 1;
 
   // A 2 3 4 5 is also valid straight, so it needs to be checked
   if (has_straight == 0 && selected_count == 5 &&
