@@ -23,6 +23,11 @@ void render_card(Card *card, Rect *dst) {
                .h = CARD_HEIGHT};
   if (card->enhancement != ENHANCEMENT_STONE)
     draw_texture(state.cards_atlas, &face, dst);
+
+  if (card->edition != EDITION_BASE) {
+    Rect edition = {.x = (5 + card->edition - 1) * CARD_WIDTH, .y = 3 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+    draw_texture(state.cards_atlas, &edition, dst);
+  }
 }
 
 void render_hand(uint8_t hovered) {
