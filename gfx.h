@@ -16,7 +16,7 @@
 #define SIDEBAR_WIDTH (100)
 #define SIDEBAR_GAP (4)
 
-void render_card(Suit suit, Rank rank, Rect *dst);
+void render_card(Card *card, Rect *dst);
 void render_hand(uint8_t hovered);
 
 void render_sidebar();

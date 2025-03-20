@@ -8,12 +8,21 @@
 #include "system.h"
 #include "text.h"
 
-void render_card(Suit suit, Rank rank, Rect *dst) {
-  Rect src = {.x = (rank % 10) * CARD_WIDTH,
-              .y = (2 * suit + floor(rank / 10.0)) * CARD_HEIGHT,
-              .w = CARD_WIDTH,
-              .h = CARD_HEIGHT};
-  draw_texture(state.cards_atlas, &src, dst);
+void render_card(Card *card, Rect *dst) {
+  Rect background = {.x = 9 * CARD_WIDTH, .y = 7 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+  if (card->enhancement != ENHANCEMENT_NONE) {
+    uint8_t enhancement_offset = card->enhancement - 1;
+    background.x = (5 + enhancement_offset % 4) * CARD_WIDTH;
+    background.y = (5 + 2 * floor(enhancement_offset / 4.0)) * CARD_HEIGHT;
+  }
+  draw_texture(state.cards_atlas, &background, dst);
+
+  Rect face = {.x = (card->rank % 10) * CARD_WIDTH,
+               .y = (2 * card->suit + floor(card->rank / 10.0)) * CARD_HEIGHT,
+               .w = CARD_WIDTH,
+               .h = CARD_HEIGHT};
+  if (card->enhancement != ENHANCEMENT_STONE)
+    draw_texture(state.cards_atlas, &face, dst);
 }
 
 void render_hand(uint8_t hovered) {
@@ -34,11 +43,11 @@ void render_hand(uint8_t hovered) {
       dst.y -= 50;
     }
 
-    render_card(hand->cards[i].suit, hand->cards[i].rank, &dst);
+    render_card(&hand->cards[i], &dst);
   }
 
   render_card(
-      hand->cards[hovered].suit, hand->cards[hovered].rank,
+      &hand->cards[hovered],
       &(Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 + (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
               .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 - CARD_HEIGHT * 0.1 - (hand->cards[hovered].selected == 1 ? 50 : 0),
               .w = CARD_WIDTH * 1.2,
