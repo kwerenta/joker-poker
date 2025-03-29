@@ -26,7 +26,7 @@ void draw_rectangle(Rect *rect, uint32_t color) {
 }
 
 void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color) {
-  static TextureVertex vertices[2];
+  TextureVertex *vertices = (TextureVertex *)sceGuGetMemory(2 * sizeof(TextureVertex));
 
   vertices[0].u = src->x;
   vertices[0].v = src->y;
