@@ -22,7 +22,11 @@ void game_init() {
 
   state.game.money = 4;
 
+  state.game.score = 0;
+
   state.game.ante = 1;
+  state.game.blind = 0;
+  state.game.round = 0;
 
   state.game.hands = 4;
   state.game.discards = 2;
@@ -36,12 +40,22 @@ void game_init() {
 
 void game_destroy() {
   cvector_free(state.game.deck);
+  state.game.deck = NULL;
+
   cvector_free(state.game.full_deck);
+  state.game.full_deck = NULL;
+
   cvector_free(state.game.hand.cards);
+  state.game.hand.cards = NULL;
+
   cvector_free(state.game.jokers.cards);
+  state.game.jokers.cards = NULL;
 
   cvector_free(state.game.shop.items);
+  state.game.shop.items = NULL;
+
   cvector_free(state.game.booster_pack.content);
+  state.game.booster_pack.content = NULL;
 }
 
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
@@ -653,6 +667,7 @@ void buy_shop_item() {
 void open_booster_pack(BoosterPackItem booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = booster_pack;
+  state.game.booster_pack.hovered_item = 0;
   state.stage = STAGE_BOOSTER_PACK;
 
   uint8_t count = booster_pack.size == BOOSTER_PACK_NORMAL ? 3 : 5;

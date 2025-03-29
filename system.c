@@ -197,7 +197,14 @@ void handle_controls(uint8_t *hovered) {
       submit_booster_pack();
     }
 
+    break;
+
   case STAGE_GAME_OVER:
+    if (button_pressed(PSP_CTRL_CROSS)) {
+      game_destroy();
+      game_init();
+    }
+
     break;
   }
 
