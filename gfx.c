@@ -119,8 +119,8 @@ void render_sidebar() {
   draw_rectangle(&mult, RGB(255, 63, 52));
 
   if (state.game.selected_hand.count != 0) {
-    snprintf(buffer, 64, "%s (%d)", get_poker_hand_name(state.game.selected_hand.poker_hand),
-             state.game.poker_hands[state.game.selected_hand.poker_hand] + 1);
+    snprintf(buffer, 64, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
+             state.game.poker_hands[ffs(state.game.selected_hand.hand_union) - 1] + 1);
     len = strlen(buffer);
     draw_text(buffer, &(Vector2){.x = hand.x + hand.w / 2.0 - (len / 2.0) * CHAR_WIDTH, .y = hand.y + 2}, white);
 

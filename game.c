@@ -159,7 +159,7 @@ void play_hand() {
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
   if (state.game.score >= required_score) {
-    // interest
+    // TODO Add max interest cap
     state.game.money += (state.game.money) / 5;
 
     cvector_for_each(state.game.hand.cards, Card, card) {
@@ -318,8 +318,10 @@ void sort_hand(uint8_t by_suit) {
   qsort(state.game.hand.cards, cvector_size(state.game.hand.cards), sizeof(Card), comparator);
 }
 
-PokerHand evaluate_hand() {
+uint16_t evaluate_hand() {
   const Hand *hand = &state.game.hand;
+
+  uint16_t result = HAND_HIGH_CARD;
 
   uint8_t rank_counts[13] = {};
   uint8_t suit_counts[4] = {};
@@ -327,8 +329,7 @@ PokerHand evaluate_hand() {
 
   // 2 of kind, 3 of kind, 4 of kind, 5 of kind
   uint8_t x_of_kind[4] = {};
-  uint8_t has_flush = 0;
-  uint8_t has_straight = 0;
+  uint8_t is_straight_possible = 1;
   uint8_t has_ace = 0;
 
   Rank highest_card = RANK_TWO, lowest_card = RANK_KING;
@@ -357,7 +358,7 @@ PokerHand evaluate_hand() {
     if (rank_counts[card->rank] > 1) {
       // this means there are duplicates in selected ranks,
       // so straight is not possible
-      has_straight = 2;
+      is_straight_possible = 0;
       x_of_kind[rank_counts[card->rank] - 2]++;
       if (rank_counts[card->rank] > 2)
         x_of_kind[rank_counts[card->rank] - 3]--;
@@ -366,54 +367,58 @@ PokerHand evaluate_hand() {
 
   for (uint8_t i = 0; i < 4; i++)
     if (suit_counts[i] == 5)
-      has_flush = 1;
+      result |= HAND_FLUSH;
 
   // A 2 3 4 5 is also valid straight, so it needs to be checked
-  if (has_straight == 0 && selected_count == 5 &&
+  if (is_straight_possible == 1 && selected_count == 5 &&
       ((has_ace == 0 && highest_card - lowest_card == 4) ||
        (has_ace == 1 && (13 - lowest_card == 4 || highest_card == 4))))
-    has_straight = 1;
+    result |= HAND_STRAIGHT;
 
-  if (has_flush == 1 && x_of_kind[5 - 2] > 0)
-    return HAND_FLUSH_FIVE;
+  for (uint8_t i = 2; i <= 5; i++) {
+    if (x_of_kind[i - 2] == 0)
+      continue;
 
-  if (has_flush == 1 && x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1)
-    return HAND_FLUSH_HOUSE;
-
-  if (x_of_kind[5 - 2] == 1)
-    return HAND_FIVE_OF_KIND;
-
-  if (has_flush == 1 && has_straight == 1)
-    return HAND_STRAIGHT_FLUSH;
-
-  if (x_of_kind[4 - 2] == 1)
-    return HAND_FOUR_OF_KIND;
-
-  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1)
-    return HAND_FULL_HOUSE;
-
-  if (has_flush == 1)
-    return HAND_FLUSH;
-
-  if (has_straight == 1)
-    return HAND_STRAIGHT;
-
-  if (x_of_kind[3 - 2] == 1)
-    return HAND_THREE_OF_KIND;
+    if (i >= 2)
+      result |= HAND_PAIR;
+    if (i >= 3)
+      result |= HAND_THREE_OF_KIND;
+    if (i >= 4)
+      result |= HAND_FOUR_OF_KIND;
+    if (i >= 5)
+      result |= HAND_FIVE_OF_KIND;
+  }
 
   if (x_of_kind[2 - 2] >= 2)
-    return HAND_TWO_PAIR;
+    result |= HAND_TWO_PAIR;
 
-  if (x_of_kind[2 - 2] >= 1)
-    return HAND_PAIR;
+  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1)
+    result |= HAND_FULL_HOUSE;
 
-  return HAND_HIGH_CARD;
+  if ((result & HAND_FLUSH) != 0 && (result & HAND_STRAIGHT) != 0)
+    result |= HAND_STRAIGHT_FLUSH;
+
+  if ((result & HAND_FLUSH) != 0 && (result & HAND_FULL_HOUSE) != 0)
+    result |= HAND_FLUSH_HOUSE;
+
+  if ((result & HAND_FLUSH) != 0 && (result & HAND_FIVE_OF_KIND) != 0)
+    result |= HAND_FLUSH_FIVE;
+
+  return result;
 }
 
-void update_scoring_hand() {
-  PokerHand poker_hand = evaluate_hand();
+uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected) {
+  if ((hand_union & expected) != 0)
+    return 1;
+  return 0;
+}
 
-  state.game.selected_hand.poker_hand = poker_hand;
+PokerHand get_poker_hand(uint16_t hand_union) { return 1 << (ffs(hand_union) - 1); }
+
+void update_scoring_hand() {
+  uint16_t hand_union = evaluate_hand();
+
+  state.game.selected_hand.hand_union = hand_union;
   const Hand *hand = &state.game.hand;
   Card *selected_cards[5] = {};
   Card **scoring_cards = state.game.selected_hand.scoring_cards;
@@ -434,9 +439,8 @@ void update_scoring_hand() {
     return;
 
   // All of those hands require 5 selected cards
-  if (poker_hand == HAND_FLUSH_FIVE || poker_hand == HAND_FLUSH_HOUSE || poker_hand == HAND_FIVE_OF_KIND ||
-      poker_hand == HAND_STRAIGHT_FLUSH || poker_hand == HAND_FULL_HOUSE || poker_hand == HAND_FLUSH ||
-      poker_hand == HAND_STRAIGHT) {
+  if (does_poker_hand_contain(hand_union, HAND_FULL_HOUSE) || does_poker_hand_contain(hand_union, HAND_FLUSH) ||
+      does_poker_hand_contain(hand_union, HAND_STRAIGHT) || does_poker_hand_contain(hand_union, HAND_FIVE_OF_KIND)) {
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL)
         return;
@@ -469,12 +473,11 @@ void update_scoring_hand() {
     }
   }
 
-  if (poker_hand == HAND_FOUR_OF_KIND || poker_hand == HAND_THREE_OF_KIND || poker_hand == HAND_PAIR ||
-      poker_hand == HAND_TWO_PAIR) {
+  if (does_poker_hand_contain(hand_union, HAND_PAIR) && does_poker_hand_contain(hand_union, HAND_FULL_HOUSE) == 0) {
     uint8_t j = 0;
 
     Rank second_scoring_rank = scoring_rank;
-    if (poker_hand == HAND_TWO_PAIR) {
+    if (get_poker_hand(hand_union) == HAND_TWO_PAIR) {
       for (uint8_t i = 0; i < 13; i++) {
         if (rank_counts[i] == 2 && i != scoring_rank) {
           second_scoring_rank = i;
@@ -495,7 +498,7 @@ void update_scoring_hand() {
   }
 
   j = 0;
-  if (poker_hand == HAND_HIGH_CARD) {
+  if (get_poker_hand(hand_union) == HAND_HIGH_CARD) {
     for (uint8_t i = 0; i < 5; i++) {
       if (selected_cards[i] == NULL || (i != highest_card_index && selected_cards[i]->enhancement != ENHANCEMENT_STONE))
         continue;
@@ -505,11 +508,11 @@ void update_scoring_hand() {
     }
   }
 
-  state.game.selected_hand.scoring = get_poker_hand_total_scoring(poker_hand);
+  state.game.selected_hand.scoring = get_poker_hand_total_scoring(hand_union);
 }
 
-PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
-  switch (hand) {
+PokerHandScoring get_poker_hand_base_scoring(uint16_t hand_union) {
+  switch (get_poker_hand(hand_union)) {
   case HAND_FLUSH_FIVE:
     return (PokerHandScoring){.mult = 16, .chips = 160};
   case HAND_FLUSH_HOUSE:
@@ -537,8 +540,8 @@ PokerHandScoring get_poker_hand_base_scoring(PokerHand hand) {
   }
 }
 
-PokerHandScoring get_planet_card_base_scoring(PokerHand hand) {
-  switch (hand) {
+PokerHandScoring get_planet_card_base_scoring(uint16_t hand_union) {
+  switch (get_poker_hand(hand_union)) {
   case HAND_FLUSH_FIVE:
     return (PokerHandScoring){.mult = 3, .chips = 50};
   case HAND_FLUSH_HOUSE:
@@ -566,12 +569,13 @@ PokerHandScoring get_planet_card_base_scoring(PokerHand hand) {
   }
 }
 
-PokerHandScoring get_poker_hand_total_scoring(PokerHand poker_hand) {
-  PokerHandScoring scoring = get_poker_hand_base_scoring(poker_hand);
-  PokerHandScoring planet_scoring = get_planet_card_base_scoring(poker_hand);
+PokerHandScoring get_poker_hand_total_scoring(uint16_t hand_union) {
+  PokerHandScoring scoring = get_poker_hand_base_scoring(hand_union);
+  PokerHandScoring planet_scoring = get_planet_card_base_scoring(hand_union);
 
-  scoring.chips += planet_scoring.chips * state.game.poker_hands[poker_hand];
-  scoring.mult += planet_scoring.mult * state.game.poker_hands[poker_hand];
+  uint8_t poker_hand_index = ffs(hand_union) - 1;
+  scoring.chips += planet_scoring.chips * state.game.poker_hands[poker_hand_index];
+  scoring.mult += planet_scoring.mult * state.game.poker_hands[poker_hand_index];
 
   return scoring;
 }

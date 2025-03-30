@@ -36,19 +36,19 @@ typedef enum {
 } Enhancement;
 
 typedef enum {
-  HAND_FLUSH_FIVE,
-  HAND_FLUSH_HOUSE,
-  HAND_FIVE_OF_KIND,
+  HAND_FLUSH_FIVE = 1 << 0,
+  HAND_FLUSH_HOUSE = 1 << 1,
+  HAND_FIVE_OF_KIND = 1 << 2,
 
-  HAND_STRAIGHT_FLUSH,
-  HAND_FOUR_OF_KIND,
-  HAND_FULL_HOUSE,
-  HAND_FLUSH,
-  HAND_STRAIGHT,
-  HAND_THREE_OF_KIND,
-  HAND_TWO_PAIR,
-  HAND_PAIR,
-  HAND_HIGH_CARD
+  HAND_STRAIGHT_FLUSH = 1 << 3,
+  HAND_FOUR_OF_KIND = 1 << 4,
+  HAND_FULL_HOUSE = 1 << 5,
+  HAND_FLUSH = 1 << 6,
+  HAND_STRAIGHT = 1 << 7,
+  HAND_THREE_OF_KIND = 1 << 8,
+  HAND_TWO_PAIR = 1 << 9,
+  HAND_PAIR = 1 << 10,
+  HAND_HIGH_CARD = 1 << 11
 } PokerHand;
 
 typedef enum {
@@ -118,7 +118,7 @@ typedef struct {
 
 typedef struct {
   uint8_t count;
-  PokerHand poker_hand;
+  uint16_t hand_union;
   PokerHandScoring scoring;
   Card *scoring_cards[5];
 } SelectedHand;
@@ -207,13 +207,15 @@ void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
 void deselect_all_cards();
 void remove_selected_cards();
 
-PokerHand evaluate_hand();
+uint16_t evaluate_hand();
+uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);
+PokerHand get_poker_hand(uint16_t hand_union);
 void update_scoring_hand();
 void update_scoring_edition(Edition edition);
 
-PokerHandScoring get_poker_hand_base_scoring(PokerHand hand);
-PokerHandScoring get_planet_card_base_scoring(PokerHand hand);
-PokerHandScoring get_poker_hand_total_scoring(PokerHand hand);
+PokerHandScoring get_poker_hand_base_scoring(uint16_t hand_union);
+PokerHandScoring get_planet_card_base_scoring(uint16_t hand_union);
+PokerHandScoring get_poker_hand_total_scoring(uint16_t hand_union);
 double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
 uint8_t get_blind_money(uint8_t blind);

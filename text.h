@@ -3,7 +3,7 @@
 
 #include "game.h"
 
-char *get_poker_hand_name(PokerHand hand);
+char *get_poker_hand_name(uint16_t hand_union);
 char *get_planet_card_name(Planet planet);
 
 char *get_card_suit_name(Suit suit);

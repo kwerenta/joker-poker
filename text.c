@@ -2,8 +2,8 @@
 #include "game.h"
 #include <stdio.h>
 
-char *get_poker_hand_name(PokerHand hand) {
-  switch (hand) {
+char *get_poker_hand_name(uint16_t hand_union) {
+  switch (get_poker_hand(hand_union)) {
   case HAND_FLUSH_FIVE:
     return "Flush Five";
   case HAND_FLUSH_HOUSE:
