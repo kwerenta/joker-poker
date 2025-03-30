@@ -35,6 +35,8 @@ void game_init() {
 
   state.game.shop.selected_card = 0;
 
+  memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
+
   state.stage = STAGE_GAME;
 }
 
