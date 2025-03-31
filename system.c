@@ -77,14 +77,14 @@ uint8_t button_pressed(unsigned int button) {
   return 0;
 }
 
-Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color) {
+Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32_t color) {
   Rect dst = {.x = pos->x, .y = pos->y, .w = 6, .h = 10};
   Rect src = {.x = 0, .y = 0, .w = 6, .h = 10};
 
   uint8_t xOffset = 0;
   uint8_t yOffest = 0;
 
-  for (; *text;) {
+  for (; len > 0; len--) {
     if (*text == ' ') {
       dst.x += CHAR_WIDTH;
       text++;
@@ -135,6 +135,10 @@ Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color) {
   }
 
   return (Vector2){.x = dst.x, .y = dst.y};
+}
+
+Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color) {
+  return draw_text_len(text, strlen(text), pos, color);
 }
 
 void handle_controls(uint8_t *hovered) {

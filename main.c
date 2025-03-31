@@ -9,6 +9,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define CLAY_IMPLEMENTATION
+#include "lib/clay.h"
+#include "renderer.h"
+
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
@@ -28,7 +32,9 @@ void init() {
   srand(time(NULL));
 
   setup_callbacks();
+
   init_gu(&fbp0, &fbp1, list);
+  renderer_init();
 
   state.cards_atlas = load_texture("res/cards.png");
   state.font = load_texture("res/font.png");
@@ -68,20 +74,28 @@ int main(int argc, char *argv[]) {
 
     start_frame(list);
 
-    switch (state.stage) {
-    case STAGE_GAME:
-      render_hand(hovered);
-      render_sidebar();
-      break;
-    case STAGE_SHOP:
-      render_shop();
-      break;
-    case STAGE_GAME_OVER:
-      render_game_over();
-      break;
-    case STAGE_BOOSTER_PACK:
-      render_booster_pack();
+    Clay_BeginLayout();
+
+    CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
+
+      switch (state.stage) {
+      case STAGE_GAME:
+        render_hand(hovered);
+        render_sidebar();
+        break;
+      case STAGE_SHOP:
+        render_shop();
+        break;
+      case STAGE_GAME_OVER:
+        render_game_over();
+        break;
+      case STAGE_BOOSTER_PACK:
+        render_booster_pack();
+      }
     }
+
+    Clay_RenderCommandArray render_commands = Clay_EndLayout();
+    execute_render_commands(render_commands);
 
     end_frame();
   }
