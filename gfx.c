@@ -168,7 +168,7 @@ CLAY(sidebar_block) {
     CLAY({.id = CLAY_ID_LOCAL("Chips"),
           .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
-                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+                     .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = {15, 188, 249, 255}}) {
       CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips,
                 CLAY_TEXT_CONFIG({.textColor = color_white}));
@@ -179,7 +179,7 @@ CLAY(sidebar_block) {
     CLAY({.id = CLAY_ID_LOCAL("Mult"),
           .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
-                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+                     .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = {255, 63, 52, 255}}) {
       CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult,
                 CLAY_TEXT_CONFIG({.textColor = color_white}));
