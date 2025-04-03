@@ -120,102 +120,105 @@ void render_sidebar() {
                    .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                    .layoutDirection = CLAY_TOP_TO_BOTTOM,
                    .childGap = SIDEBAR_GAP},
-        .backgroundColor = {30, 39, 46, 255}}){
+        .backgroundColor = {30, 39, 46, 255}}) {
 
-      CLAY({.id = CLAY_ID("Blind"),
+    CLAY({.id = CLAY_ID("Blind"),
+          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                     .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+          .backgroundColor = {255, 168, 1, 255}}) {
+
+      CLAY_TEXT(blind, CLAY_TEXT_CONFIG({.textColor = color_white}));
+    }
+
+    CLAY(sidebar_block) {
+      CLAY_TEXT(CLAY_STRING("Score at least:"),
+                CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
+      CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+    }
+
+    CLAY({.id = CLAY_ID("Score"),
+          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)},
+                     .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                     .childGap = SIDEBAR_GAP},
+          .backgroundColor = color_block_bg}) {
+      CLAY({.id = CLAY_ID_LOCAL("RoundScore"),
+            .layout = {.sizing = {.width = CLAY_SIZING_FIXED(5 * CHAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
+                       .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}}}) {
+        CLAY_TEXT(CLAY_STRING("Round score"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+      }
+
+      CLAY({.id = CLAY_ID_LOCAL("ScoreValue"),
             .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                       .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
-                       .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-            .backgroundColor = {255, 168, 1, 255}}){
-
-          CLAY_TEXT(blind, CLAY_TEXT_CONFIG({.textColor = color_white}));
-}
-
-CLAY(sidebar_block) {
-  CLAY_TEXT(CLAY_STRING("Score at least:"),
-            CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
-  CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
-}
-
-CLAY({.id = CLAY_ID("Score"),
-      .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)},
-                 .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
-                 .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
-                 .childGap = SIDEBAR_GAP},
-      .backgroundColor = color_block_bg}) {
-  CLAY({.id = CLAY_ID_LOCAL("RoundScore"),
-        .layout = {.sizing = {.width = CLAY_SIZING_FIXED(5 * CHAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
-                   .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}}}) {
-    CLAY_TEXT(CLAY_STRING("Round score"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  }
-
-  CLAY({.id = CLAY_ID_LOCAL("ScoreValue"),
-        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
-    CLAY_TEXT(score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
-  }
-}
-
-CLAY(sidebar_block) {
-  CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
-            CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
-
-  CLAY({.id = CLAY_ID_LOCAL("Score"),
-        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                   .childGap = SIDEBAR_GAP,
-                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
-
-    CLAY({.id = CLAY_ID_LOCAL("Chips"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                     .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
-                     .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = {15, 188, 249, 255}}) {
-      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips,
-                CLAY_TEXT_CONFIG({.textColor = color_white}));
+                       .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
+        CLAY_TEXT(score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+      }
     }
 
-    CLAY_TEXT(CLAY_STRING("x"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    Clay_ElementDeclaration sidebar_block_gap = sidebar_block;
+    sidebar_block_gap.layout.childGap = SIDEBAR_GAP;
 
-    CLAY({.id = CLAY_ID_LOCAL("Mult"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                     .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
-                     .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = {255, 63, 52, 255}}) {
-      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult,
-                CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY(sidebar_block_gap) {
+      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
+                CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
+
+      CLAY({.id = CLAY_ID_LOCAL("Score"),
+            .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                       .childGap = SIDEBAR_GAP,
+                       .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
+
+        CLAY({.id = CLAY_ID_LOCAL("Chips"),
+              .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                         .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
+                         .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_CENTER}},
+              .backgroundColor = {15, 188, 249, 255}}) {
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips,
+                    CLAY_TEXT_CONFIG({.textColor = color_white}));
+        }
+
+        CLAY_TEXT(CLAY_STRING("x"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+
+        CLAY({.id = CLAY_ID_LOCAL("Mult"),
+              .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                         .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
+                         .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}},
+              .backgroundColor = {255, 63, 52, 255}}) {
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult,
+                    CLAY_TEXT_CONFIG({.textColor = color_white}));
+        }
+      }
     }
-  }
-}
 
-CLAY(sidebar_block) {
-  CLAY_TEXT(CLAY_STRING("Hands"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  CLAY_TEXT(hands, CLAY_TEXT_CONFIG({.textColor = color_white}));
-}
+    CLAY(sidebar_block) {
+      CLAY_TEXT(CLAY_STRING("Hands"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(hands, CLAY_TEXT_CONFIG({.textColor = color_white}));
+    }
 
-CLAY(sidebar_block) {
-  CLAY_TEXT(CLAY_STRING("Discards"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  CLAY_TEXT(discards, CLAY_TEXT_CONFIG({.textColor = color_white}));
-}
+    CLAY(sidebar_block) {
+      CLAY_TEXT(CLAY_STRING("Discards"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(discards, CLAY_TEXT_CONFIG({.textColor = color_white}));
+    }
 
-CLAY(sidebar_block) {
-  CLAY_TEXT(CLAY_STRING("Money"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  CLAY_TEXT(money, CLAY_TEXT_CONFIG({.textColor = color_white}));
-}
+    CLAY(sidebar_block) {
+      CLAY_TEXT(CLAY_STRING("Money"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(money, CLAY_TEXT_CONFIG({.textColor = color_white}));
+    }
 
-CLAY({.id = CLAY_ID("RoundInfo"),
-      .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)}, .childGap = SIDEBAR_GAP}}) {
-  CLAY(sidebar_block) {
-    CLAY_TEXT(CLAY_STRING("Ante"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-    CLAY_TEXT(ante, CLAY_TEXT_CONFIG({.textColor = color_white}));
-  }
+    CLAY(
+        {.id = CLAY_ID("RoundInfo"),
+         .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)}, .childGap = SIDEBAR_GAP}}) {
+      CLAY(sidebar_block) {
+        CLAY_TEXT(CLAY_STRING("Ante"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+        CLAY_TEXT(ante, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      }
 
-  CLAY(sidebar_block) {
-    CLAY_TEXT(CLAY_STRING("Round"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-    CLAY_TEXT(round, CLAY_TEXT_CONFIG({.textColor = color_white}));
-  }
-}
-}
-;
+      CLAY(sidebar_block) {
+        CLAY_TEXT(CLAY_STRING("Round"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+        CLAY_TEXT(round, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      }
+    }
+  };
 }
 
 void render_shop() {
