@@ -58,13 +58,55 @@ void render_hand(uint8_t hovered) {
               .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 - CARD_HEIGHT * 0.1 - (hand->cards[hovered].selected == 1 ? 50 : 0),
               .w = CARD_WIDTH * 1.2,
               .h = CARD_HEIGHT * 1.2});
+
+  char buffer[32] = {0};
+  snprintf(buffer, 32, "Deck: %zu/%zu", cvector_size(state.game.deck), cvector_size(state.game.full_deck));
+  draw_text(buffer, &(Vector2){400, 254}, RGB(255, 255, 255));
 }
 
 void render_sidebar() {
-  char buffer[64];
   Clay_Color color_white = {255, 255, 255, 255};
   Clay_Color color_block_bg = {72, 84, 96, 255};
   uint32_t white = 0xFFFFFFFF;
+
+  char buffer[1024] = {0};
+
+  Clay_String blind = {.isStaticallyAllocated = 0, .chars = buffer, .length = 0};
+  blind.length = snprintf((char *)blind.chars, 1024, "Blind %d", state.game.blind + 1);
+
+  Clay_String required_score = {.isStaticallyAllocated = 0, .chars = blind.chars + blind.length, .length = 0};
+  required_score.length =
+      snprintf((char *)required_score.chars, 64, "%.0lf", get_required_score(state.game.ante, state.game.blind));
+
+  Clay_String score = {.isStaticallyAllocated = 0, .chars = required_score.chars + required_score.length, .length = 0};
+  score.length = snprintf((char *)score.chars, 64, "%.0lf", state.game.score);
+
+  Clay_String hand = {.isStaticallyAllocated = 0, .chars = score.chars + score.length, .length = 0};
+  if (state.game.selected_hand.count != 0) {
+    hand.length = snprintf((char *)hand.chars, 32, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
+                           state.game.poker_hands[ffs(state.game.selected_hand.hand_union) - 1] + 1);
+  }
+
+  Clay_String chips = {.isStaticallyAllocated = 0, .chars = hand.chars + hand.length, .length = 0};
+  chips.length = snprintf((char *)chips.chars, 64, "%d", state.game.selected_hand.scoring.chips);
+
+  Clay_String mult = {.isStaticallyAllocated = 0, .chars = chips.chars + chips.length, .length = 0};
+  mult.length = snprintf((char *)mult.chars, 64, "%0.lf", state.game.selected_hand.scoring.mult);
+
+  Clay_String hands = {.isStaticallyAllocated = 0, .chars = mult.chars + mult.length, .length = 0};
+  hands.length = snprintf((char *)hands.chars, 4, "%d", state.game.hands);
+
+  Clay_String discards = {.isStaticallyAllocated = 0, .chars = hands.chars + hands.length, .length = 0};
+  discards.length = snprintf((char *)discards.chars, 4, "%d", state.game.discards);
+
+  Clay_String money = {.isStaticallyAllocated = 0, .chars = discards.chars + discards.length, .length = 0};
+  money.length = snprintf((char *)money.chars, 8, "$%d", state.game.money);
+
+  Clay_String ante = {.isStaticallyAllocated = 0, .chars = money.chars + money.length, .length = 0};
+  ante.length = snprintf((char *)ante.chars, 5, "%d/8", state.game.ante);
+
+  Clay_String round = {.isStaticallyAllocated = 0, .chars = ante.chars + ante.length, .length = 0};
+  round.length = snprintf((char *)round.chars, 4, "%d", state.game.round);
 
   CLAY({.id = CLAY_ID("Sidebar"),
         .layout = {.sizing = {.width = CLAY_SIZING_FIXED(SIDEBAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
@@ -79,7 +121,7 @@ void render_sidebar() {
                        .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
             .backgroundColor = {255, 168, 1, 255}}){
 
-          CLAY_TEXT(CLAY_STRING("Blind %d"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+          CLAY_TEXT(blind, CLAY_TEXT_CONFIG({.textColor = color_white}));
 }
 
 CLAY({.id = CLAY_ID("RequiredScore"),
@@ -90,7 +132,7 @@ CLAY({.id = CLAY_ID("RequiredScore"),
       .backgroundColor = color_block_bg}) {
   CLAY_TEXT(CLAY_STRING("Score at least:"),
             CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
-  CLAY_TEXT(CLAY_STRING("%d"), CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+  CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
 }
 
 CLAY({.id = CLAY_ID("Score"),
@@ -108,7 +150,7 @@ CLAY({.id = CLAY_ID("Score"),
   CLAY({.id = CLAY_ID_LOCAL("ScoreValue"),
         .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                    .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
-    CLAY_TEXT(CLAY_STRING("%.0lf"), CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+    CLAY_TEXT(score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
   }
 }
 
@@ -120,7 +162,7 @@ CLAY({.id = CLAY_ID("CurrentHand"),
                  .childGap = SIDEBAR_GAP},
       .backgroundColor = color_block_bg}) {
 
-  CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : CLAY_STRING("%s (%d)"),
+  CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
             CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
 
   CLAY({.id = CLAY_ID_LOCAL("Score"),
@@ -134,7 +176,7 @@ CLAY({.id = CLAY_ID("CurrentHand"),
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
 
           .backgroundColor = {15, 188, 249, 255}}) {
-      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : CLAY_STRING("%0.l"),
+      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips,
                 CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
 
@@ -145,7 +187,7 @@ CLAY({.id = CLAY_ID("CurrentHand"),
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = {255, 63, 52, 255}}) {
-      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : CLAY_STRING("%0.lf"),
+      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult,
                 CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
   }
@@ -158,7 +200,7 @@ CLAY({.id = CLAY_ID("Hands"),
                  .padding = CLAY_PADDING_ALL(SIDEBAR_GAP)},
       .backgroundColor = color_block_bg}) {
   CLAY_TEXT(CLAY_STRING("Hands"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  CLAY_TEXT(CLAY_STRING("%d"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+  CLAY_TEXT(hands, CLAY_TEXT_CONFIG({.textColor = color_white}));
 }
 
 CLAY({.id = CLAY_ID("Discards"),
@@ -168,7 +210,7 @@ CLAY({.id = CLAY_ID("Discards"),
                  .padding = CLAY_PADDING_ALL(SIDEBAR_GAP)},
       .backgroundColor = color_block_bg}) {
   CLAY_TEXT(CLAY_STRING("Discards"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  CLAY_TEXT(CLAY_STRING("%d"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+  CLAY_TEXT(discards, CLAY_TEXT_CONFIG({.textColor = color_white}));
 }
 
 CLAY({.id = CLAY_ID("Money"),
@@ -178,7 +220,7 @@ CLAY({.id = CLAY_ID("Money"),
                  .padding = CLAY_PADDING_ALL(SIDEBAR_GAP)},
       .backgroundColor = color_block_bg}) {
   CLAY_TEXT(CLAY_STRING("Money"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-  CLAY_TEXT(CLAY_STRING("$%d"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+  CLAY_TEXT(money, CLAY_TEXT_CONFIG({.textColor = color_white}));
 }
 
 CLAY({.id = CLAY_ID("RoundInfo"),
@@ -190,7 +232,7 @@ CLAY({.id = CLAY_ID("RoundInfo"),
          .padding = CLAY_PADDING_ALL(SIDEBAR_GAP)},
         .backgroundColor = color_block_bg}) {
     CLAY_TEXT(CLAY_STRING("Ante"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-    CLAY_TEXT(CLAY_STRING("%d/8"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY_TEXT(ante, CLAY_TEXT_CONFIG({.textColor = color_white}));
   }
 
   CLAY({.id = CLAY_ID_LOCAL("Round"),
@@ -200,14 +242,11 @@ CLAY({.id = CLAY_ID("RoundInfo"),
          .padding = CLAY_PADDING_ALL(SIDEBAR_GAP)},
         .backgroundColor = color_block_bg}) {
     CLAY_TEXT(CLAY_STRING("Round"), CLAY_TEXT_CONFIG({.textColor = color_white}));
-    CLAY_TEXT(CLAY_STRING("%d"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY_TEXT(round, CLAY_TEXT_CONFIG({.textColor = color_white}));
   }
 }
 }
 ;
-
-snprintf(buffer, 64, "Deck: %zu/%zu", cvector_size(state.game.deck), cvector_size(state.game.full_deck));
-draw_text(buffer, &(Vector2){400, 254}, white);
 }
 
 void render_shop() {

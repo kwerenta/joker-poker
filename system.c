@@ -84,7 +84,7 @@ Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32
   uint8_t xOffset = 0;
   uint8_t yOffest = 0;
 
-  for (; len > 0; len--) {
+  for (; len > 0 && *text; len--) {
     if (*text == ' ') {
       dst.x += CHAR_WIDTH;
       text++;
