@@ -86,6 +86,22 @@ void execute_render_commands(Clay_RenderCommandArray render_commands) {
       break;
     }
 
+    case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
+      CustomElementData *custom_element = render_command->renderData.custom.customData;
+      if (!custom_element)
+        continue;
+
+      switch (custom_element->type) {
+      case CUSTOM_ELEMENT_CARD: {
+        render_card(
+            &custom_element->card,
+            &(Rect){.x = bounding_box.x, .y = bounding_box.y, .w = bounding_box.width, .h = bounding_box.height});
+        break;
+      }
+      };
+      break;
+    }
+
     default:
       state.running = 0;
       break;

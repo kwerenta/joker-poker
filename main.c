@@ -80,8 +80,8 @@ int main(int argc, char *argv[]) {
 
       switch (state.stage) {
       case STAGE_GAME:
-        render_hand(hovered);
         render_sidebar();
+        render_hand(hovered);
         break;
       case STAGE_SHOP:
         render_shop();

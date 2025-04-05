@@ -32,37 +32,79 @@ void render_card(Card *card, Rect *dst) {
   }
 }
 
+static char deck_buffer[16] = {0};
+static CustomElementData custom_buffer[16] = {0};
+
 void render_hand(uint8_t hovered) {
   const Hand *hand = &state.game.hand;
 
-  uint32_t hand_width = cvector_size(hand->cards) * (CARD_WIDTH - 16);
-  for (uint8_t i = 0; i < cvector_size(hand->cards); i++) {
-    if (hovered == i) {
-      continue;
+  Clay_String deck = {.isStaticallyAllocated = 0, .length = 0, .chars = deck_buffer};
+  deck.length = snprintf((char *)deck.chars, 16, "Deck %zu/%zu", cvector_size(state.game.deck),
+                         cvector_size(state.game.full_deck));
+
+  CLAY({
+      .id = CLAY_ID("Game"),
+      .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                 .padding = CLAY_PADDING_ALL(8),
+                 .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_BOTTOM}},
+  }) {
+    CLAY({
+        .id = CLAY_ID("Bottom"),
+        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+                   .childGap = 8,
+                   .layoutDirection = CLAY_LEFT_TO_RIGHT},
+    }) {
+      CLAY({
+          .id = CLAY_ID("Hand"),
+          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)}},
+      }) {}
+
+      CLAY({
+          .id = CLAY_ID_LOCAL("Deck"),
+          .layout = {.sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_GROW(0)},
+                     .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_BOTTOM}},
+      }) {
+        CLAY_TEXT(deck, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}, .textAlignment = CLAY_TEXT_ALIGN_CENTER}));
+      }
     }
-
-    Rect dst = {.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 + (CARD_WIDTH - 16) * i,
-                .y = SCREEN_HEIGHT - CARD_HEIGHT - 16,
-                .w = CARD_WIDTH,
-                .h = CARD_HEIGHT};
-
-    if (hand->cards[i].selected == 1) {
-      dst.y -= 50;
-    }
-
-    render_card(&hand->cards[i], &dst);
   }
 
-  render_card(
-      &hand->cards[hovered],
-      &(Rect){.x = SCREEN_WIDTH / 2.0 - hand_width / 2.0 + (CARD_WIDTH - 16) * hovered - CARD_WIDTH * 0.1,
-              .y = SCREEN_HEIGHT - CARD_HEIGHT - 16 - CARD_HEIGHT * 0.1 - (hand->cards[hovered].selected == 1 ? 50 : 0),
-              .w = CARD_WIDTH * 1.2,
-              .h = CARD_HEIGHT * 1.2});
+  size_t card_count = cvector_size(hand->cards);
+  size_t cards_width = card_count * CARD_WIDTH;
 
-  char buffer[32] = {0};
-  snprintf(buffer, 32, "Deck: %zu/%zu", cvector_size(state.game.deck), cvector_size(state.game.full_deck));
-  draw_text(buffer, &(Vector2){400, 254}, RGB(255, 255, 255));
+  for (uint8_t i = 0; i < card_count; i++) {
+    float hand_width = Clay_GetElementData(CLAY_ID("Hand")).boundingBox.width;
+
+    custom_buffer[i] = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = hand->cards[i]};
+
+    float offset = 0;
+    if (card_count == 1)
+      offset = (float)(hand_width - CARD_WIDTH) / 2;
+    else if (cards_width <= hand_width)
+      offset = (float)(hand_width - cards_width) / (card_count + 1) * (i + 1) + CARD_WIDTH * i;
+    else
+      offset = i * (float)(hand_width - CARD_WIDTH) / (card_count - 1);
+
+    CLAY({
+        .floating =
+            {
+                .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
+                .parentId = CLAY_ID("Hand").id,
+                .offset = {.x = offset, .y = hand->cards[i].selected == 1 ? -40 : 0},
+                .zIndex = hovered == i ? 2 : 1,
+                .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
+            },
+    }) {
+      CLAY({
+          .custom = {.customData = &custom_buffer[i]},
+          .layout =
+              {
+                  .sizing = {.width = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_WIDTH),
+                             .height = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_HEIGHT)},
+              },
+      }) {}
+    }
+  }
 }
 
 const Clay_ElementDeclaration sidebar_block = {
