@@ -95,8 +95,6 @@ int append_clay_string(Clay_String *dest, char **buffer, size_t *remaining, cons
 
 void render_sidebar() {
   Clay_Color color_white = {255, 255, 255, 255};
-  Clay_Color color_block_bg = {72, 84, 96, 255};
-  uint32_t white = 0xFFFFFFFF;
 
   char arena[1024] = {0};
   size_t size = sizeof(arena);
@@ -135,7 +133,7 @@ void render_sidebar() {
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
                      .childGap = SIDEBAR_GAP},
-          .backgroundColor = color_block_bg}) {
+          .backgroundColor = sidebar_block.backgroundColor}) {
       CLAY({.id = CLAY_ID_LOCAL("RoundScore"),
             .layout = {.sizing = {.width = CLAY_SIZING_FIXED(5 * CHAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
                        .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}}}) {
