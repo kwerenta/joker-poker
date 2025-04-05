@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
     // state.delta = (curr_tick - last_tick) / 1000.0;
     // last_tick = curr_tick;
 
+    state.frame_arena.offset = 0;
+
     start_frame(list);
 
     Clay_BeginLayout();

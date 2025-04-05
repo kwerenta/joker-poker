@@ -32,15 +32,8 @@ void render_card(Card *card, Rect *dst) {
   }
 }
 
-static char deck_buffer[16] = {0};
-static CustomElementData custom_buffer[16] = {0};
-
 void render_hand(uint8_t hovered) {
   const Hand *hand = &state.game.hand;
-
-  Clay_String deck = {.isStaticallyAllocated = 0, .length = 0, .chars = deck_buffer};
-  deck.length = snprintf((char *)deck.chars, 16, "Deck %zu/%zu", cvector_size(state.game.deck),
-                         cvector_size(state.game.full_deck));
 
   CLAY({
       .id = CLAY_ID("Game"),
@@ -64,6 +57,9 @@ void render_hand(uint8_t hovered) {
           .layout = {.sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_GROW(0)},
                      .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_BOTTOM}},
       }) {
+        Clay_String deck;
+        append_clay_string(&deck, "Deck %zu/%zu", cvector_size(state.game.deck), cvector_size(state.game.full_deck));
+
         CLAY_TEXT(deck, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}, .textAlignment = CLAY_TEXT_ALIGN_CENTER}));
       }
     }
@@ -75,7 +71,8 @@ void render_hand(uint8_t hovered) {
   for (uint8_t i = 0; i < card_count; i++) {
     float hand_width = Clay_GetElementData(CLAY_ID("Hand")).boundingBox.width;
 
-    custom_buffer[i] = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = hand->cards[i]};
+    CustomElementData *card_element = frame_arena_allocate(sizeof(CustomElementData));
+    *card_element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = hand->cards[i]};
 
     float offset = 0;
     if (card_count == 1)
@@ -96,7 +93,7 @@ void render_hand(uint8_t hovered) {
             },
     }) {
       CLAY({
-          .custom = {.customData = &custom_buffer[i]},
+          .custom = {.customData = card_element},
           .layout =
               {
                   .sizing = {.width = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_WIDTH),
@@ -114,33 +111,8 @@ const Clay_ElementDeclaration sidebar_block = {
                .layoutDirection = CLAY_TOP_TO_BOTTOM,
                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}};
 
-int append_clay_string(Clay_String *dest, char **buffer, size_t *remaining, const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  int written = vsnprintf(*buffer, *remaining, format, args);
-  va_end(args);
-
-  if (written < 0 || (size_t)written >= *remaining) {
-    // TODO Add proper error handling
-    written = (*remaining > 0) ? *remaining - 1 : 0;
-  }
-
-  dest->isStaticallyAllocated = 0;
-  dest->chars = *buffer;
-  dest->length = written;
-
-  *buffer += written;
-  *remaining -= written;
-
-  return written;
-}
-
 void render_sidebar() {
   Clay_Color color_white = {255, 255, 255, 255};
-
-  char arena[1024] = {0};
-  size_t size = sizeof(arena);
-  char *offest = arena;
 
   CLAY({.id = CLAY_ID("Sidebar"),
         .layout = {.sizing = {.width = CLAY_SIZING_FIXED(SIDEBAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
@@ -155,7 +127,7 @@ void render_sidebar() {
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = {255, 168, 1, 255}}) {
       Clay_String blind;
-      append_clay_string(&blind, &offest, &size, "Blind %d", state.game.blind + 1);
+      append_clay_string(&blind, "Blind %d", state.game.blind + 1);
 
       CLAY_TEXT(blind, CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
@@ -164,8 +136,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Score at least:"),
                 CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
       Clay_String required_score;
-      append_clay_string(&required_score, &offest, &size, "%.0lf",
-                         get_required_score(state.game.ante, state.game.blind));
+      append_clay_string(&required_score, "%.0lf", get_required_score(state.game.ante, state.game.blind));
 
       CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
     }
@@ -186,7 +157,7 @@ void render_sidebar() {
             .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                        .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
         Clay_String score;
-        append_clay_string(&score, &offest, &size, "%.0lf", state.game.score);
+        append_clay_string(&score, "%.0lf", state.game.score);
 
         CLAY_TEXT(score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
       }
@@ -198,7 +169,7 @@ void render_sidebar() {
     CLAY(sidebar_block_gap) {
       Clay_String hand;
       if (state.game.selected_hand.count != 0)
-        append_clay_string(&hand, &offest, &size, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
+        append_clay_string(&hand, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
                            state.game.poker_hands[ffs(state.game.selected_hand.hand_union) - 1] + 1);
       CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
                 CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
@@ -214,7 +185,7 @@ void render_sidebar() {
                          .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_CENTER}},
               .backgroundColor = {15, 188, 249, 255}}) {
           Clay_String chips;
-          append_clay_string(&chips, &offest, &size, "%d", state.game.selected_hand.scoring.chips);
+          append_clay_string(&chips, "%d", state.game.selected_hand.scoring.chips);
 
           CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips,
                     CLAY_TEXT_CONFIG({.textColor = color_white}));
@@ -228,7 +199,7 @@ void render_sidebar() {
                          .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}},
               .backgroundColor = {255, 63, 52, 255}}) {
           Clay_String mult;
-          append_clay_string(&mult, &offest, &size, "%0.lf", state.game.selected_hand.scoring.mult);
+          append_clay_string(&mult, "%0.lf", state.game.selected_hand.scoring.mult);
 
           CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult,
                     CLAY_TEXT_CONFIG({.textColor = color_white}));
@@ -240,7 +211,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Hands"), CLAY_TEXT_CONFIG({.textColor = color_white}));
 
       Clay_String hands;
-      append_clay_string(&hands, &offest, &size, "%d", state.game.hands);
+      append_clay_string(&hands, "%d", state.game.hands);
       CLAY_TEXT(hands, CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
 
@@ -248,7 +219,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Discards"), CLAY_TEXT_CONFIG({.textColor = color_white}));
 
       Clay_String discards;
-      append_clay_string(&discards, &offest, &size, "%d", state.game.discards);
+      append_clay_string(&discards, "%d", state.game.discards);
       CLAY_TEXT(discards, CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
 
@@ -256,7 +227,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Money"), CLAY_TEXT_CONFIG({.textColor = color_white}));
 
       Clay_String money;
-      append_clay_string(&money, &offest, &size, "$%d", state.game.money);
+      append_clay_string(&money, "$%d", state.game.money);
       CLAY_TEXT(money, CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
 
@@ -267,7 +238,7 @@ void render_sidebar() {
         CLAY_TEXT(CLAY_STRING("Ante"), CLAY_TEXT_CONFIG({.textColor = color_white}));
 
         Clay_String ante;
-        append_clay_string(&ante, &offest, &size, "%d/8", state.game.ante);
+        append_clay_string(&ante, "%d/8", state.game.ante);
         CLAY_TEXT(ante, CLAY_TEXT_CONFIG({.textColor = color_white}));
       }
 
@@ -275,7 +246,7 @@ void render_sidebar() {
         CLAY_TEXT(CLAY_STRING("Round"), CLAY_TEXT_CONFIG({.textColor = color_white}));
 
         Clay_String round;
-        append_clay_string(&round, &offest, &size, "%d", state.game.round);
+        append_clay_string(&round, "%d", state.game.round);
         CLAY_TEXT(round, CLAY_TEXT_CONFIG({.textColor = color_white}));
       }
     }

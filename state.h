@@ -4,7 +4,10 @@
 #include <pspctrl.h>
 
 #include "game.h"
+#include "lib/clay.h"
 #include "system.h"
+
+#define FRAME_ARENA_CAPACITY (5120)
 
 typedef enum {
   STAGE_GAME,
@@ -19,6 +22,16 @@ typedef struct {
 } Controls;
 
 typedef struct {
+  uint8_t data[FRAME_ARENA_CAPACITY];
+  size_t offset;
+} Arena;
+
+void *frame_arena_allocate(size_t size);
+int append_clay_string(Clay_String *dest, const char *format, ...);
+
+typedef struct {
+  Arena frame_arena;
+
   Texture *cards_atlas;
   Texture *font;
 
