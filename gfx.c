@@ -121,15 +121,18 @@ void render_sidebar() {
                    .childGap = SIDEBAR_GAP},
         .backgroundColor = {30, 39, 46, 255}}) {
 
-    CLAY({.id = CLAY_ID("Blind"),
+    CLAY({.id = CLAY_ID("Stage"),
           .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = {255, 168, 1, 255}}) {
-      Clay_String blind;
-      append_clay_string(&blind, "Blind %d", state.game.blind + 1);
+      Clay_String stage;
+      if (state.stage == STAGE_GAME)
+        append_clay_string(&stage, "Blind %d", state.game.blind + 1);
+      else
+        append_clay_string(&stage, "SHOP");
 
-      CLAY_TEXT(blind, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(stage, CLAY_TEXT_CONFIG({.textColor = color_white}));
     }
 
     CLAY(sidebar_block) {
@@ -254,78 +257,104 @@ void render_sidebar() {
 }
 
 void render_shop() {
-  char buffer[64];
-  Vector2 pos = {10, 10};
+  CLAY({.id = CLAY_ID("Shop"),
+        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+                   .padding = {.top = CARD_HEIGHT + 32, .left = 16, .right = 16, .bottom = 0}}}) {
+    CLAY({.id = CLAY_ID("ShopContent"),
+          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                     .padding = CLAY_PADDING_ALL(16),
+                     .childGap = 8,
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
+          .backgroundColor = {30, 39, 46, 255}}) {
 
-  snprintf(buffer, 64, "Money: $%d", state.game.money);
-  draw_text(buffer, &pos, 0xFFFFFFFF);
+      for (uint8_t i = 0; i < cvector_size(state.game.shop.items); i++) {
+        ShopItem *item = &state.game.shop.items[i];
+        Clay_String name;
 
-  for (uint8_t i = 0; i < cvector_size(state.game.shop.items); i++) {
-    uint32_t color = state.game.shop.selected_card == i ? 0xFF00FF00 : 0xFFFFFFFF;
-    ShopItem *item = &state.game.shop.items[i];
+        switch (item->type) {
+        case SHOP_ITEM_JOKER: {
+          name = (Clay_String){.chars = item->joker.name, .length = strlen(item->joker.name)};
+          break;
+        }
+        case SHOP_ITEM_CARD: {
+          name = get_full_card_name(item->card.suit, item->card.rank);
+          break;
+        }
+        case SHOP_ITEM_PLANET: {
+          name = (Clay_String){.chars = get_planet_card_name(item->planet),
+                               .length = strlen(get_planet_card_name(item->planet))};
+          break;
+        }
+        case SHOP_ITEM_BOOSTER_PACK: {
+          name = get_full_booster_pack_name(item->booster_pack.size, item->booster_pack.type);
+          break;
+        }
+        }
 
-    pos.y += 16;
+        CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
+          Clay_Color text_color =
+              state.game.shop.selected_card == i ? (Clay_Color){0, 255, 0, 255} : (Clay_Color){255, 255, 255, 255};
+          CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
 
-    switch (item->type) {
-    case SHOP_ITEM_JOKER:
-      draw_text(item->joker.name, &pos, color);
+          if (item->type == SHOP_ITEM_JOKER) {
+            Clay_String description = {.chars = item->joker.description, .length = strlen(item->joker.description)};
+            CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = text_color}));
+          }
 
-      pos.y += 8;
-      draw_text(item->joker.description, &pos, color);
-      break;
-
-    case SHOP_ITEM_CARD:
-      get_full_card_name(buffer, item->card.suit, item->card.rank);
-      draw_text(buffer, &pos, color);
-      break;
-
-    case SHOP_ITEM_PLANET:
-      draw_text(get_planet_card_name(item->planet), &pos, color);
-      break;
-
-    case SHOP_ITEM_BOOSTER_PACK:
-      get_full_booster_pack_name(buffer, item->booster_pack.size, item->booster_pack.type);
-      draw_text(buffer, &pos, color);
-      break;
+          Clay_String price;
+          append_clay_string(&price, "$%d", get_shop_item_price(item));
+          CLAY_TEXT(price, CLAY_TEXT_CONFIG({.textColor = text_color}));
+        }
+      }
     }
-
-    pos.y += 8;
-    snprintf(buffer, 64, "$%d", get_shop_item_price(item));
-    draw_text(buffer, &pos, color);
   }
 }
 
 void render_booster_pack() {
-  char buffer[64];
-  Vector2 pos = {10, 10};
+  CLAY({.id = CLAY_ID("BoosterPack"),
+        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+                   .padding = {.top = CARD_HEIGHT + 32, .left = 16, .right = 16, .bottom = 0}}}) {
+    CLAY({.id = CLAY_ID("ShopContent"),
+          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                     .padding = CLAY_PADDING_ALL(16),
+                     .childGap = 8,
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
+          .backgroundColor = {30, 39, 46, 255}}) {
 
-  snprintf(buffer, 64, "Money: $%d", state.game.money);
-  draw_text(buffer, &pos, 0xFFFFFFFF);
+      for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
+        BoosterPackContent item = state.game.booster_pack.content[i];
+        Clay_String name;
 
-  for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
-    BoosterPackContent item = state.game.booster_pack.content[i];
-    uint32_t color = state.game.booster_pack.hovered_item == i ? 0xFF00FF00
-                     : item.selected == 1                      ? 0xFFFF0000
-                                                               : 0xFFFFFFFF;
+        switch (state.game.booster_pack.item.type) {
+        case BOOSTER_PACK_STANDARD: {
+          name = get_full_card_name(item.card.suit, item.card.rank);
+          break;
+        }
+        case BOOSTER_PACK_CELESTIAL: {
+          name = (Clay_String){.chars = get_planet_card_name(item.planet),
+                               .length = strlen(get_planet_card_name(item.planet))};
+          break;
+        }
+        case BOOSTER_PACK_BUFFON: {
+          name = (Clay_String){.chars = item.joker.name, .length = strlen(item.joker.name)};
+          break;
+        }
+        }
 
-    pos.y += 16;
+        CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
+          Clay_Color text_color = state.game.booster_pack.hovered_item == i ? (Clay_Color){0, 255, 0, 255}
+                                  : item.selected == 1                      ? (Clay_Color){0, 0, 255, 255}
+                                                                            : (Clay_Color){255, 255, 255, 255};
+          CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
 
-    switch (state.game.booster_pack.item.type) {
-    case BOOSTER_PACK_BUFFON:
-      draw_text(item.joker.name, &pos, color);
-
-      pos.y += 8;
-      draw_text(item.joker.description, &pos, color);
-      break;
-
-    case BOOSTER_PACK_STANDARD:
-      get_full_card_name(buffer, item.card.suit, item.card.rank);
-      draw_text(buffer, &pos, color);
-      break;
-
-    case BOOSTER_PACK_CELESTIAL:
-      draw_text(get_planet_card_name(item.planet), &pos, color);
-      break;
+          if (state.game.booster_pack.item.type == BOOSTER_PACK_BUFFON) {
+            Clay_String description = {.chars = item.joker.description, .length = strlen(item.joker.description)};
+            CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = text_color}));
+          }
+        }
+      }
     }
   }
 }

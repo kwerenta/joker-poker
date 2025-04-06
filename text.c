@@ -1,5 +1,7 @@
 #include "text.h"
 #include "game.h"
+#include "renderer.h"
+#include "state.h"
 #include <stdio.h>
 
 char *get_poker_hand_name(uint16_t hand_union) {
@@ -104,8 +106,11 @@ char *get_card_rank_name(Rank rank) {
   }
 }
 
-int get_full_card_name(char *out, Suit suit, Rank rank) {
-  return snprintf(out, 17, "%s of %s", get_card_rank_name(rank), get_card_suit_name(suit));
+Clay_String get_full_card_name(Suit suit, Rank rank) {
+  Clay_String card_name;
+  append_clay_string(&card_name, "%s of %s", get_card_rank_name(rank), get_card_suit_name(suit));
+
+  return card_name;
 }
 
 char *get_booster_pack_size_name(BoosterPackSize size) {
@@ -130,7 +135,10 @@ char *get_booster_pack_type_name(BoosterPackType type) {
   }
 }
 
-int get_full_booster_pack_name(char *out, BoosterPackSize size, BoosterPackType type) {
-  return snprintf(out, 64, "%s%s%s Pack", get_booster_pack_size_name(size), size == BOOSTER_PACK_NORMAL ? "" : " ",
-                  get_booster_pack_type_name(type));
+Clay_String get_full_booster_pack_name(BoosterPackSize size, BoosterPackType type) {
+  Clay_String booster_pack_name;
+  append_clay_string(&booster_pack_name, "%s%s%s Pack", get_booster_pack_size_name(size),
+                     size == BOOSTER_PACK_NORMAL ? "" : " ", get_booster_pack_type_name(type));
+
+  return booster_pack_name;
 }

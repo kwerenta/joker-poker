@@ -80,9 +80,11 @@ int main(int argc, char *argv[]) {
 
     CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
 
+      if (state.stage != STAGE_GAME_OVER)
+        render_sidebar();
+
       switch (state.stage) {
       case STAGE_GAME:
-        render_sidebar();
         render_hand(hovered);
         break;
       case STAGE_SHOP:
