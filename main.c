@@ -83,18 +83,29 @@ int main(int argc, char *argv[]) {
       if (state.stage != STAGE_GAME_OVER)
         render_sidebar();
 
-      switch (state.stage) {
-      case STAGE_GAME:
-        render_hand(hovered);
-        break;
-      case STAGE_SHOP:
-        render_shop();
-        break;
-      case STAGE_GAME_OVER:
-        render_game_over();
-        break;
-      case STAGE_BOOSTER_PACK:
-        render_booster_pack();
+      CLAY({.id = CLAY_ID("Content"),
+            .layout = {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
+            }}) {
+        if (state.stage != STAGE_GAME_OVER)
+          render_topbar();
+
+        switch (state.stage) {
+        case STAGE_GAME:
+          render_hand(hovered);
+          break;
+        case STAGE_SHOP:
+          render_shop();
+          break;
+        case STAGE_GAME_OVER:
+          render_game_over();
+          break;
+        case STAGE_BOOSTER_PACK:
+          render_booster_pack();
+          break;
+        }
       }
     }
 

@@ -91,13 +91,16 @@ void execute_render_commands(Clay_RenderCommandArray render_commands) {
       if (!custom_element)
         continue;
 
+      Rect dst = {.x = bounding_box.x, .y = bounding_box.y, .w = bounding_box.width, .h = bounding_box.height};
+
       switch (custom_element->type) {
-      case CUSTOM_ELEMENT_CARD: {
-        render_card(
-            &custom_element->card,
-            &(Rect){.x = bounding_box.x, .y = bounding_box.y, .w = bounding_box.width, .h = bounding_box.height});
+      case CUSTOM_ELEMENT_CARD:
+        render_card(&custom_element->card, &dst);
         break;
-      }
+
+      case CUSTOM_ELEMENT_JOKER:
+        render_joker(&custom_element->joker, &dst);
+        break;
       };
       break;
     }

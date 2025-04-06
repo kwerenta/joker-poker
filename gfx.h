@@ -17,9 +17,12 @@
 #define SIDEBAR_GAP (4)
 
 void render_card(Card *card, Rect *dst);
+void render_joker(Joker *joker, Rect *dst);
+
 void render_hand(uint8_t hovered);
 
 void render_sidebar();
+void render_topbar();
 
 void render_shop();
 

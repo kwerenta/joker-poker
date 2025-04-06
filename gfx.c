@@ -5,6 +5,7 @@
 
 #include "game.h"
 #include "gfx.h"
+#include "lib/cvector.h"
 #include "renderer.h"
 #include "state.h"
 #include "system.h"
@@ -32,13 +33,21 @@ void render_card(Card *card, Rect *dst) {
   }
 }
 
+void render_joker(Joker *joker, Rect *dst) {
+  Rect src = {.x = 9 * CARD_WIDTH, .y = CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+  if (joker->id == 6)
+    src.y += 2 * CARD_HEIGHT;
+
+  draw_texture(state.cards_atlas, &src, dst);
+}
+
 void render_hand(uint8_t hovered) {
   const Hand *hand = &state.game.hand;
 
   CLAY({
       .id = CLAY_ID("Game"),
       .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                 .padding = CLAY_PADDING_ALL(8),
+                 .padding = {.bottom = 8},
                  .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_BOTTOM}},
   }) {
     CLAY({
@@ -100,6 +109,57 @@ void render_hand(uint8_t hovered) {
                              .height = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_HEIGHT)},
               },
       }) {}
+    }
+  }
+}
+
+void render_topbar() {
+  CLAY({.id = CLAY_ID("Topbar"),
+        .layout = {
+            .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            .childGap = 4,
+        }}) {
+    CLAY({.id = CLAY_ID("Jokers"),
+          .backgroundColor = {30, 39, 46, 255},
+          .layout = {
+              .sizing = {.width = CLAY_SIZING_PERCENT(0.7), .height = CLAY_SIZING_GROW(0)},
+              .childGap = 8,
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+          }}) {
+      cvector_for_each(state.game.jokers.cards, Joker, joker) {
+        CustomElementData *joker_data = frame_arena_allocate(sizeof(CustomElementData));
+        *joker_data = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = *joker};
+
+        CLAY({.custom = joker_data,
+              .layout = {
+                  .sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              }}) {}
+      }
+
+      CLAY({.id = CLAY_ID_LOCAL("Size"),
+            .floating = {
+                .attachTo = CLAY_ATTACH_TO_PARENT,
+                .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_BOTTOM, .element = CLAY_ATTACH_POINT_LEFT_TOP},
+            }}) {
+        Clay_String size;
+        append_clay_string(&size, "%d/%d", cvector_size(state.game.jokers.cards), state.game.jokers.size);
+
+        CLAY_TEXT(size, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+      }
+    }
+
+    CLAY({.id = CLAY_ID("Consumables"),
+          .backgroundColor = {30, 39, 46, 255},
+          .layout = {
+              .sizing = {.width = CLAY_SIZING_PERCENT(0.3), .height = CLAY_SIZING_GROW(0)},
+          }}) {
+      CLAY({.id = CLAY_ID_LOCAL("Size"),
+            .floating = {
+                .attachTo = CLAY_ATTACH_TO_PARENT,
+                .attachPoints = {.parent = CLAY_ATTACH_POINT_RIGHT_BOTTOM, .element = CLAY_ATTACH_POINT_RIGHT_TOP},
+            }}) {
+        CLAY_TEXT(CLAY_STRING("0/2"), CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+      }
     }
   }
 }
@@ -260,7 +320,7 @@ void render_shop() {
   CLAY({.id = CLAY_ID("Shop"),
         .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                    .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
-                   .padding = {.top = CARD_HEIGHT + 32, .left = 16, .right = 16, .bottom = 0}}}) {
+                   .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0}}}) {
     CLAY({.id = CLAY_ID("ShopContent"),
           .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                      .padding = CLAY_PADDING_ALL(16),
@@ -315,7 +375,7 @@ void render_booster_pack() {
   CLAY({.id = CLAY_ID("BoosterPack"),
         .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                    .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
-                   .padding = {.top = CARD_HEIGHT + 32, .left = 16, .right = 16, .bottom = 0}}}) {
+                   .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0}}}) {
     CLAY({.id = CLAY_ID("ShopContent"),
           .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                      .padding = CLAY_PADDING_ALL(16),
