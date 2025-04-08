@@ -41,25 +41,30 @@ void render_joker(Joker *joker, Rect *dst) {
   draw_texture(state.cards_atlas, &src, dst);
 }
 
+void render_consumable(Consumable *consumable, Rect *dst) {
+  Rect src = {.x = 4 * CARD_WIDTH, .y = 5 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+  draw_texture(state.cards_atlas, &src, dst);
+}
+
 void render_hand(uint8_t hovered) {
   const Hand *hand = &state.game.hand;
 
-  CLAY({
-      .id = CLAY_ID("Game"),
-      .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                 .padding = {.bottom = 8},
-                 .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_BOTTOM}},
-  }) {
-    CLAY({
-        .id = CLAY_ID("Bottom"),
-        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
-                   .childGap = 8,
-                   .layoutDirection = CLAY_LEFT_TO_RIGHT},
-    }) {
-      CLAY({
-          .id = CLAY_ID("Hand"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)}},
-      }) {}
+  CLAY({.id = CLAY_ID("Game"),
+        .layout = {
+            .sizing = {.width = CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .padding = {.bottom = 8},
+            .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_BOTTOM},
+        }}) {
+    CLAY({.id = CLAY_ID("Bottom"),
+          .layout = {
+              .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .childGap = 8,
+              .layoutDirection = CLAY_LEFT_TO_RIGHT,
+          }}) {
+      CLAY({.id = CLAY_ID("Hand"),
+            .layout = {
+                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+            }}) {}
 
       CLAY({
           .id = CLAY_ID_LOCAL("Deck"),
@@ -91,24 +96,18 @@ void render_hand(uint8_t hovered) {
     else
       offset = i * (float)(hand_width - CARD_WIDTH) / (card_count - 1);
 
-    CLAY({
-        .floating =
-            {
-                .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
-                .parentId = CLAY_ID("Hand").id,
-                .offset = {.x = offset, .y = hand->cards[i].selected == 1 ? -40 : 0},
-                .zIndex = hovered == i ? 2 : 1,
-                .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
-            },
-    }) {
-      CLAY({
-          .custom = {.customData = card_element},
-          .layout =
-              {
-                  .sizing = {.width = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_WIDTH),
-                             .height = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_HEIGHT)},
-              },
-      }) {}
+    CLAY({.floating = {
+              .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
+              .parentId = CLAY_ID("Hand").id,
+              .offset = {.x = offset, .y = hand->cards[i].selected == 1 ? -40 : 0},
+              .zIndex = hovered == i ? 2 : 1,
+              .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
+          }}) {
+      CLAY({.custom = {.customData = card_element},
+            .layout = {
+                .sizing = {.width = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_WIDTH),
+                           .height = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_HEIGHT)},
+            }}) {}
     }
   }
 }
@@ -152,13 +151,28 @@ void render_topbar() {
           .backgroundColor = {30, 39, 46, 255},
           .layout = {
               .sizing = {.width = CLAY_SIZING_PERCENT(0.3), .height = CLAY_SIZING_GROW(0)},
+              .childGap = 8,
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
+      cvector_for_each(state.game.consumables.items, Consumable, consumable) {
+        CustomElementData *consumable_data = frame_arena_allocate(sizeof(CustomElementData));
+        *consumable_data = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = *consumable};
+
+        CLAY({.custom = consumable_data,
+              .layout = {
+                  .sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              }}) {}
+      }
+
       CLAY({.id = CLAY_ID_LOCAL("Size"),
             .floating = {
                 .attachTo = CLAY_ATTACH_TO_PARENT,
                 .attachPoints = {.parent = CLAY_ATTACH_POINT_RIGHT_BOTTOM, .element = CLAY_ATTACH_POINT_RIGHT_TOP},
             }}) {
-        CLAY_TEXT(CLAY_STRING("0/2"), CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+        Clay_String size;
+        append_clay_string(&size, "%d/%d", cvector_size(state.game.consumables.items), state.game.consumables.size);
+
+        CLAY_TEXT(size, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
       }
     }
   }

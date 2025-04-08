@@ -111,6 +111,22 @@ typedef struct {
   cvector_vector_type(Card) cards;
 } Hand;
 
+typedef enum { CONSUMABLE_PLANET } ConsumableType;
+
+typedef struct {
+  ConsumableType type;
+
+  union {
+    Planet planet;
+  };
+} Consumable;
+
+typedef struct {
+  int8_t hovered;
+  uint8_t size;
+  cvector_vector_type(Consumable) items;
+} Consumables;
+
 typedef struct {
   uint8_t size;
   cvector_vector_type(Joker) cards;
@@ -171,9 +187,12 @@ typedef struct {
 typedef struct {
   cvector_vector_type(Card) full_deck;
   cvector_vector_type(Card) deck;
+
   Hand hand;
   SelectedHand selected_hand;
+
   JokerHand jokers;
+  Consumables consumables;
 
   double score;
   uint8_t ante;
@@ -220,6 +239,7 @@ double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
 uint8_t get_blind_money(uint8_t blind);
 
+void use_consumable(Consumable *consumable);
 uint8_t get_shop_item_price(ShopItem *item);
 void buy_shop_item();
 void open_booster_pack(BoosterPackItem booster_pack);

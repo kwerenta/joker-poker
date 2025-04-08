@@ -18,6 +18,7 @@
 
 void render_card(Card *card, Rect *dst);
 void render_joker(Joker *joker, Rect *dst);
+void render_consumable(Consumable *consumable, Rect *dst);
 
 void render_hand(uint8_t hovered);
 

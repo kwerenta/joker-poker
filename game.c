@@ -33,6 +33,7 @@ void game_init() {
   state.game.discards = 2;
 
   state.game.jokers.size = 5;
+  state.game.consumables.size = 2;
 
   state.game.shop.selected_card = 0;
 
@@ -55,6 +56,9 @@ void game_destroy() {
 
   cvector_free(state.game.jokers.cards);
   state.game.jokers.cards = NULL;
+
+  cvector_free(state.game.consumables.items);
+  state.game.consumables.items = NULL;
 
   cvector_free(state.game.shop.items);
   state.game.shop.items = NULL;
@@ -618,6 +622,25 @@ double get_required_score(uint8_t ante, uint8_t blind) {
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
 
+// If consumable is NULL then hovered item from consumables section will be used
+void use_consumable(Consumable *consumable_to_use) {
+  Consumable *consumable = consumable_to_use;
+
+  if (consumable_to_use == NULL) {
+    if (cvector_size(state.game.consumables.items) == 0)
+      return;
+
+    // TODO set consumable to hovered item
+    return;
+  }
+
+  switch (consumable->type) {
+  case CONSUMABLE_PLANET:
+    state.game.poker_hands[consumable->planet] += 1;
+    break;
+  }
+}
+
 uint8_t add_item_to_player(ShopItem *item) {
   switch (item->type) {
   case SHOP_ITEM_JOKER:
@@ -632,7 +655,11 @@ uint8_t add_item_to_player(ShopItem *item) {
     break;
 
   case SHOP_ITEM_PLANET:
-    state.game.poker_hands[item->planet] += 1;
+    if (cvector_size(state.game.consumables.items) >= state.game.consumables.size)
+      return 0;
+
+    Consumable planet = {.type = CONSUMABLE_PLANET, .planet = item->planet};
+    cvector_push_back(state.game.consumables.items, planet);
     break;
 
   case SHOP_ITEM_BOOSTER_PACK:
@@ -727,7 +754,12 @@ void submit_booster_pack() {
       break;
     }
 
-    add_item_to_player(&item);
+    if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL) {
+      Consumable planet = {.type = CONSUMABLE_PLANET, .planet = item.planet = content->planet};
+      use_consumable(&planet);
+    } else {
+      add_item_to_player(&item);
+    }
   }
 
   state.stage = STAGE_SHOP;

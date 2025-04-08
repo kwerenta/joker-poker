@@ -104,6 +104,10 @@ void execute_render_commands(Clay_RenderCommandArray render_commands) {
       case CUSTOM_ELEMENT_JOKER:
         render_joker(&custom_element->joker, &dst);
         break;
+
+      case CUSTOM_ELEMENT_CONSUMABLE:
+        render_consumable(&custom_element->consumable, &dst);
+        break;
       };
       break;
     }

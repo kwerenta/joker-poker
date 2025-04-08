@@ -4,13 +4,14 @@
 #include "game.h"
 #include "lib/clay.h"
 
-typedef enum { CUSTOM_ELEMENT_CARD, CUSTOM_ELEMENT_JOKER } CustomElementType;
+typedef enum { CUSTOM_ELEMENT_CARD, CUSTOM_ELEMENT_JOKER, CUSTOM_ELEMENT_CONSUMABLE } CustomElementType;
 
 typedef struct {
   CustomElementType type;
   union {
     Card card;
     Joker joker;
+    Consumable consumable;
   };
 } CustomElementData;
 
