@@ -1,5 +1,6 @@
 #include "state.h"
 
+#include "debug.h"
 #include "lib/clay.h"
 
 #include <stdarg.h>
@@ -15,7 +16,7 @@ int append_clay_string(Clay_String *dest, const char *format, ...) {
   va_end(args);
 
   if (written < 0 || (size_t)written >= remaining) {
-    // TODO Add proper error handling
+    log_message(LOG_ERROR, "Frame arena overflow: Failed to append Clay string.");
     written = (remaining > 0) ? remaining - 1 : 0;
   }
 
@@ -30,7 +31,8 @@ int append_clay_string(Clay_String *dest, const char *format, ...) {
 
 void *frame_arena_allocate(size_t size) {
   if (state.frame_arena.offset + size > FRAME_ARENA_CAPACITY) {
-    // TODO add error handling
+    log_message(LOG_ERROR, "Frame arena overflow: Failed to allocate memory.");
+    state.running = 0;
     return NULL;
   }
   void *ptr = &state.frame_arena.data[state.frame_arena.offset];

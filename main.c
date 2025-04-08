@@ -13,6 +13,7 @@
 #include "lib/clay.h"
 #include "renderer.h"
 
+#include "debug.h"
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
@@ -29,6 +30,8 @@ void *fbp1;
 State state;
 
 void init() {
+  log_init();
+
   srand(time(NULL));
 
   setup_callbacks();
@@ -46,6 +49,8 @@ void init() {
 
   state.delta = 0;
   state.running = 1;
+
+  log_message(LOG_INFO, "Application has been initialized.");
 }
 
 void destroy() {
@@ -57,6 +62,8 @@ void destroy() {
 
   stbi_image_free(state.font->data);
   free(state.font);
+
+  log_message(LOG_INFO, "Application has been destroyed.");
 }
 
 int main(int argc, char *argv[]) {
@@ -64,7 +71,8 @@ int main(int argc, char *argv[]) {
 
   uint8_t hovered = 0;
 
-  uint32_t last_tick = 0;
+  log_message(LOG_INFO, "Starting main loop...");
+
   while (state.running) {
     handle_controls(&hovered);
 
@@ -116,6 +124,7 @@ int main(int argc, char *argv[]) {
   }
 
   destroy();
+  log_shutdown();
 
   return 0;
 }

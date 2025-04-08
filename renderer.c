@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "debug.h"
 #include "gfx.h"
 #include "lib/clay.h"
 #include "state.h"
@@ -11,7 +12,7 @@
   RGBA((uint8_t)roundf(color.r), (uint8_t)roundf(color.g), (uint8_t)roundf(color.b), (uint8_t)roundf(color.a))
 
 void error_handler(Clay_ErrorData error) {
-  printf("%s", error.errorText.chars);
+  log_message(LOG_ERROR, "Clay error: %s", error.errorText.chars);
   state.running = 0;
 }
 
@@ -23,6 +24,8 @@ void renderer_init() {
   uint64_t total_memory = Clay_MinMemorySize();
   Clay_Arena arena = Clay_CreateArenaWithCapacityAndMemory(total_memory, malloc(total_memory));
   Clay_Initialize(arena, (Clay_Dimensions){SCREEN_WIDTH, SCREEN_HEIGHT}, (Clay_ErrorHandler){error_handler});
+
+  log_message(LOG_INFO, "Initialized Clay with %llu byte memory arena.", total_memory);
 
   Clay_SetMeasureTextFunction(measure_text, NULL);
 }
@@ -106,6 +109,7 @@ void execute_render_commands(Clay_RenderCommandArray render_commands) {
     }
 
     default:
+      log_message(LOG_ERROR, "Tried to render unsupported Clay element. (ID=%d)", render_command->commandType);
       state.running = 0;
       break;
     }

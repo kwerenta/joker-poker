@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "debug.h"
 #include "game.h"
 #include "lib/cvector.h"
 #include "state.h"
@@ -38,6 +39,8 @@ void game_init() {
   memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
 
   state.stage = STAGE_GAME;
+
+  log_message(LOG_INFO, "Game has been initialized.");
 }
 
 void game_destroy() {
@@ -58,6 +61,8 @@ void game_destroy() {
 
   cvector_free(state.game.booster_pack.content);
   state.game.booster_pack.content = NULL;
+
+  log_message(LOG_INFO, "Game has been destroyed.");
 }
 
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
