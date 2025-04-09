@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "debug.h"
 #include "game.h"
 #include "gfx.h"
 #include "lib/cvector.h"
@@ -46,6 +47,72 @@ void render_consumable(Consumable *consumable, Rect *dst) {
   draw_texture(state.cards_atlas, &src, dst);
 }
 
+void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
+  size_t item_count = 0;
+  switch (section) {
+  case NAVIGATION_HAND:
+    item_count = cvector_size(state.game.hand.cards);
+    break;
+
+  case NAVIGATION_CONSUMABLES:
+    item_count = cvector_size(state.game.consumables.items);
+    break;
+
+  default:
+    log_message(LOG_WARNING, "Tried to render incompatible section in render_aligned_items function");
+    return;
+  }
+  size_t items_width = item_count * CARD_WIDTH;
+
+  for (uint8_t i = 0; i < item_count; i++) {
+    float parent_width = Clay_GetElementData(parent_id).boundingBox.width;
+
+    CustomElementData *element = frame_arena_allocate(sizeof(CustomElementData));
+    switch (section) {
+    case NAVIGATION_HAND:
+      *element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = state.game.hand.cards[i]};
+      break;
+
+    case NAVIGATION_CONSUMABLES:
+      *element = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = state.game.consumables.items[i]};
+      break;
+
+    default:
+      return;
+    }
+
+    float x_offset = 0;
+    if (item_count == 1)
+      x_offset = (float)(parent_width - CARD_WIDTH) / 2;
+    else if (items_width <= parent_width)
+      x_offset = (float)(parent_width - items_width) / (item_count + 1) * (i + 1) + CARD_WIDTH * i;
+    else
+      x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
+
+    float y_offset = 0;
+    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1)
+      y_offset = -40;
+
+    uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
+
+    CLAY({.floating = {
+              .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
+              .parentId = parent_id.id,
+              .offset = {.x = x_offset, .y = y_offset},
+              .zIndex = is_hovered ? 2 : 1,
+              .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
+          }}) {
+      float scale = is_hovered ? 1.2 : 1;
+
+      CLAY({.custom = {.customData = element},
+            .layout = {
+                .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
+                           .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
+            }}) {}
+    }
+  }
+}
+
 void render_hand() {
   const Hand *hand = &state.game.hand;
 
@@ -79,40 +146,7 @@ void render_hand() {
     }
   }
 
-  size_t card_count = cvector_size(hand->cards);
-  size_t cards_width = card_count * CARD_WIDTH;
-
-  for (uint8_t i = 0; i < card_count; i++) {
-    float hand_width = Clay_GetElementData(CLAY_ID("Hand")).boundingBox.width;
-
-    CustomElementData *card_element = frame_arena_allocate(sizeof(CustomElementData));
-    *card_element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = hand->cards[i]};
-
-    float offset = 0;
-    if (card_count == 1)
-      offset = (float)(hand_width - CARD_WIDTH) / 2;
-    else if (cards_width <= hand_width)
-      offset = (float)(hand_width - cards_width) / (card_count + 1) * (i + 1) + CARD_WIDTH * i;
-    else
-      offset = i * (float)(hand_width - CARD_WIDTH) / (card_count - 1);
-
-    uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == NAVIGATION_HAND;
-
-    CLAY({.floating = {
-              .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
-              .parentId = CLAY_ID("Hand").id,
-              .offset = {.x = offset, .y = hand->cards[i].selected == 1 ? -40 : 0},
-              .zIndex = is_hovered ? 2 : 1,
-              .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
-          }}) {
-      float scale = is_hovered ? 1.2 : 1;
-      CLAY({.custom = {.customData = card_element},
-            .layout = {
-                .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
-                           .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
-            }}) {}
-    }
-  }
+  render_spread_items(NAVIGATION_HAND, CLAY_ID("Hand"));
 }
 
 void render_topbar() {
@@ -157,20 +191,6 @@ void render_topbar() {
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
-      for (uint8_t i = 0; i < cvector_size(state.game.consumables.items); i++) {
-        CustomElementData *consumable_data = frame_arena_allocate(sizeof(CustomElementData));
-        *consumable_data =
-            (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = state.game.consumables.items[i]};
-
-        float scale = state.navigation.section == NAVIGATION_CONSUMABLES && state.navigation.hovered == i ? 1.2 : 1;
-
-        CLAY({.custom = consumable_data,
-              .layout = {
-                  .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
-                             .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
-              }}) {}
-      }
-
       CLAY({.id = CLAY_ID_LOCAL("Size"),
             .floating = {
                 .attachTo = CLAY_ATTACH_TO_PARENT,
@@ -183,6 +203,8 @@ void render_topbar() {
       }
     }
   }
+
+  render_spread_items(NAVIGATION_CONSUMABLES, CLAY_ID("Consumables"));
 }
 
 const Clay_ElementDeclaration sidebar_block = {
