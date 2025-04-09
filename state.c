@@ -62,6 +62,8 @@ void set_nav_hovered(uint8_t new_hovered) {
   case NAVIGATION_CONSUMABLES:
     max_value = cvector_size(state.game.consumables.items);
     break;
+  case NAVIGATION_JOKERS:
+    max_value = cvector_size(state.game.jokers.cards);
   }
 
   if (new_hovered >= max_value || new_hovered < 0)

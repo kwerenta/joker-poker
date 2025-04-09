@@ -58,6 +58,10 @@ void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
     item_count = cvector_size(state.game.consumables.items);
     break;
 
+  case NAVIGATION_JOKERS:
+    item_count = cvector_size(state.game.jokers.cards);
+    break;
+
   default:
     log_message(LOG_WARNING, "Tried to render incompatible section in render_aligned_items function");
     return;
@@ -75,6 +79,10 @@ void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
 
     case NAVIGATION_CONSUMABLES:
       *element = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = state.game.consumables.items[i]};
+      break;
+
+    case NAVIGATION_JOKERS:
+      *element = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = state.game.jokers.cards[i]};
       break;
 
     default:
@@ -162,16 +170,6 @@ void render_topbar() {
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
-      cvector_for_each(state.game.jokers.cards, Joker, joker) {
-        CustomElementData *joker_data = frame_arena_allocate(sizeof(CustomElementData));
-        *joker_data = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = *joker};
-
-        CLAY({.custom = joker_data,
-              .layout = {
-                  .sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
-              }}) {}
-      }
-
       CLAY({.id = CLAY_ID_LOCAL("Size"),
             .floating = {
                 .attachTo = CLAY_ATTACH_TO_PARENT,
@@ -204,6 +202,7 @@ void render_topbar() {
     }
   }
 
+  render_spread_items(NAVIGATION_JOKERS, CLAY_ID("Jokers"));
   render_spread_items(NAVIGATION_CONSUMABLES, CLAY_ID("Consumables"));
 }
 

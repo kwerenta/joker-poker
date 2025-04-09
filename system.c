@@ -153,7 +153,7 @@ void handle_controls() {
     } else if (button_pressed(PSP_CTRL_CROSS)) {
       if (state.navigation.section == NAVIGATION_CONSUMABLES)
         use_consumable(NULL);
-      else
+      else if (state.navigation.section == NAVIGATION_HAND)
         toggle_card_select(state.navigation.hovered);
     } else if (button_pressed(PSP_CTRL_SQUARE)) {
       play_hand();
@@ -170,7 +170,20 @@ void handle_controls() {
     } else if (button_pressed(PSP_CTRL_DOWN)) {
       sort_hand(1);
     } else if (button_pressed(PSP_CTRL_SELECT)) {
-      change_nav_section(state.navigation.section == NAVIGATION_CONSUMABLES ? NAVIGATION_HAND : NAVIGATION_CONSUMABLES);
+      switch (state.navigation.section) {
+      case NAVIGATION_HAND:
+        change_nav_section(NAVIGATION_JOKERS);
+        break;
+      case NAVIGATION_JOKERS:
+        change_nav_section(NAVIGATION_CONSUMABLES);
+        break;
+      case NAVIGATION_CONSUMABLES:
+        change_nav_section(NAVIGATION_HAND);
+        break;
+
+      default:
+        break;
+      }
     }
 
     break;
