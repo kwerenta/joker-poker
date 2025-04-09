@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <time.h>
 
 #include <pspctrl.h>
@@ -69,12 +68,10 @@ void destroy() {
 int main(int argc, char *argv[]) {
   init();
 
-  uint8_t hovered = 0;
-
   log_message(LOG_INFO, "Starting main loop...");
 
   while (state.running) {
-    handle_controls(&hovered);
+    handle_controls();
 
     // uint32_t curr_tick = SDL_GetTicks();
     // state.delta = (curr_tick - last_tick) / 1000.0;
@@ -102,7 +99,7 @@ int main(int argc, char *argv[]) {
 
         switch (state.stage) {
         case STAGE_GAME:
-          render_hand(hovered);
+          render_hand();
           break;
         case STAGE_SHOP:
           render_shop();

@@ -21,6 +21,13 @@ typedef struct {
   unsigned int state;
 } Controls;
 
+typedef enum { NAVIGATION_HAND, NAVIGATION_SHOP, NAVIGATION_BOOSTER_PACK } NavigationSection;
+
+typedef struct {
+  uint8_t hovered;
+  NavigationSection section;
+} Navigation;
+
 typedef struct {
   uint8_t data[FRAME_ARENA_CAPACITY];
   size_t offset;
@@ -29,6 +36,10 @@ typedef struct {
 void *frame_arena_allocate(size_t size);
 int append_clay_string(Clay_String *dest, const char *format, ...);
 
+void change_nav_section(NavigationSection section);
+void set_nav_hovered(uint8_t new_hovered);
+void change_stage(Stage stage);
+
 typedef struct {
   Arena frame_arena;
 
@@ -36,6 +47,7 @@ typedef struct {
   Texture *font;
 
   Controls controls;
+  Navigation navigation;
 
   double delta;
   uint8_t running;

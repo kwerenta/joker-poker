@@ -166,7 +166,6 @@ typedef struct {
 typedef struct {
   BoosterPackItem item;
   cvector_vector_type(BoosterPackContent) content;
-  uint8_t hovered_item;
 } BoosterPack;
 
 typedef struct {
@@ -181,7 +180,6 @@ typedef struct {
 
 typedef struct {
   cvector_vector_type(ShopItem) items;
-  uint8_t selected_card;
 } Shop;
 
 typedef struct {
@@ -220,9 +218,8 @@ void discard_hand();
 void fill_hand();
 void sort_hand(uint8_t by_suit);
 
-void set_hovered_card(uint8_t *hovered, uint8_t new_position);
 void toggle_card_select(uint8_t index);
-void move_card_in_hand(uint8_t *hovered, uint8_t new_position);
+void move_card_in_hand(uint8_t new_position);
 void deselect_all_cards();
 void remove_selected_cards();
 

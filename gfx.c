@@ -46,7 +46,7 @@ void render_consumable(Consumable *consumable, Rect *dst) {
   draw_texture(state.cards_atlas, &src, dst);
 }
 
-void render_hand(uint8_t hovered) {
+void render_hand() {
   const Hand *hand = &state.game.hand;
 
   CLAY({.id = CLAY_ID("Game"),
@@ -96,17 +96,20 @@ void render_hand(uint8_t hovered) {
     else
       offset = i * (float)(hand_width - CARD_WIDTH) / (card_count - 1);
 
+    uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == NAVIGATION_HAND;
+
     CLAY({.floating = {
               .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
               .parentId = CLAY_ID("Hand").id,
               .offset = {.x = offset, .y = hand->cards[i].selected == 1 ? -40 : 0},
-              .zIndex = hovered == i ? 2 : 1,
+              .zIndex = is_hovered ? 2 : 1,
               .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
           }}) {
+      float scale = is_hovered ? 1.2 : 1;
       CLAY({.custom = {.customData = card_element},
             .layout = {
-                .sizing = {.width = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_WIDTH),
-                           .height = CLAY_SIZING_FIXED((hovered == i ? 1.2 : 1) * CARD_HEIGHT)},
+                .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
+                           .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {}
     }
   }
@@ -367,8 +370,9 @@ void render_shop() {
         }
 
         CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
-          Clay_Color text_color =
-              state.game.shop.selected_card == i ? (Clay_Color){0, 255, 0, 255} : (Clay_Color){255, 255, 255, 255};
+          Clay_Color text_color = state.navigation.section == NAVIGATION_SHOP && state.navigation.hovered == i
+                                      ? (Clay_Color){0, 255, 0, 255}
+                                      : (Clay_Color){255, 255, 255, 255};
           CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
 
           if (item->type == SHOP_ITEM_JOKER) {
@@ -418,9 +422,10 @@ void render_booster_pack() {
         }
 
         CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
-          Clay_Color text_color = state.game.booster_pack.hovered_item == i ? (Clay_Color){0, 255, 0, 255}
-                                  : item.selected == 1                      ? (Clay_Color){0, 0, 255, 255}
-                                                                            : (Clay_Color){255, 255, 255, 255};
+          Clay_Color text_color = state.navigation.section == NAVIGATION_BOOSTER_PACK && state.navigation.hovered == i
+                                      ? (Clay_Color){0, 255, 0, 255}
+                                  : item.selected == 1 ? (Clay_Color){0, 0, 255, 255}
+                                                       : (Clay_Color){255, 255, 255, 255};
           CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
 
           if (state.game.booster_pack.item.type == BOOSTER_PACK_BUFFON) {

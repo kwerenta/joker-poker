@@ -35,7 +35,8 @@ void game_init() {
   state.game.jokers.size = 5;
   state.game.consumables.size = 2;
 
-  state.game.shop.selected_card = 0;
+  state.navigation.hovered = 0;
+  state.navigation.section = NAVIGATION_HAND;
 
   memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
 
@@ -178,7 +179,7 @@ void play_hand() {
         state.game.money += 3;
     }
 
-    state.stage = STAGE_SHOP;
+    change_stage(STAGE_SHOP);
     restock_shop();
 
     state.game.money += 1 * state.game.hands + get_blind_money(state.game.blind);
@@ -240,13 +241,6 @@ void shuffle_deck() {
   }
 }
 
-void set_hovered_card(uint8_t *hovered, uint8_t new_position) {
-  if (new_position >= cvector_size(state.game.hand.cards))
-    return;
-
-  *hovered = new_position;
-}
-
 void toggle_card_select(uint8_t index) {
   Hand *hand = &state.game.hand;
 
@@ -281,11 +275,13 @@ void deselect_all_cards() {
   state.game.selected_hand.count = 0;
 }
 
-void move_card_in_hand(uint8_t *hovered, uint8_t new_position) {
+void move_card_in_hand(uint8_t new_position) {
   Hand *hand = &state.game.hand;
 
   if (new_position >= cvector_size(hand->cards))
     return;
+
+  uint8_t *hovered = &state.navigation.hovered;
 
   Card temp = hand->cards[*hovered];
   hand->cards[*hovered] = hand->cards[new_position];
@@ -685,28 +681,29 @@ uint8_t get_shop_item_price(ShopItem *item) {
 
 void buy_shop_item() {
   uint8_t shopCount = cvector_size(state.game.shop.items);
-  ShopItem *item = &state.game.shop.items[state.game.shop.selected_card];
+  ShopItem *item = &state.game.shop.items[state.navigation.hovered];
   uint8_t price = get_shop_item_price(item);
 
-  if (state.game.shop.selected_card >= shopCount || state.game.money < price)
+  if (state.navigation.hovered >= shopCount || state.game.money < price)
     return;
+
+  uint8_t item_index = state.navigation.hovered;
 
   if (add_item_to_player(item) == 0)
     return;
 
   state.game.money -= price;
-  cvector_erase(state.game.shop.items, state.game.shop.selected_card);
+  cvector_erase(state.game.shop.items, item_index);
   shopCount--;
 
-  if (state.game.shop.selected_card >= shopCount)
-    state.game.shop.selected_card = shopCount - 1;
+  if (state.stage == STAGE_SHOP && item_index >= shopCount)
+    state.navigation.hovered = shopCount - 1;
 }
 
 void open_booster_pack(BoosterPackItem booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = booster_pack;
-  state.game.booster_pack.hovered_item = 0;
-  state.stage = STAGE_BOOSTER_PACK;
+  change_stage(STAGE_BOOSTER_PACK);
 
   uint8_t count = booster_pack.size == BOOSTER_PACK_NORMAL ? 3 : 5;
   for (uint8_t i = 0; i < count; i++) {
@@ -762,11 +759,11 @@ void submit_booster_pack() {
     }
   }
 
-  state.stage = STAGE_SHOP;
+  change_stage(STAGE_SHOP);
 }
 
 void toggle_booster_pack_item_select() {
-  BoosterPackContent *content = &state.game.booster_pack.content[state.game.booster_pack.hovered_item];
+  BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
 
   if (content->selected == 1) {
     content->selected = 0;
@@ -787,7 +784,7 @@ void toggle_booster_pack_item_select() {
 
 void restock_shop() {
   cvector_clear(state.game.shop.items);
-  state.game.shop.selected_card = 0;
+  state.navigation.hovered = 0;
 
   ShopItem card = {.type = SHOP_ITEM_CARD,
                    .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE)};
@@ -823,5 +820,5 @@ void exit_shop() {
 
   fill_hand();
 
-  state.stage = STAGE_GAME;
+  change_stage(STAGE_GAME);
 }
