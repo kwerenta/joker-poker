@@ -635,8 +635,12 @@ void use_consumable(Consumable *consumable_to_use) {
     break;
   }
 
-  if (consumable_to_use == NULL)
+  if (consumable_to_use == NULL) {
     cvector_erase(state.game.consumables.items, state.navigation.hovered);
+
+    if (cvector_size(state.game.consumables.items) >= state.navigation.hovered && state.navigation.hovered > 0)
+      state.navigation.hovered--;
+  }
 }
 
 uint8_t add_item_to_player(ShopItem *item) {
