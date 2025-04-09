@@ -153,17 +153,21 @@ void render_topbar() {
     CLAY({.id = CLAY_ID("Consumables"),
           .backgroundColor = {30, 39, 46, 255},
           .layout = {
-              .sizing = {.width = CLAY_SIZING_PERCENT(0.3), .height = CLAY_SIZING_GROW(0)},
+              .sizing = {.width = CLAY_SIZING_PERCENT(0.3), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
-      cvector_for_each(state.game.consumables.items, Consumable, consumable) {
+      for (uint8_t i = 0; i < cvector_size(state.game.consumables.items); i++) {
         CustomElementData *consumable_data = frame_arena_allocate(sizeof(CustomElementData));
-        *consumable_data = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = *consumable};
+        *consumable_data =
+            (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = state.game.consumables.items[i]};
+
+        float scale = state.navigation.section == NAVIGATION_CONSUMABLES && state.navigation.hovered == i ? 1.2 : 1;
 
         CLAY({.custom = consumable_data,
               .layout = {
-                  .sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+                  .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
+                             .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
               }}) {}
       }
 

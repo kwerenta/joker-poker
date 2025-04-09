@@ -626,8 +626,7 @@ void use_consumable(Consumable *consumable_to_use) {
     if (cvector_size(state.game.consumables.items) == 0)
       return;
 
-    // TODO set consumable to hovered item
-    return;
+    consumable = &cvector_at(state.game.consumables.items, state.navigation.hovered);
   }
 
   switch (consumable->type) {
@@ -635,6 +634,9 @@ void use_consumable(Consumable *consumable_to_use) {
     state.game.poker_hands[consumable->planet] += 1;
     break;
   }
+
+  if (consumable_to_use == NULL)
+    cvector_erase(state.game.consumables.items, state.navigation.hovered);
 }
 
 uint8_t add_item_to_player(ShopItem *item) {

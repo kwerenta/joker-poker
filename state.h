@@ -21,7 +21,7 @@ typedef struct {
   unsigned int state;
 } Controls;
 
-typedef enum { NAVIGATION_HAND, NAVIGATION_SHOP, NAVIGATION_BOOSTER_PACK } NavigationSection;
+typedef enum { NAVIGATION_HAND, NAVIGATION_SHOP, NAVIGATION_BOOSTER_PACK, NAVIGATION_CONSUMABLES } NavigationSection;
 
 typedef struct {
   uint8_t hovered;
