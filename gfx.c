@@ -47,7 +47,7 @@ void render_consumable(Consumable *consumable, Rect *dst) {
   draw_texture(state.cards_atlas, &src, dst);
 }
 
-void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
+void render_spread_items(NavigationSection section, Clay_String parent_id) {
   size_t item_count = 0;
   switch (section) {
   case NAVIGATION_HAND:
@@ -66,10 +66,13 @@ void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
     log_message(LOG_WARNING, "Tried to render incompatible section in render_aligned_items function");
     return;
   }
+  if (item_count == 0)
+    return;
+
   size_t items_width = item_count * CARD_WIDTH;
 
   for (uint8_t i = 0; i < item_count; i++) {
-    float parent_width = Clay_GetElementData(parent_id).boundingBox.width;
+    float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width;
 
     CustomElementData *element = frame_arena_allocate(sizeof(CustomElementData));
     switch (section) {
@@ -103,9 +106,10 @@ void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
 
     uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
 
-    CLAY({.floating = {
+    CLAY({.id = CLAY_SIDI(parent_id, i + 1),
+          .floating = {
               .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
-              .parentId = parent_id.id,
+              .parentId = CLAY_SID(parent_id).id,
               .offset = {.x = x_offset, .y = y_offset},
               .zIndex = is_hovered ? 2 : 1,
               .attachPoints = {.parent = CLAY_ATTACH_POINT_LEFT_CENTER, .element = CLAY_ATTACH_POINT_LEFT_CENTER},
@@ -117,6 +121,71 @@ void render_spread_items(NavigationSection section, Clay_ElementId parent_id) {
                 .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
                            .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {}
+    }
+  }
+
+  if (state.navigation.section != section)
+    return;
+
+  Clay_String name;
+  Clay_String description;
+
+  Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM,
+                                             .element = CLAY_ATTACH_POINT_CENTER_TOP};
+  switch (section) {
+  case NAVIGATION_HAND: {
+    Card *card = &state.game.hand.cards[state.navigation.hovered];
+    name = get_full_card_name(card->suit, card->rank);
+    append_clay_string(&description, "+%d chips", card->chips);
+
+    attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
+    attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+    break;
+  }
+
+  case NAVIGATION_JOKERS: {
+    Joker *joker = &state.game.jokers.cards[state.navigation.hovered];
+    name = (Clay_String){.chars = joker->name, .length = strlen(joker->name)};
+    description = (Clay_String){.chars = joker->description, .length = strlen(joker->description)};
+    break;
+  }
+
+  case NAVIGATION_CONSUMABLES: {
+    Consumable *consumable = &state.game.consumables.items[state.navigation.hovered];
+    switch (consumable->type) {
+    case CONSUMABLE_PLANET:
+      name = (Clay_String){.chars = get_planet_card_name(consumable->planet),
+                           .length = strlen(get_planet_card_name(consumable->planet))};
+      uint16_t hand_union = 1 << consumable->planet;
+      PokerHandScoring upgrade = get_planet_card_base_scoring(hand_union);
+      append_clay_string(&description, "%s (+%u chips, +%0.lf mult)", get_poker_hand_name(hand_union), upgrade.chips,
+                         upgrade.mult);
+      break;
+    }
+    break;
+  }
+
+  default:
+    return;
+  }
+
+  CLAY({.id = CLAY_ID("Tooltip"),
+        .floating = {
+            .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
+            .parentId = CLAY_SIDI(parent_id, state.navigation.hovered + 1).id,
+            .zIndex = 3,
+            .offset = {.y = 4 * (section == NAVIGATION_HAND ? -1 : 1)},
+            .attachPoints = attach_points,
+        }}) {
+    CLAY({.backgroundColor = {30, 39, 46, 255},
+          .layout = {
+              .padding = CLAY_PADDING_ALL(4),
+              .childGap = 2,
+              .sizing = {.width = CLAY_SIZING_GROW(0, 100), .height = CLAY_SIZING_GROW(0)},
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          }}) {
+      CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+      CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
     }
   }
 }
@@ -154,7 +223,7 @@ void render_hand() {
     }
   }
 
-  render_spread_items(NAVIGATION_HAND, CLAY_ID("Hand"));
+  render_spread_items(NAVIGATION_HAND, CLAY_STRING("Hand"));
 }
 
 void render_topbar() {
@@ -202,8 +271,8 @@ void render_topbar() {
     }
   }
 
-  render_spread_items(NAVIGATION_JOKERS, CLAY_ID("Jokers"));
-  render_spread_items(NAVIGATION_CONSUMABLES, CLAY_ID("Consumables"));
+  render_spread_items(NAVIGATION_JOKERS, CLAY_STRING("Jokers"));
+  render_spread_items(NAVIGATION_CONSUMABLES, CLAY_STRING("Consumables"));
 }
 
 const Clay_ElementDeclaration sidebar_block = {

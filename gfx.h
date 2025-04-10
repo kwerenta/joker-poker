@@ -21,7 +21,7 @@ void render_card(Card *card, Rect *dst);
 void render_joker(Joker *joker, Rect *dst);
 void render_consumable(Consumable *consumable, Rect *dst);
 
-void render_spread_items(NavigationSection section, Clay_ElementId parent_id);
+void render_spread_items(NavigationSection section, Clay_String parent_id);
 
 void render_hand();
 void render_sidebar();
