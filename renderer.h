@@ -6,7 +6,7 @@
 
 typedef enum { CUSTOM_ELEMENT_CARD, CUSTOM_ELEMENT_JOKER, CUSTOM_ELEMENT_CONSUMABLE } CustomElementType;
 
-typedef struct {
+typedef struct __attribute__((aligned(16))) {
   CustomElementType type;
   union {
     Card card;

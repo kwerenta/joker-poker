@@ -31,11 +31,17 @@ int append_clay_string(Clay_String *dest, const char *format, ...) {
 }
 
 void *frame_arena_allocate(size_t size) {
+  // Align offset to 16 bytes as it is required by PSP device
+  size_t alignment = 16;
+  size_t padding = (alignment - (state.frame_arena.offset % alignment)) % alignment;
+  state.frame_arena.offset += padding;
+
   if (state.frame_arena.offset + size > FRAME_ARENA_CAPACITY) {
     log_message(LOG_ERROR, "Frame arena overflow: Failed to allocate memory.");
     state.running = 0;
     return NULL;
   }
+
   void *ptr = &state.frame_arena.data[state.frame_arena.offset];
   state.frame_arena.offset += size;
   return ptr;
