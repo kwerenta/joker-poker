@@ -76,7 +76,6 @@ void change_stage(Stage stage) {
   state.stage = stage;
 
   switch (stage) {
-  case STAGE_GAME_OVER:
   case STAGE_GAME:
     change_nav_section(NAVIGATION_HAND);
     break;
@@ -87,6 +86,10 @@ void change_stage(Stage stage) {
 
   case STAGE_BOOSTER_PACK:
     change_nav_section(NAVIGATION_BOOSTER_PACK);
+    break;
+
+  case STAGE_CASH_OUT:
+  case STAGE_GAME_OVER:
     break;
   }
 }

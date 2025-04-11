@@ -234,7 +234,12 @@ PokerHandScoring get_planet_card_base_scoring(uint16_t hand_union);
 PokerHandScoring get_poker_hand_total_scoring(uint16_t hand_union);
 double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
+
 uint8_t get_blind_money(uint8_t blind);
+uint8_t get_hands_money();
+uint8_t get_interest_money();
+
+void get_cash_out();
 
 void use_consumable(Consumable *consumable);
 uint8_t get_shop_item_price(ShopItem *item);

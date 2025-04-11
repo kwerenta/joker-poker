@@ -31,6 +31,8 @@ void render_shop();
 
 void render_booster_pack();
 
+void render_cash_out();
+
 void render_game_over();
 
 #endif

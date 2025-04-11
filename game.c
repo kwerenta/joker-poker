@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <stdio.h>
 
 #include "debug.h"
 #include "game.h"
@@ -171,23 +170,32 @@ void play_hand() {
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
   if (state.game.score >= required_score) {
-    // TODO Add max interest cap
-    state.game.money += (state.game.money) / 5;
-
     cvector_for_each(state.game.hand.cards, Card, card) {
       if (card->enhancement == ENHANCEMENT_GOLD)
         state.game.money += 3;
     }
 
-    change_stage(STAGE_SHOP);
-    restock_shop();
-
-    state.game.money += 1 * state.game.hands + get_blind_money(state.game.blind);
+    change_stage(STAGE_CASH_OUT);
   } else if (state.game.hands == 0) {
     state.stage = STAGE_GAME_OVER;
   } else {
     fill_hand();
   }
+}
+
+void get_cash_out() {
+  state.game.money += get_interest_money() + get_hands_money() + get_blind_money(state.game.blind);
+
+  state.game.score = 0;
+
+  // Reset hand and deck for new blind
+  state.game.hands = 4;
+  state.game.discards = 2;
+  cvector_clear(state.game.hand.cards);
+  cvector_copy(state.game.full_deck, state.game.deck);
+
+  change_stage(STAGE_SHOP);
+  restock_shop();
 }
 
 void update_scoring_edition(Edition edition) {
@@ -617,6 +625,12 @@ double get_required_score(uint8_t ante, uint8_t blind) {
 }
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
+uint8_t get_hands_money() { return state.game.hands; }
+
+uint8_t get_interest_money() {
+  // TODO Add max interest cap
+  return state.game.money / 5;
+}
 
 // If consumable is NULL then hovered item from consumables section will be used
 void use_consumable(Consumable *consumable_to_use) {
@@ -815,15 +829,7 @@ void exit_shop() {
     state.game.ante++;
   }
 
-  state.game.score = 0;
-
-  // Reset hand and deck for new blind
-  state.game.hands = 4;
-  state.game.discards = 2;
-  cvector_clear(state.game.hand.cards);
-  cvector_copy(state.game.full_deck, state.game.deck);
   shuffle_deck();
-
   fill_hand();
 
   change_stage(STAGE_GAME);

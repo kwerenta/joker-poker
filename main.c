@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
         case STAGE_GAME:
           render_hand();
           break;
+        case STAGE_CASH_OUT:
+          render_cash_out();
+          break;
         case STAGE_SHOP:
           render_shop();
           break;

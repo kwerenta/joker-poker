@@ -532,6 +532,58 @@ void render_booster_pack() {
   }
 }
 
+void render_cash_out() {
+  CLAY({.id = CLAY_ID("Cashout"),
+        .layout = {
+            .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+            .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0},
+        }}) {
+    CLAY({.id = CLAY_ID("CashoutContent"),
+          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                     .padding = CLAY_PADDING_ALL(16),
+                     .childGap = 8,
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
+          .backgroundColor = {30, 39, 46, 255}}) {
+      uint8_t interest = get_interest_money();
+      uint8_t hands = get_hands_money();
+      uint8_t blind = get_blind_money(state.game.blind);
+
+      CLAY({.layout = {
+                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)},
+                .childAlignment = {CLAY_ALIGN_X_CENTER},
+            }}) {
+        Clay_String cash_out_text;
+        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + blind);
+        CLAY_TEXT(cash_out_text, CLAY_TEXT_CONFIG({.textColor = {255, 168, 1, 255}}));
+      }
+
+      CLAY({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(1)}},
+            .backgroundColor = {200, 200, 200, 255}}) {}
+
+      CLAY({.layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
+        if (blind != 0) {
+          Clay_String blind_money;
+          append_clay_string(&blind_money, "Blind: $%d", get_blind_money(state.game.blind));
+          CLAY_TEXT(blind_money, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+        }
+
+        if (hands != 0) {
+          Clay_String hands_money;
+          append_clay_string(&hands_money, "Hands: $%d", get_hands_money());
+          CLAY_TEXT(hands_money, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+        }
+
+        if (interest != 0) {
+          Clay_String interest_money;
+          append_clay_string(&interest_money, "Interest: $%d", get_interest_money());
+          CLAY_TEXT(interest_money, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+        }
+      }
+    }
+  }
+}
+
 void render_game_over() {
   Vector2 pos = {10, 10};
   draw_text("You've lost:(", &pos, 0xFFFFFFFF);
