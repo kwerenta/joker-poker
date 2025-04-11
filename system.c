@@ -20,8 +20,13 @@ void draw_rectangle(Rect *rect, uint32_t color) {
   vertices[1].x = rect->x + rect->w;
   vertices[1].y = rect->y + rect->h;
 
+  sceGuEnable(GU_BLEND);
+  sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+
   sceGuColor(color);
   sceGuDrawArray(GU_SPRITES, GU_TEXTURE_16BIT | GU_VERTEX_16BIT | GU_TRANSFORM_2D, 2, 0, vertices);
+
+  sceGuDisable(GU_BLEND);
 }
 
 void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color) {
