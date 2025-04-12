@@ -52,7 +52,7 @@ void change_nav_section(NavigationSection section) {
   state.navigation.section = section;
 }
 
-void set_nav_hovered(uint8_t new_hovered) {
+uint8_t get_nav_section_size() {
   uint8_t max_value = 0;
 
   switch (state.navigation.section) {
@@ -72,10 +72,53 @@ void set_nav_hovered(uint8_t new_hovered) {
     max_value = cvector_size(state.game.jokers.cards);
   }
 
+  return max_value;
+}
+
+void set_nav_hovered(uint8_t new_hovered) {
+  uint8_t max_value = get_nav_section_size();
+
   if (new_hovered >= max_value || new_hovered < 0)
     return;
 
   state.navigation.hovered = new_hovered;
+}
+
+void move_nav_hovered(uint8_t new_position) {
+  uint8_t max_position = get_nav_section_size();
+
+  if (new_position >= max_position)
+    return;
+
+  uint8_t *hovered = &state.navigation.hovered;
+
+  switch (state.navigation.section) {
+  case NAVIGATION_HAND: {
+    Card temp = state.game.hand.cards[*hovered];
+    state.game.hand.cards[*hovered] = state.game.hand.cards[new_position];
+    state.game.hand.cards[new_position] = temp;
+    break;
+  }
+
+  case NAVIGATION_JOKERS: {
+    Joker temp = state.game.jokers.cards[*hovered];
+    state.game.jokers.cards[*hovered] = state.game.jokers.cards[new_position];
+    state.game.jokers.cards[new_position] = temp;
+    break;
+  }
+
+  case NAVIGATION_CONSUMABLES: {
+    Consumable temp = state.game.consumables.items[*hovered];
+    state.game.consumables.items[*hovered] = state.game.consumables.items[new_position];
+    state.game.consumables.items[new_position] = temp;
+    break;
+  }
+
+  default:
+    return;
+  }
+
+  *hovered = new_position;
 }
 
 void change_stage(Stage stage) {

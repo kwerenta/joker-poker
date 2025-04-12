@@ -283,21 +283,6 @@ void deselect_all_cards() {
   state.game.selected_hand.count = 0;
 }
 
-void move_card_in_hand(uint8_t new_position) {
-  Hand *hand = &state.game.hand;
-
-  if (new_position >= cvector_size(hand->cards))
-    return;
-
-  uint8_t *hovered = &state.navigation.hovered;
-
-  Card temp = hand->cards[*hovered];
-  hand->cards[*hovered] = hand->cards[new_position];
-  hand->cards[new_position] = temp;
-
-  *hovered = new_position;
-}
-
 int compare_by_rank(const void *a, const void *b) {
   Rank a_rank = ((const Card *)a)->rank, b_rank = ((const Card *)b)->rank;
   if (a_rank == RANK_ACE) {

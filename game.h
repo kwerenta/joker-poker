@@ -219,7 +219,6 @@ void fill_hand();
 void sort_hand(uint8_t by_suit);
 
 void toggle_card_select(uint8_t index);
-void move_card_in_hand(uint8_t new_position);
 void deselect_all_cards();
 void remove_selected_cards();
 

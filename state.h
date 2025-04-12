@@ -44,7 +44,10 @@ void *frame_arena_allocate(size_t size);
 int append_clay_string(Clay_String *dest, const char *format, ...);
 
 void change_nav_section(NavigationSection section);
+
 void set_nav_hovered(uint8_t new_hovered);
+void move_nav_hovered(uint8_t new_position);
+
 void change_stage(Stage stage);
 
 typedef struct {

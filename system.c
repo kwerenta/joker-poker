@@ -167,9 +167,9 @@ void handle_controls() {
     } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
       discard_hand();
     } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-      move_card_in_hand(state.navigation.hovered - 1);
+      move_nav_hovered(state.navigation.hovered - 1);
     } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-      move_card_in_hand(state.navigation.hovered + 1);
+      move_nav_hovered(state.navigation.hovered + 1);
     } else if (button_pressed(PSP_CTRL_UP)) {
       sort_hand(0);
     } else if (button_pressed(PSP_CTRL_DOWN)) {
