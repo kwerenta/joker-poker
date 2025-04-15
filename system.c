@@ -202,8 +202,14 @@ void handle_controls() {
     if (button_pressed(PSP_CTRL_CIRCLE)) {
       exit_shop();
     } else if (button_pressed(PSP_CTRL_UP)) {
-      set_nav_hovered(state.navigation.hovered - 1);
+      if (state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS)
+        change_nav_section(NAVIGATION_SHOP_ITEMS);
     } else if (button_pressed(PSP_CTRL_DOWN)) {
+      if (state.navigation.section == NAVIGATION_SHOP_ITEMS)
+        change_nav_section(NAVIGATION_SHOP_BOOSTER_PACKS);
+    } else if (button_pressed(PSP_CTRL_LEFT)) {
+      set_nav_hovered(state.navigation.hovered - 1);
+    } else if (button_pressed(PSP_CTRL_RIGHT)) {
       set_nav_hovered(state.navigation.hovered + 1);
     } else if (button_pressed(PSP_CTRL_CROSS)) {
       buy_shop_item();

@@ -47,6 +47,11 @@ void render_consumable(Consumable *consumable, Rect *dst) {
   draw_texture(state.cards_atlas, &src, dst);
 }
 
+void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
+  Rect src = {.x = 4 * CARD_WIDTH, .y = 7 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+  draw_texture(state.cards_atlas, &src, dst);
+}
+
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
   size_t item_count = 0;
   switch (section) {
@@ -62,6 +67,14 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     item_count = cvector_size(state.game.jokers.cards);
     break;
 
+  case NAVIGATION_SHOP_ITEMS:
+    item_count = cvector_size(state.game.shop.items);
+    break;
+
+  case NAVIGATION_SHOP_BOOSTER_PACKS:
+    item_count = cvector_size(state.game.shop.booster_packs);
+    break;
+
   default:
     log_message(LOG_WARNING, "Tried to render incompatible section in render_aligned_items function");
     return;
@@ -75,6 +88,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width;
 
     CustomElementData *element = frame_arena_allocate(sizeof(CustomElementData));
+
     switch (section) {
     case NAVIGATION_HAND:
       *element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = state.game.hand.cards[i]};
@@ -86,6 +100,29 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
 
     case NAVIGATION_JOKERS:
       *element = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = state.game.jokers.cards[i]};
+      break;
+
+    case NAVIGATION_SHOP_ITEMS: {
+      ShopItem *item = &state.game.shop.items[i];
+
+      switch (item->type) {
+      case SHOP_ITEM_CARD:
+        *element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
+        break;
+      case SHOP_ITEM_PLANET:
+        *element = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                       .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
+        break;
+      case SHOP_ITEM_JOKER:
+        *element = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
+        break;
+      }
+      break;
+    }
+
+    case NAVIGATION_SHOP_BOOSTER_PACKS:
+      *element =
+          (CustomElementData){.type = CUSTOM_ELEMENT_BOOSTER_PACK, .booster_pack = state.game.shop.booster_packs[i]};
       break;
 
     default:
@@ -120,7 +157,30 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .layout = {
                 .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
                            .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
-            }}) {}
+            }}) {
+        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS)
+          continue;
+
+        CLAY({.id = CLAY_ID_LOCAL("Price"),
+              .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
+                           .offset = {.y = CHAR_HEIGHT},
+                           .zIndex = 4,
+                           .attachPoints = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                            .element = CLAY_ATTACH_POINT_CENTER_BOTTOM}}}) {
+          CLAY({.backgroundColor = {30, 39, 46, 255},
+                .border = {.color = {255, 168, 1, 255}, .width = CLAY_BORDER_ALL(1)},
+                .layout = {
+                    .padding = CLAY_PADDING_ALL(4),
+                }}) {
+            Clay_String price;
+            append_clay_string(&price, "$%d",
+                               section == NAVIGATION_SHOP_BOOSTER_PACKS
+                                   ? get_booster_pack_price(&state.game.shop.booster_packs[i])
+                                   : get_shop_item_price(&state.game.shop.items[i]));
+            CLAY_TEXT(price, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+          }
+        }
+      }
     }
   }
 
@@ -129,6 +189,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
 
   Clay_String name;
   Clay_String description;
+  uint8_t is_above = 0;
 
   Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM,
                                              .element = CLAY_ATTACH_POINT_CENTER_TOP};
@@ -137,9 +198,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     Card *card = &state.game.hand.cards[state.navigation.hovered];
     name = get_full_card_name(card->suit, card->rank);
     append_clay_string(&description, "+%d chips", card->chips);
-
-    attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
-    attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+    is_above = 1;
     break;
   }
 
@@ -165,8 +224,49 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     break;
   }
 
+  case NAVIGATION_SHOP_ITEMS: {
+    ShopItem *item = &state.game.shop.items[state.navigation.hovered];
+    switch (item->type) {
+    case SHOP_ITEM_CARD:
+      name = get_full_card_name(item->card.suit, item->card.rank);
+      append_clay_string(&description, "+%d chips", item->card.chips);
+      break;
+
+    case SHOP_ITEM_JOKER:
+      name = (Clay_String){.chars = item->joker.name, .length = strlen(item->joker.name)};
+      description = (Clay_String){.chars = item->joker.description, .length = strlen(item->joker.description)};
+      break;
+
+    case SHOP_ITEM_PLANET:
+      name = (Clay_String){.chars = get_planet_card_name(item->planet),
+                           .length = strlen(get_planet_card_name(item->planet))};
+      uint16_t hand_union = 1 << item->planet;
+      PokerHandScoring upgrade = get_planet_card_base_scoring(hand_union);
+      append_clay_string(&description, "%s (+%u chips, +%0.lf mult)", get_poker_hand_name(hand_union), upgrade.chips,
+                         upgrade.mult);
+      break;
+    }
+
+    is_above = 1;
+    break;
+  }
+
+  case NAVIGATION_SHOP_BOOSTER_PACKS: {
+    BoosterPackItem *booster_pack = &state.game.shop.booster_packs[state.navigation.hovered];
+    name = get_full_booster_pack_name(booster_pack->size, booster_pack->type);
+    append_clay_string(&description, "Choose up to %d from %d", booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1,
+                       booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5);
+    is_above = 1;
+    break;
+  }
+
   default:
     return;
+  }
+
+  if (is_above == 1) {
+    attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
+    attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
   }
 
   CLAY({.id = CLAY_ID("Tooltip"),
@@ -174,7 +274,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
             .parentId = CLAY_SIDI(parent_id, state.navigation.hovered + 1).id,
             .zIndex = 3,
-            .offset = {.y = 4 * (section == NAVIGATION_HAND ? -1 : 1)},
+            .offset = {.y = 4 * (is_above == 1 ? -1 : 1)},
             .attachPoints = attach_points,
         }}) {
     CLAY({.backgroundColor = {30, 39, 46, 255},
@@ -439,51 +539,24 @@ void render_shop() {
                      .layoutDirection = CLAY_TOP_TO_BOTTOM},
           .backgroundColor = {30, 39, 46, 255}}) {
 
-      for (uint8_t i = 0; i < cvector_size(state.game.shop.items); i++) {
-        ShopItem *item = &state.game.shop.items[i];
-        Clay_String name;
+      CLAY({.id = CLAY_ID("ShopItems"),
+            .layout = {
+                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            }}) {}
+      render_spread_items(NAVIGATION_SHOP_ITEMS, CLAY_STRING("ShopItems"));
 
-        switch (item->type) {
-        case SHOP_ITEM_JOKER: {
-          name = (Clay_String){.chars = item->joker.name, .length = strlen(item->joker.name)};
-          break;
-        }
-        case SHOP_ITEM_CARD: {
-          name = get_full_card_name(item->card.suit, item->card.rank);
-          break;
-        }
-        case SHOP_ITEM_PLANET: {
-          name = (Clay_String){.chars = get_planet_card_name(item->planet),
-                               .length = strlen(get_planet_card_name(item->planet))};
-          break;
-        }
-        case SHOP_ITEM_BOOSTER_PACK: {
-          name = get_full_booster_pack_name(item->booster_pack.size, item->booster_pack.type);
-          break;
-        }
-        }
+      CLAY({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)}}}) {}
 
-        CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
-          Clay_Color text_color = state.navigation.section == NAVIGATION_SHOP && state.navigation.hovered == i
-                                      ? (Clay_Color){0, 255, 0, 255}
-                                      : (Clay_Color){255, 255, 255, 255};
-          CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
-
-          if (item->type == SHOP_ITEM_JOKER) {
-            Clay_String description = {.chars = item->joker.description, .length = strlen(item->joker.description)};
-            CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = text_color}));
-          }
-
-          Clay_String price;
-          append_clay_string(&price, "$%d", get_shop_item_price(item));
-          CLAY_TEXT(price, CLAY_TEXT_CONFIG({.textColor = text_color}));
-        }
-      }
+      CLAY({.id = CLAY_ID("ShopBoosterPacks"),
+            .layout = {
+                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            }}) {}
+      render_spread_items(NAVIGATION_SHOP_BOOSTER_PACKS, CLAY_STRING("ShopBoosterPacks"));
     }
   }
 }
 
-void render_booster_pack() {
+void render_booster_pack_content() {
   CLAY({.id = CLAY_ID("BoosterPack"),
         .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
                    .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},

@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
           render_game_over();
           break;
         case STAGE_BOOSTER_PACK:
-          render_booster_pack();
+          render_booster_pack_content();
           break;
         }
       }

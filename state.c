@@ -59,7 +59,7 @@ uint8_t get_nav_section_size() {
   case NAVIGATION_HAND:
     max_value = cvector_size(state.game.hand.cards);
     break;
-  case NAVIGATION_SHOP:
+  case NAVIGATION_SHOP_ITEMS:
     max_value = cvector_size(state.game.shop.items);
     break;
   case NAVIGATION_BOOSTER_PACK:
@@ -70,6 +70,10 @@ uint8_t get_nav_section_size() {
     break;
   case NAVIGATION_JOKERS:
     max_value = cvector_size(state.game.jokers.cards);
+    break;
+  case NAVIGATION_SHOP_BOOSTER_PACKS:
+    max_value = cvector_size(state.game.shop.booster_packs);
+    break;
   }
 
   return max_value;
@@ -130,7 +134,7 @@ void change_stage(Stage stage) {
     break;
 
   case STAGE_SHOP:
-    change_nav_section(NAVIGATION_SHOP);
+    change_nav_section(NAVIGATION_SHOP_ITEMS);
     break;
 
   case STAGE_BOOSTER_PACK:

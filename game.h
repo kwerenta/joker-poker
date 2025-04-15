@@ -139,7 +139,7 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_BOOSTER_PACK } ShopItemType;
+typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET } ShopItemType;
 
 typedef enum { BOOSTER_PACK_BUFFON, BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_STANDARD } BoosterPackType;
 
@@ -174,12 +174,13 @@ typedef struct {
     Joker joker;
     Card card;
     Planet planet;
-    BoosterPackItem booster_pack;
   };
 } ShopItem;
 
 typedef struct {
+  uint8_t size;
   cvector_vector_type(ShopItem) items;
+  cvector_vector_type(BoosterPackItem) booster_packs;
 } Shop;
 
 typedef struct {
@@ -242,8 +243,9 @@ void get_cash_out();
 
 void use_consumable(Consumable *consumable);
 uint8_t get_shop_item_price(ShopItem *item);
+uint8_t get_booster_pack_price(BoosterPackItem *booster_pack);
 void buy_shop_item();
-void open_booster_pack(BoosterPackItem booster_pack);
+void open_booster_pack(BoosterPackItem *booster_pack);
 void submit_booster_pack();
 void toggle_booster_pack_item_select();
 void restock_shop();
