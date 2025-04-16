@@ -1,10 +1,10 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include <clay.h>
 #include <pspctrl.h>
 
 #include "game.h"
-#include "lib/clay.h"
 #include "system.h"
 
 #define FRAME_ARENA_CAPACITY (5120)
@@ -44,6 +44,7 @@ typedef struct {
 void *frame_arena_allocate(size_t size);
 int append_clay_string(Clay_String *dest, const char *format, ...);
 
+uint8_t get_nav_section_size(NavigationSection section);
 void change_nav_section(NavigationSection section);
 
 void set_nav_hovered(uint8_t new_hovered);

@@ -1,8 +1,9 @@
 #ifndef TEXT_H
 #define TEXT_H
 
+#include <clay.h>
+
 #include "game.h"
-#include "lib/clay.h"
 
 char *get_poker_hand_name(uint16_t hand_union);
 char *get_planet_card_name(Planet planet);

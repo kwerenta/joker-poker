@@ -17,6 +17,14 @@
 #define SIDEBAR_WIDTH (100)
 #define SIDEBAR_GAP (4)
 
+#define COLOR_WHITE (Clay_Color){255, 255, 255, 255}
+#define COLOR_MULT (Clay_Color){255, 63, 52, 255}
+#define COLOR_CHIPS (Clay_Color){15, 188, 249, 255}
+#define COLOR_MONEY (Clay_Color){255, 168, 1, 255}
+#define COLOR_CARD_BG (Clay_Color){30, 39, 46, 255}
+
+#define WHITE_TEXT_CONFIG CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE})
+
 void render_card(Card *card, Rect *dst);
 void render_joker(Joker *joker, Rect *dst);
 void render_consumable(Consumable *consumable, Rect *dst);

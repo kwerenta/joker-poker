@@ -1,16 +1,17 @@
+#include "gfx.h"
+
+#include <cvector.h>
 #include <math.h>
 #include <pspgu.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "debug.h"
 #include "game.h"
-#include "gfx.h"
-#include "lib/cvector.h"
 #include "renderer.h"
 #include "state.h"
 #include "system.h"
 #include "text.h"
+#include "utils.h"
 
 void render_card(Card *card, Rect *dst) {
   Rect background = {.x = 9 * CARD_WIDTH, .y = 7 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
@@ -25,8 +26,7 @@ void render_card(Card *card, Rect *dst) {
                .y = (2 * card->suit + floor(card->rank / 10.0)) * CARD_HEIGHT,
                .w = CARD_WIDTH,
                .h = CARD_HEIGHT};
-  if (card->enhancement != ENHANCEMENT_STONE)
-    draw_texture(state.cards_atlas, &face, dst);
+  if (card->enhancement != ENHANCEMENT_STONE) draw_texture(state.cards_atlas, &face, dst);
 
   if (card->edition != EDITION_BASE) {
     Rect edition = {.x = (5 + card->edition - 1) * CARD_WIDTH, .y = 3 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
@@ -36,8 +36,7 @@ void render_card(Card *card, Rect *dst) {
 
 void render_joker(Joker *joker, Rect *dst) {
   Rect src = {.x = 9 * CARD_WIDTH, .y = CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-  if (joker->id == 6)
-    src.y += 2 * CARD_HEIGHT;
+  if (joker->id == 6) src.y += 2 * CARD_HEIGHT;
 
   draw_texture(state.cards_atlas, &src, dst);
 }
@@ -53,81 +52,14 @@ void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
 }
 
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
-  size_t item_count = 0;
-  switch (section) {
-  case NAVIGATION_HAND:
-    item_count = cvector_size(state.game.hand.cards);
-    break;
-
-  case NAVIGATION_CONSUMABLES:
-    item_count = cvector_size(state.game.consumables.items);
-    break;
-
-  case NAVIGATION_JOKERS:
-    item_count = cvector_size(state.game.jokers.cards);
-    break;
-
-  case NAVIGATION_SHOP_ITEMS:
-    item_count = cvector_size(state.game.shop.items);
-    break;
-
-  case NAVIGATION_SHOP_BOOSTER_PACKS:
-    item_count = cvector_size(state.game.shop.booster_packs);
-    break;
-
-  default:
-    log_message(LOG_WARNING, "Tried to render incompatible section in render_aligned_items function");
-    return;
-  }
-  if (item_count == 0)
-    return;
-
+  size_t item_count = get_nav_section_size(section);
+  if (item_count == 0) return;
   size_t items_width = item_count * CARD_WIDTH;
 
   for (uint8_t i = 0; i < item_count; i++) {
     float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width;
-
     CustomElementData *element = frame_arena_allocate(sizeof(CustomElementData));
-
-    switch (section) {
-    case NAVIGATION_HAND:
-      *element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = state.game.hand.cards[i]};
-      break;
-
-    case NAVIGATION_CONSUMABLES:
-      *element = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = state.game.consumables.items[i]};
-      break;
-
-    case NAVIGATION_JOKERS:
-      *element = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = state.game.jokers.cards[i]};
-      break;
-
-    case NAVIGATION_SHOP_ITEMS: {
-      ShopItem *item = &state.game.shop.items[i];
-
-      switch (item->type) {
-      case SHOP_ITEM_CARD:
-        *element = (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
-        break;
-      case SHOP_ITEM_PLANET:
-        *element = (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
-                                       .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
-        break;
-      case SHOP_ITEM_JOKER:
-        *element = (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
-        break;
-      }
-      break;
-    }
-
-    case NAVIGATION_SHOP_BOOSTER_PACKS:
-      *element =
-          (CustomElementData){.type = CUSTOM_ELEMENT_BOOSTER_PACK, .booster_pack = state.game.shop.booster_packs[i]};
-      break;
-
-    default:
-      return;
-    }
+    *element = create_spread_item_element(section, i);
 
     float x_offset = 0;
     if (item_count == 1)
@@ -138,8 +70,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
       x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
 
     float y_offset = 0;
-    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1)
-      y_offset = -40;
+    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
 
     uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
 
@@ -155,11 +86,9 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
 
       CLAY({.custom = {.customData = element},
             .layout = {
-                .sizing = {.width = CLAY_SIZING_FIXED(scale * CARD_WIDTH),
-                           .height = CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
+                .sizing = {CLAY_SIZING_FIXED(scale * CARD_WIDTH), CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {
-        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS)
-          continue;
+        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS) continue;
 
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
@@ -167,8 +96,8 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
                            .zIndex = 4,
                            .attachPoints = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM}}}) {
-          CLAY({.backgroundColor = {30, 39, 46, 255},
-                .border = {.color = {255, 168, 1, 255}, .width = CLAY_BORDER_ALL(1)},
+          CLAY({.backgroundColor = COLOR_CARD_BG,
+                .border = {.color = COLOR_MONEY, .width = CLAY_BORDER_ALL(1)},
                 .layout = {
                     .padding = CLAY_PADDING_ALL(4),
                 }}) {
@@ -177,94 +106,25 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
                                section == NAVIGATION_SHOP_BOOSTER_PACKS
                                    ? get_booster_pack_price(&state.game.shop.booster_packs[i])
                                    : get_shop_item_price(&state.game.shop.items[i]));
-            CLAY_TEXT(price, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+            CLAY_TEXT(price, WHITE_TEXT_CONFIG);
           }
         }
       }
     }
   }
 
-  if (state.navigation.section != section)
-    return;
+  if (state.navigation.section != section) return;
 
   Clay_String name;
   Clay_String description;
-  uint8_t is_above = 0;
+  get_nav_item_tooltip_content(&name, &description, section);
 
+  float y_offset = 4;
   Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM,
                                              .element = CLAY_ATTACH_POINT_CENTER_TOP};
-  switch (section) {
-  case NAVIGATION_HAND: {
-    Card *card = &state.game.hand.cards[state.navigation.hovered];
-    name = get_full_card_name(card->suit, card->rank);
-    append_clay_string(&description, "+%d chips", card->chips);
-    is_above = 1;
-    break;
-  }
 
-  case NAVIGATION_JOKERS: {
-    Joker *joker = &state.game.jokers.cards[state.navigation.hovered];
-    name = (Clay_String){.chars = joker->name, .length = strlen(joker->name)};
-    description = (Clay_String){.chars = joker->description, .length = strlen(joker->description)};
-    break;
-  }
-
-  case NAVIGATION_CONSUMABLES: {
-    Consumable *consumable = &state.game.consumables.items[state.navigation.hovered];
-    switch (consumable->type) {
-    case CONSUMABLE_PLANET:
-      name = (Clay_String){.chars = get_planet_card_name(consumable->planet),
-                           .length = strlen(get_planet_card_name(consumable->planet))};
-      uint16_t hand_union = 1 << consumable->planet;
-      PokerHandScoring upgrade = get_planet_card_base_scoring(hand_union);
-      append_clay_string(&description, "%s (+%u chips, +%0.lf mult)", get_poker_hand_name(hand_union), upgrade.chips,
-                         upgrade.mult);
-      break;
-    }
-    break;
-  }
-
-  case NAVIGATION_SHOP_ITEMS: {
-    ShopItem *item = &state.game.shop.items[state.navigation.hovered];
-    switch (item->type) {
-    case SHOP_ITEM_CARD:
-      name = get_full_card_name(item->card.suit, item->card.rank);
-      append_clay_string(&description, "+%d chips", item->card.chips);
-      break;
-
-    case SHOP_ITEM_JOKER:
-      name = (Clay_String){.chars = item->joker.name, .length = strlen(item->joker.name)};
-      description = (Clay_String){.chars = item->joker.description, .length = strlen(item->joker.description)};
-      break;
-
-    case SHOP_ITEM_PLANET:
-      name = (Clay_String){.chars = get_planet_card_name(item->planet),
-                           .length = strlen(get_planet_card_name(item->planet))};
-      uint16_t hand_union = 1 << item->planet;
-      PokerHandScoring upgrade = get_planet_card_base_scoring(hand_union);
-      append_clay_string(&description, "%s (+%u chips, +%0.lf mult)", get_poker_hand_name(hand_union), upgrade.chips,
-                         upgrade.mult);
-      break;
-    }
-
-    is_above = 1;
-    break;
-  }
-
-  case NAVIGATION_SHOP_BOOSTER_PACKS: {
-    BoosterPackItem *booster_pack = &state.game.shop.booster_packs[state.navigation.hovered];
-    name = get_full_booster_pack_name(booster_pack->size, booster_pack->type);
-    append_clay_string(&description, "Choose up to %d from %d", booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1,
-                       booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5);
-    is_above = 1;
-    break;
-  }
-
-  default:
-    return;
-  }
-
-  if (is_above == 1) {
+  if (section == NAVIGATION_HAND || section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS) {
+    y_offset *= -1;
     attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
     attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
   }
@@ -274,18 +134,18 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
             .parentId = CLAY_SIDI(parent_id, state.navigation.hovered + 1).id,
             .zIndex = 3,
-            .offset = {.y = 4 * (is_above == 1 ? -1 : 1)},
+            .offset = {.y = y_offset},
             .attachPoints = attach_points,
         }}) {
-    CLAY({.backgroundColor = {30, 39, 46, 255},
+    CLAY({.backgroundColor = COLOR_CARD_BG,
           .layout = {
               .padding = CLAY_PADDING_ALL(4),
               .childGap = 2,
-              .sizing = {.width = CLAY_SIZING_GROW(0, 100), .height = CLAY_SIZING_GROW(0)},
+              .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
               .layoutDirection = CLAY_TOP_TO_BOTTOM,
           }}) {
-      CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
-      CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+      CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(description, WHITE_TEXT_CONFIG);
     }
   }
 }
@@ -295,30 +155,30 @@ void render_hand() {
 
   CLAY({.id = CLAY_ID("Game"),
         .layout = {
-            .sizing = {.width = CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
             .padding = {.bottom = 8},
             .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_BOTTOM},
         }}) {
     CLAY({.id = CLAY_ID("Bottom"),
           .layout = {
-              .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
               .childGap = 8,
               .layoutDirection = CLAY_LEFT_TO_RIGHT,
           }}) {
       CLAY({.id = CLAY_ID("Hand"),
             .layout = {
-                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
             }}) {}
 
       CLAY({
           .id = CLAY_ID_LOCAL("Deck"),
-          .layout = {.sizing = {.width = CLAY_SIZING_FIXED(CARD_WIDTH), .height = CLAY_SIZING_GROW(0)},
+          .layout = {.sizing = {CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_GROW(0)},
                      .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_BOTTOM}},
       }) {
         Clay_String deck;
         append_clay_string(&deck, "Deck %zu/%zu", cvector_size(state.game.deck), cvector_size(state.game.full_deck));
 
-        CLAY_TEXT(deck, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}, .textAlignment = CLAY_TEXT_ALIGN_CENTER}));
+        CLAY_TEXT(deck, CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .textAlignment = CLAY_TEXT_ALIGN_CENTER}));
       }
     }
   }
@@ -329,13 +189,13 @@ void render_hand() {
 void render_topbar() {
   CLAY({.id = CLAY_ID("Topbar"),
         .layout = {
-            .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
             .childGap = 4,
         }}) {
     CLAY({.id = CLAY_ID("Jokers"),
-          .backgroundColor = {30, 39, 46, 255},
+          .backgroundColor = COLOR_CARD_BG,
           .layout = {
-              .sizing = {.width = CLAY_SIZING_PERCENT(0.7), .height = CLAY_SIZING_GROW(0)},
+              .sizing = {CLAY_SIZING_PERCENT(0.7), CLAY_SIZING_GROW(0)},
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
@@ -347,14 +207,14 @@ void render_topbar() {
         Clay_String size;
         append_clay_string(&size, "%d/%d", cvector_size(state.game.jokers.cards), state.game.jokers.size);
 
-        CLAY_TEXT(size, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+        CLAY_TEXT(size, WHITE_TEXT_CONFIG);
       }
     }
 
     CLAY({.id = CLAY_ID("Consumables"),
-          .backgroundColor = {30, 39, 46, 255},
+          .backgroundColor = COLOR_CARD_BG,
           .layout = {
-              .sizing = {.width = CLAY_SIZING_PERCENT(0.3), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .sizing = {CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_FIXED(CARD_HEIGHT)},
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
@@ -366,7 +226,7 @@ void render_topbar() {
         Clay_String size;
         append_clay_string(&size, "%d/%d", cvector_size(state.game.consumables.items), state.game.consumables.size);
 
-        CLAY_TEXT(size, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+        CLAY_TEXT(size, WHITE_TEXT_CONFIG);
       }
     }
   }
@@ -375,40 +235,37 @@ void render_topbar() {
   render_spread_items(NAVIGATION_CONSUMABLES, CLAY_STRING("Consumables"));
 }
 
-const Clay_ElementDeclaration sidebar_block = {
+const Clay_ElementDeclaration sidebar_block_config = {
     .backgroundColor = {72, 84, 96, 255},
-    .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)},
+    .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
                .padding = {.top = SIDEBAR_GAP, .left = SIDEBAR_GAP, .right = SIDEBAR_GAP, .bottom = SIDEBAR_GAP},
                .layoutDirection = CLAY_TOP_TO_BOTTOM,
                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}};
 
 void render_sidebar() {
-  Clay_Color color_white = {255, 255, 255, 255};
-
   CLAY({.id = CLAY_ID("Sidebar"),
-        .layout = {.sizing = {.width = CLAY_SIZING_FIXED(SIDEBAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
+        .layout = {.sizing = {CLAY_SIZING_FIXED(SIDEBAR_WIDTH), CLAY_SIZING_GROW(0)},
                    .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                    .layoutDirection = CLAY_TOP_TO_BOTTOM,
                    .childGap = SIDEBAR_GAP},
-        .backgroundColor = {30, 39, 46, 255}}) {
-
+        .backgroundColor = COLOR_CARD_BG}) {
     CLAY({.id = CLAY_ID("Stage"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+          .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = {255, 168, 1, 255}}) {
+          .backgroundColor = COLOR_MONEY}) {
       Clay_String stage;
       if (state.stage == STAGE_GAME)
         append_clay_string(&stage, "Blind %d", state.game.blind + 1);
       else
         append_clay_string(&stage, "SHOP");
 
-      CLAY_TEXT(stage, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(stage, WHITE_TEXT_CONFIG);
     }
 
-    CLAY(sidebar_block) {
+    CLAY(sidebar_block_config) {
       CLAY_TEXT(CLAY_STRING("Score at least:"),
-                CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
+                CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
       Clay_String required_score;
       append_clay_string(&required_score, "%.0lf", get_required_score(state.game.ante, state.game.blind));
 
@@ -416,19 +273,19 @@ void render_sidebar() {
     }
 
     CLAY({.id = CLAY_ID("Score"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)},
+          .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
                      .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
                      .childGap = SIDEBAR_GAP},
-          .backgroundColor = sidebar_block.backgroundColor}) {
+          .backgroundColor = sidebar_block_config.backgroundColor}) {
       CLAY({.id = CLAY_ID_LOCAL("RoundScore"),
-            .layout = {.sizing = {.width = CLAY_SIZING_FIXED(5 * CHAR_WIDTH), .height = CLAY_SIZING_GROW(0)},
+            .layout = {.sizing = {CLAY_SIZING_FIXED(5 * CHAR_WIDTH), CLAY_SIZING_GROW(0)},
                        .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}}}) {
-        CLAY_TEXT(CLAY_STRING("Round score"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+        CLAY_TEXT(CLAY_STRING("Round score"), WHITE_TEXT_CONFIG);
       }
 
       CLAY({.id = CLAY_ID_LOCAL("ScoreValue"),
-            .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+            .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                        .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
         Clay_String score;
         append_clay_string(&score, "%.0lf", state.game.score);
@@ -437,7 +294,7 @@ void render_sidebar() {
       }
     }
 
-    Clay_ElementDeclaration sidebar_block_gap = sidebar_block;
+    Clay_ElementDeclaration sidebar_block_gap = sidebar_block_config;
     sidebar_block_gap.layout.childGap = SIDEBAR_GAP;
 
     CLAY(sidebar_block_gap) {
@@ -446,153 +303,142 @@ void render_sidebar() {
         append_clay_string(&hand, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
                            state.game.poker_hands[ffs(state.game.selected_hand.hand_union) - 1] + 1);
       CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
-                CLAY_TEXT_CONFIG({.textColor = color_white, .wrapMode = CLAY_TEXT_WRAP_NONE}));
+                CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
 
       CLAY({.id = CLAY_ID_LOCAL("Score"),
-            .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+            .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                        .childGap = SIDEBAR_GAP,
                        .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
-
         CLAY({.id = CLAY_ID_LOCAL("Chips"),
-              .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                          .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                          .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_CENTER}},
-              .backgroundColor = {15, 188, 249, 255}}) {
+              .backgroundColor = COLOR_CHIPS}) {
           Clay_String chips;
-          append_clay_string(&chips, "%d", state.game.selected_hand.scoring.chips);
+          append_clay_string(&chips, "%d", state.game.selected_hand.score_pair.chips);
 
-          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips,
-                    CLAY_TEXT_CONFIG({.textColor = color_white}));
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips, WHITE_TEXT_CONFIG);
         }
 
-        CLAY_TEXT(CLAY_STRING("x"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+        CLAY_TEXT(CLAY_STRING("x"), WHITE_TEXT_CONFIG);
 
         CLAY({.id = CLAY_ID_LOCAL("Mult"),
-              .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                          .padding = CLAY_PADDING_ALL(SIDEBAR_GAP),
                          .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER}},
-              .backgroundColor = {255, 63, 52, 255}}) {
+              .backgroundColor = COLOR_MULT}) {
           Clay_String mult;
-          append_clay_string(&mult, "%0.lf", state.game.selected_hand.scoring.mult);
+          append_clay_string(&mult, "%0.lf", state.game.selected_hand.score_pair.mult);
 
-          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult,
-                    CLAY_TEXT_CONFIG({.textColor = color_white}));
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult, WHITE_TEXT_CONFIG);
         }
       }
     }
 
-    CLAY(sidebar_block) {
-      CLAY_TEXT(CLAY_STRING("Hands"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY(sidebar_block_config) {
+      CLAY_TEXT(CLAY_STRING("Hands"), WHITE_TEXT_CONFIG);
 
       Clay_String hands;
       append_clay_string(&hands, "%d", state.game.hands);
-      CLAY_TEXT(hands, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(hands, WHITE_TEXT_CONFIG);
     }
 
-    CLAY(sidebar_block) {
-      CLAY_TEXT(CLAY_STRING("Discards"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY(sidebar_block_config) {
+      CLAY_TEXT(CLAY_STRING("Discards"), WHITE_TEXT_CONFIG);
 
       Clay_String discards;
       append_clay_string(&discards, "%d", state.game.discards);
-      CLAY_TEXT(discards, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(discards, WHITE_TEXT_CONFIG);
     }
 
-    CLAY(sidebar_block) {
-      CLAY_TEXT(CLAY_STRING("Money"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY(sidebar_block_config) {
+      CLAY_TEXT(CLAY_STRING("Money"), WHITE_TEXT_CONFIG);
 
       Clay_String money;
       append_clay_string(&money, "$%d", state.game.money);
-      CLAY_TEXT(money, CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY_TEXT(money, WHITE_TEXT_CONFIG);
     }
 
-    CLAY(
-        {.id = CLAY_ID("RoundInfo"),
-         .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)}, .childGap = SIDEBAR_GAP}}) {
-      CLAY(sidebar_block) {
-        CLAY_TEXT(CLAY_STRING("Ante"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+    CLAY({.id = CLAY_ID("RoundInfo"),
+          .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)}, .childGap = SIDEBAR_GAP}}) {
+      CLAY(sidebar_block_config) {
+        CLAY_TEXT(CLAY_STRING("Ante"), WHITE_TEXT_CONFIG);
 
         Clay_String ante;
         append_clay_string(&ante, "%d/8", state.game.ante);
-        CLAY_TEXT(ante, CLAY_TEXT_CONFIG({.textColor = color_white}));
+        CLAY_TEXT(ante, WHITE_TEXT_CONFIG);
       }
 
-      CLAY(sidebar_block) {
-        CLAY_TEXT(CLAY_STRING("Round"), CLAY_TEXT_CONFIG({.textColor = color_white}));
+      CLAY(sidebar_block_config) {
+        CLAY_TEXT(CLAY_STRING("Round"), WHITE_TEXT_CONFIG);
 
         Clay_String round;
         append_clay_string(&round, "%d", state.game.round);
-        CLAY_TEXT(round, CLAY_TEXT_CONFIG({.textColor = color_white}));
+        CLAY_TEXT(round, WHITE_TEXT_CONFIG);
       }
     }
   };
 }
 
-void render_shop() {
-  CLAY({.id = CLAY_ID("Shop"),
-        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
-                   .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0}}}) {
-    CLAY({.id = CLAY_ID("ShopContent"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                     .padding = CLAY_PADDING_ALL(16),
-                     .childGap = 8,
-                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
-          .backgroundColor = {30, 39, 46, 255}}) {
+Clay_ElementDeclaration card_element_config(Clay_ElementId id) {
+  return (Clay_ElementDeclaration){.id = id,
+                                   .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                                              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+                                              .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0}}};
+};
 
-      CLAY({.id = CLAY_ID("ShopItems"),
-            .layout = {
-                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
-            }}) {}
+Clay_ElementDeclaration card_content_config() {
+  return (Clay_ElementDeclaration){.id = CLAY_ID_LOCAL("Content"),
+                                   .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                                              .padding = CLAY_PADDING_ALL(16),
+                                              .childGap = 8,
+                                              .layoutDirection = CLAY_TOP_TO_BOTTOM},
+                                   .backgroundColor = COLOR_CARD_BG};
+}
+
+void render_shop() {
+  CLAY(card_element_config(CLAY_ID("Shop"))) {
+    CLAY(card_content_config()) {
+      CLAY({.id = CLAY_ID("ShopItems"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
       render_spread_items(NAVIGATION_SHOP_ITEMS, CLAY_STRING("ShopItems"));
 
-      CLAY({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)}}}) {}
+      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {}
 
       CLAY({.id = CLAY_ID("ShopBoosterPacks"),
-            .layout = {
-                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(CARD_HEIGHT)},
-            }}) {}
+            .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
       render_spread_items(NAVIGATION_SHOP_BOOSTER_PACKS, CLAY_STRING("ShopBoosterPacks"));
     }
   }
 }
 
 void render_booster_pack_content() {
-  CLAY({.id = CLAY_ID("BoosterPack"),
-        .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
-                   .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0}}}) {
-    CLAY({.id = CLAY_ID("ShopContent"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                     .padding = CLAY_PADDING_ALL(16),
-                     .childGap = 8,
-                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
-          .backgroundColor = {30, 39, 46, 255}}) {
-
+  CLAY(card_element_config(CLAY_ID("BoosterPack"))) {
+    CLAY(card_content_config()) {
       for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
         BoosterPackContent item = state.game.booster_pack.content[i];
         Clay_String name;
 
         switch (state.game.booster_pack.item.type) {
-        case BOOSTER_PACK_STANDARD: {
-          name = get_full_card_name(item.card.suit, item.card.rank);
-          break;
-        }
-        case BOOSTER_PACK_CELESTIAL: {
-          name = (Clay_String){.chars = get_planet_card_name(item.planet),
-                               .length = strlen(get_planet_card_name(item.planet))};
-          break;
-        }
-        case BOOSTER_PACK_BUFFON: {
-          name = (Clay_String){.chars = item.joker.name, .length = strlen(item.joker.name)};
-          break;
-        }
+          case BOOSTER_PACK_STANDARD: {
+            name = get_full_card_name(item.card.suit, item.card.rank);
+            break;
+          }
+          case BOOSTER_PACK_CELESTIAL: {
+            name = (Clay_String){.chars = get_planet_card_name(item.planet),
+                                 .length = strlen(get_planet_card_name(item.planet))};
+            break;
+          }
+          case BOOSTER_PACK_BUFFON: {
+            name = (Clay_String){.chars = item.joker.name, .length = strlen(item.joker.name)};
+            break;
+          }
         }
 
         CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
           Clay_Color text_color = state.navigation.section == NAVIGATION_BOOSTER_PACK && state.navigation.hovered == i
                                       ? (Clay_Color){0, 255, 0, 255}
                                   : item.selected == 1 ? (Clay_Color){0, 0, 255, 255}
-                                                       : (Clay_Color){255, 255, 255, 255};
+                                                       : COLOR_WHITE;
           CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
 
           if (state.game.booster_pack.item.type == BOOSTER_PACK_BUFFON) {
@@ -606,51 +452,40 @@ void render_booster_pack_content() {
 }
 
 void render_cash_out() {
-  CLAY({.id = CLAY_ID("Cashout"),
-        .layout = {
-            .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
-            .padding = {.top = 16, .left = 16, .right = 16, .bottom = 0},
-        }}) {
-    CLAY({.id = CLAY_ID("CashoutContent"),
-          .layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0)},
-                     .padding = CLAY_PADDING_ALL(16),
-                     .childGap = 8,
-                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
-          .backgroundColor = {30, 39, 46, 255}}) {
+  CLAY(card_element_config(CLAY_ID("Cashout"))) {
+    CLAY(card_content_config()) {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
       uint8_t blind = get_blind_money(state.game.blind);
 
       CLAY({.layout = {
-                .sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIT(0)},
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
                 .childAlignment = {CLAY_ALIGN_X_CENTER},
             }}) {
         Clay_String cash_out_text;
         append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + blind);
-        CLAY_TEXT(cash_out_text, CLAY_TEXT_CONFIG({.textColor = {255, 168, 1, 255}}));
+        CLAY_TEXT(cash_out_text, CLAY_TEXT_CONFIG({.textColor = COLOR_MONEY}));
       }
 
-      CLAY({.layout = {.sizing = {.width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(1)}},
-            .backgroundColor = {200, 200, 200, 255}}) {}
+      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(1)}}, .backgroundColor = COLOR_WHITE}) {}
 
       CLAY({.layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
         if (blind != 0) {
           Clay_String blind_money;
           append_clay_string(&blind_money, "Blind: $%d", get_blind_money(state.game.blind));
-          CLAY_TEXT(blind_money, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+          CLAY_TEXT(blind_money, WHITE_TEXT_CONFIG);
         }
 
         if (hands != 0) {
           Clay_String hands_money;
           append_clay_string(&hands_money, "Hands: $%d", get_hands_money());
-          CLAY_TEXT(hands_money, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+          CLAY_TEXT(hands_money, WHITE_TEXT_CONFIG);
         }
 
         if (interest != 0) {
           Clay_String interest_money;
           append_clay_string(&interest_money, "Interest: $%d", get_interest_money());
-          CLAY_TEXT(interest_money, CLAY_TEXT_CONFIG({.textColor = {255, 255, 255, 255}}));
+          CLAY_TEXT(interest_money, WHITE_TEXT_CONFIG);
         }
       }
     }

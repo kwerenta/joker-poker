@@ -1,20 +1,19 @@
-#include <time.h>
-
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <pspgu.h>
 #include <pspkernel.h>
+#include <time.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #define CLAY_IMPLEMENTATION
-#include "lib/clay.h"
-#include "renderer.h"
+#include <clay.h>
 
 #include "debug.h"
 #include "game.h"
 #include "gfx.h"
+#include "renderer.h"
 #include "state.h"
 #include "system.h"
 
@@ -84,9 +83,7 @@ int main(int argc, char *argv[]) {
     Clay_BeginLayout();
 
     CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
-
-      if (state.stage != STAGE_GAME_OVER)
-        render_sidebar();
+      if (state.stage != STAGE_GAME_OVER) render_sidebar();
 
       CLAY({.id = CLAY_ID("Content"),
             .layout = {
@@ -94,25 +91,24 @@ int main(int argc, char *argv[]) {
                 .layoutDirection = CLAY_TOP_TO_BOTTOM,
                 .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
             }}) {
-        if (state.stage != STAGE_GAME_OVER)
-          render_topbar();
+        if (state.stage != STAGE_GAME_OVER) render_topbar();
 
         switch (state.stage) {
-        case STAGE_GAME:
-          render_hand();
-          break;
-        case STAGE_CASH_OUT:
-          render_cash_out();
-          break;
-        case STAGE_SHOP:
-          render_shop();
-          break;
-        case STAGE_GAME_OVER:
-          render_game_over();
-          break;
-        case STAGE_BOOSTER_PACK:
-          render_booster_pack_content();
-          break;
+          case STAGE_GAME:
+            render_hand();
+            break;
+          case STAGE_CASH_OUT:
+            render_cash_out();
+            break;
+          case STAGE_SHOP:
+            render_shop();
+            break;
+          case STAGE_GAME_OVER:
+            render_game_over();
+            break;
+          case STAGE_BOOSTER_PACK:
+            render_booster_pack_content();
+            break;
         }
       }
     }

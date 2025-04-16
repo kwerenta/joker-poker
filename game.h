@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "lib/cvector.h"
+#include <cvector.h>
 #include <stdint.h>
 
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
@@ -71,7 +71,7 @@ typedef enum {
 typedef struct {
   double mult;
   uint32_t chips;
-} PokerHandScoring;
+} ScorePair;
 
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
 
@@ -135,7 +135,7 @@ typedef struct {
 typedef struct {
   uint8_t count;
   uint16_t hand_union;
-  PokerHandScoring scoring;
+  ScorePair score_pair;
   Card *scoring_cards[5];
 } SelectedHand;
 
@@ -229,9 +229,9 @@ PokerHand get_poker_hand(uint16_t hand_union);
 void update_scoring_hand();
 void update_scoring_edition(Edition edition);
 
-PokerHandScoring get_poker_hand_base_scoring(uint16_t hand_union);
-PokerHandScoring get_planet_card_base_scoring(uint16_t hand_union);
-PokerHandScoring get_poker_hand_total_scoring(uint16_t hand_union);
+ScorePair get_poker_hand_base_score(uint16_t hand_union);
+ScorePair get_planet_card_base_score(uint16_t hand_union);
+ScorePair get_poker_hand_total_score(uint16_t hand_union);
 double get_ante_base_score(uint8_t ante);
 double get_required_score(uint8_t ante, uint8_t blind);
 

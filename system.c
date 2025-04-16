@@ -1,3 +1,5 @@
+#include "system.h"
+
 #include <math.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
@@ -9,7 +11,6 @@
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
-#include "system.h"
 
 void draw_rectangle(Rect *rect, uint32_t color) {
   Vertex *vertices = (Vertex *)sceGuGetMemory(2 * sizeof(Vertex));
@@ -114,18 +115,18 @@ Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32
       yOffest = 7;
     } else {
       switch (*text) {
-      case '[':
-        xOffset = 0;
-        break;
-      case ']':
-        xOffset = 1;
-        break;
-      case '{':
-        xOffset = 2;
-        break;
-      case '}':
-        xOffset = 3;
-        break;
+        case '[':
+          xOffset = 0;
+          break;
+        case ']':
+          xOffset = 1;
+          break;
+        case '{':
+          xOffset = 2;
+          break;
+        case '}':
+          xOffset = 3;
+          break;
       }
       yOffest = 8;
     }
@@ -150,95 +151,92 @@ void handle_controls() {
   sceCtrlReadBufferPositive(&controls->data, 1);
 
   switch (state.stage) {
-  case STAGE_GAME:
-    if (button_pressed(PSP_CTRL_RIGHT)) {
-      set_nav_hovered(state.navigation.hovered + 1);
-    } else if (button_pressed(PSP_CTRL_LEFT)) {
-      set_nav_hovered(state.navigation.hovered - 1);
-    } else if (button_pressed(PSP_CTRL_CROSS)) {
-      if (state.navigation.section == NAVIGATION_CONSUMABLES)
-        use_consumable(NULL);
-      else if (state.navigation.section == NAVIGATION_HAND)
-        toggle_card_select(state.navigation.hovered);
-    } else if (button_pressed(PSP_CTRL_SQUARE)) {
-      play_hand();
-    } else if (button_pressed(PSP_CTRL_CIRCLE)) {
-      deselect_all_cards();
-    } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
-      discard_hand();
-    } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-      move_nav_hovered(state.navigation.hovered - 1);
-    } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-      move_nav_hovered(state.navigation.hovered + 1);
-    } else if (button_pressed(PSP_CTRL_UP)) {
-      sort_hand(0);
-    } else if (button_pressed(PSP_CTRL_DOWN)) {
-      sort_hand(1);
-    } else if (button_pressed(PSP_CTRL_SELECT)) {
-      switch (state.navigation.section) {
-      case NAVIGATION_HAND:
-        change_nav_section(NAVIGATION_JOKERS);
-        break;
-      case NAVIGATION_JOKERS:
-        change_nav_section(NAVIGATION_CONSUMABLES);
-        break;
-      case NAVIGATION_CONSUMABLES:
-        change_nav_section(NAVIGATION_HAND);
-        break;
+    case STAGE_GAME:
+      if (button_pressed(PSP_CTRL_RIGHT)) {
+        set_nav_hovered(state.navigation.hovered + 1);
+      } else if (button_pressed(PSP_CTRL_LEFT)) {
+        set_nav_hovered(state.navigation.hovered - 1);
+      } else if (button_pressed(PSP_CTRL_CROSS)) {
+        if (state.navigation.section == NAVIGATION_CONSUMABLES)
+          use_consumable(NULL);
+        else if (state.navigation.section == NAVIGATION_HAND)
+          toggle_card_select(state.navigation.hovered);
+      } else if (button_pressed(PSP_CTRL_SQUARE)) {
+        play_hand();
+      } else if (button_pressed(PSP_CTRL_CIRCLE)) {
+        deselect_all_cards();
+      } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
+        discard_hand();
+      } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+        move_nav_hovered(state.navigation.hovered - 1);
+      } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+        move_nav_hovered(state.navigation.hovered + 1);
+      } else if (button_pressed(PSP_CTRL_UP)) {
+        sort_hand(0);
+      } else if (button_pressed(PSP_CTRL_DOWN)) {
+        sort_hand(1);
+      } else if (button_pressed(PSP_CTRL_SELECT)) {
+        switch (state.navigation.section) {
+          case NAVIGATION_HAND:
+            change_nav_section(NAVIGATION_JOKERS);
+            break;
+          case NAVIGATION_JOKERS:
+            change_nav_section(NAVIGATION_CONSUMABLES);
+            break;
+          case NAVIGATION_CONSUMABLES:
+            change_nav_section(NAVIGATION_HAND);
+            break;
 
-      default:
-        break;
+          default:
+            break;
+        }
       }
-    }
 
-    break;
+      break;
 
-  case STAGE_CASH_OUT:
-    if (button_pressed(PSP_CTRL_CROSS))
-      get_cash_out();
-    break;
+    case STAGE_CASH_OUT:
+      if (button_pressed(PSP_CTRL_CROSS)) get_cash_out();
+      break;
 
-  case STAGE_SHOP:
-    if (button_pressed(PSP_CTRL_CIRCLE)) {
-      exit_shop();
-    } else if (button_pressed(PSP_CTRL_UP)) {
-      if (state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS)
-        change_nav_section(NAVIGATION_SHOP_ITEMS);
-    } else if (button_pressed(PSP_CTRL_DOWN)) {
-      if (state.navigation.section == NAVIGATION_SHOP_ITEMS)
-        change_nav_section(NAVIGATION_SHOP_BOOSTER_PACKS);
-    } else if (button_pressed(PSP_CTRL_LEFT)) {
-      set_nav_hovered(state.navigation.hovered - 1);
-    } else if (button_pressed(PSP_CTRL_RIGHT)) {
-      set_nav_hovered(state.navigation.hovered + 1);
-    } else if (button_pressed(PSP_CTRL_CROSS)) {
-      buy_shop_item();
-    }
+    case STAGE_SHOP:
+      if (button_pressed(PSP_CTRL_CIRCLE)) {
+        exit_shop();
+      } else if (button_pressed(PSP_CTRL_UP)) {
+        if (state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS) change_nav_section(NAVIGATION_SHOP_ITEMS);
+      } else if (button_pressed(PSP_CTRL_DOWN)) {
+        if (state.navigation.section == NAVIGATION_SHOP_ITEMS) change_nav_section(NAVIGATION_SHOP_BOOSTER_PACKS);
+      } else if (button_pressed(PSP_CTRL_LEFT)) {
+        set_nav_hovered(state.navigation.hovered - 1);
+      } else if (button_pressed(PSP_CTRL_RIGHT)) {
+        set_nav_hovered(state.navigation.hovered + 1);
+      } else if (button_pressed(PSP_CTRL_CROSS)) {
+        buy_shop_item();
+      }
 
-    break;
+      break;
 
-  case STAGE_BOOSTER_PACK:
-    if (button_pressed(PSP_CTRL_CIRCLE)) {
-      state.stage = STAGE_SHOP;
-    } else if (button_pressed(PSP_CTRL_UP)) {
-      set_nav_hovered(state.navigation.hovered - 1);
-    } else if (button_pressed(PSP_CTRL_DOWN)) {
-      set_nav_hovered(state.navigation.hovered + 1);
-    } else if (button_pressed(PSP_CTRL_CROSS)) {
-      toggle_booster_pack_item_select();
-    } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
-      submit_booster_pack();
-    }
+    case STAGE_BOOSTER_PACK:
+      if (button_pressed(PSP_CTRL_CIRCLE)) {
+        state.stage = STAGE_SHOP;
+      } else if (button_pressed(PSP_CTRL_UP)) {
+        set_nav_hovered(state.navigation.hovered - 1);
+      } else if (button_pressed(PSP_CTRL_DOWN)) {
+        set_nav_hovered(state.navigation.hovered + 1);
+      } else if (button_pressed(PSP_CTRL_CROSS)) {
+        toggle_booster_pack_item_select();
+      } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
+        submit_booster_pack();
+      }
 
-    break;
+      break;
 
-  case STAGE_GAME_OVER:
-    if (button_pressed(PSP_CTRL_CROSS)) {
-      game_destroy();
-      game_init();
-    }
+    case STAGE_GAME_OVER:
+      if (button_pressed(PSP_CTRL_CROSS)) {
+        game_destroy();
+        game_init();
+      }
 
-    break;
+      break;
   }
 
   controls->state = controls->data.Buttons;
@@ -298,7 +296,6 @@ int callback_thread(SceSize args, void *argp) {
 
 int setup_callbacks() {
   int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11, 0xFA0, 0, 0);
-  if (thid >= 0)
-    sceKernelStartThread(thid, 0, 0);
+  if (thid >= 0) sceKernelStartThread(thid, 0, 0);
   return thid;
 }

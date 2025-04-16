@@ -1,10 +1,10 @@
 #include "../state.h"
 
-void activate_joker_1() { state.game.selected_hand.scoring.mult += 4; }
+void activate_joker_1() { state.game.selected_hand.score_pair.mult += 4; }
 
 void activate_joker_6() {
   if (does_poker_hand_contain(state.game.selected_hand.hand_union, HAND_PAIR))
-    state.game.selected_hand.scoring.mult += 8;
+    state.game.selected_hand.score_pair.mult += 8;
 }
 
 const Joker JOKERS[] = {{.id = 1,

@@ -1,8 +1,9 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include <clay.h>
+
 #include "game.h"
-#include "lib/clay.h"
 
 typedef enum {
   CUSTOM_ELEMENT_CARD,
