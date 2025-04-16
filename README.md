@@ -34,11 +34,6 @@ Once these are solid, content will be expanded to include most of the jokers, bo
 
 1. Clone the repository
 
-```sh
-git clone https://github.com/kwerenta/joker-poker
-cd joker-poker
-```
-
 2. In order to generate Makefile inside `build` directory, just enter at the command line:
 
    ```sh
