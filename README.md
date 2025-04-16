@@ -5,6 +5,15 @@ Joker Poker is homebrew card game for PSP inspired by [Balatro](https://www.play
 > [!NOTE]
 > This project was written in plain C for the sake of writting it in C.
 
+## Installation
+
+### Installation from source
+
+1. Compile the game (see [Compiling](#compiling))
+1. On the Memory Stick of the physical PSP or emulator create a new folder in `/PSP/GAME/`
+1. Copy both `EBOOT.PBP` file from `build` directory and `res` folder to newly created folder
+1. Game is ready to launch
+
 ## Compiling
 
 ### Prerequisites
@@ -52,12 +61,3 @@ make
 ```
 
 After the first build, running last step is enough to get an `EBOOT.PBP` file which is main game binary.
-
-## Installation
-
-### Installation from source
-
-1. Compile the game (see [Compiling](#compiling))
-1. On the Memory Stick of the physical PSP or emulator create a new folder in `/PSP/GAME/`
-1. Copy both `EBOOT.PBP` file from `build` directory and `res` folder to newly created folder
-1. Game is ready to launch
