@@ -2,6 +2,9 @@
 
 Joker Poker is homebrew card game for PSP inspired by [Balatro](https://www.playbalatro.com).
 
+Currently, development is focused on nailing down the basic systems.
+Once these are solid, content will be expanded to include most of the jokers, boss blinds, tags, etc.
+
 > [!NOTE]
 > This project was written in plain C for the sake of writting it in C.
 
