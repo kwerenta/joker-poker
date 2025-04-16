@@ -34,7 +34,7 @@ Once these are solid, content will be expanded to include most of the jokers, bo
 
 1. Clone the repository
 
-2. In order to generate Makefile inside `build` directory, just enter at the command line:
+2. Then generate Makefile inside `build` directory, to do this just enter at the command line:
 
    ```sh
    psp-cmake -B build
@@ -46,7 +46,7 @@ Once these are solid, content will be expanded to include most of the jokers, bo
      -DBUILD_PRX=1 -DENC_PRX=1
      ```
 
-   - In order to make game work in debug mode (Game will generate log file), add following flags to above command:
+   - In order to make game work in debug mode (Game will generate log file), add following flag to above command:
      ```sh
      -DCMAKE_BUILD_TYPE=Debug
      ```
