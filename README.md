@@ -31,33 +31,24 @@ cd joker-poker
 
 2. In order to generate Makefile inside `build` directory, just enter at the command line:
 
-```sh
-psp-cmake -B build
-```
+   ```sh
+   psp-cmake -B build
+   ```
 
-    - In order to make game work on unmodded PSP (with official firmware), add following flags to above command:
+   - In order to make game work on unmodded PSP (with official firmware), add following flags to above command:
 
-```sh
--DBUILD_PRX=1 -DENC_PRX=1
-```
+     ```sh
+     -DBUILD_PRX=1 -DENC_PRX=1
+     ```
 
-    - In order to make game work in debug mode (Game will generate log file), add following flags to above command:
-
-```sh
--DCMAKE_BUILD_TYPE=Debug
-```
+   - In order to make game work in debug mode (Game will generate log file), add following flags to above command:
+     ```sh
+     -DCMAKE_BUILD_TYPE=Debug
+     ```
 
 3. Now, you can build game with:
-
-```sh
-cmake --build build
-```
-
-or
-
-```sh
-cd build
-make
-```
+   ```sh
+   cmake --build build
+   ```
 
 After the first build, running last step is enough to get an `EBOOT.PBP` file which is main game binary.
