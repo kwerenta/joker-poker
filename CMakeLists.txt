@@ -21,6 +21,6 @@ create_pbp_file(
     ICON_PATH NULL
     BACKGROUND_PATH NULL
     PREVIEW_PATH NULL
-    TITLE ${PROJECT_NAME}
-    VERSION 01.00
+    TITLE Joker\ Poker
+    VERSION 00.01
 )
