@@ -7,6 +7,13 @@ Joker Poker is homebrew card game for PSP inspired by [Balatro](https://www.play
 
 ## Installation
 
+### Installation from zip file
+
+1. Go to [releases page](https://github.com/kwerenta/joker-poker/releases)
+1. Download latest `joker-poker.zip` file
+1. Extract downloaded zip file on the Memory Stick in `/PSP/GAME/`
+1. Game is ready to launch
+
 ### Installation from source
 
 1. Compile the game (see [Compiling](#compiling))
