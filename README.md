@@ -59,3 +59,22 @@ cd joker-poker
    ```
 
 After the first build, running last step is enough to get an `EBOOT.PBP` file which is main game binary.
+
+## Controls
+
+There are currently no in-game control hints.
+
+- General
+  - LEFT/RIGHT - change currently hovered item
+  - CROSS - select currently hovered item
+- Game
+  - SELECT - switch between hand, jokers and consumables slots
+  - SQUARE - play selected cards
+  - TRIANGLE - discard selected cards
+  - CIRCLE - deselect all cards
+  - LTRIGGER/RTRIGGER - move hovered item to the left/right
+  - UP/DOWN - sort hand by rank/suit
+- SHOP
+  - UP/DOWN - change between booster packs and other items
+  - TRIANGLE - submit booster pack with selected items
+  - CIRCLE - skip booster pack
