@@ -20,25 +20,25 @@ git clone https://github.com/kwerenta/joker-poker
 cd joker-poker
 ```
 
-1. In order to generate Makefile inside `build` directory, just enter at the command line:
+2. In order to generate Makefile inside `build` directory, just enter at the command line:
 
 ```sh
 psp-cmake -B build
 ```
 
-- In order to make game work on unmodded PSP (with official firmware), add following flags to above command:
+    - In order to make game work on unmodded PSP (with official firmware), add following flags to above command:
 
 ```sh
 -DBUILD_PRX=1 -DENC_PRX=1
 ```
 
-- In order to make game work in debug mode (Game will generate log file), add following flags to above command:
+    - In order to make game work in debug mode (Game will generate log file), add following flags to above command:
 
 ```sh
 -DCMAKE_BUILD_TYPE=Debug
 ```
 
-1. Now, you can build game with:
+3. Now, you can build game with:
 
 ```sh
 cmake --build build
