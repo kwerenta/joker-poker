@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 
 project(joker-poker)
 
@@ -22,5 +22,5 @@ create_pbp_file(
     BACKGROUND_PATH NULL
     PREVIEW_PATH NULL
     TITLE Joker\ Poker
-    VERSION 00.01
+    VERSION 0.01
 )
