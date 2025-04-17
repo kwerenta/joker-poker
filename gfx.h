@@ -25,6 +25,7 @@
 
 #define WHITE_TEXT_CONFIG CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE})
 
+void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst);
 void render_card(Card *card, Rect *dst);
 void render_joker(Joker *joker, Rect *dst);
 void render_consumable(Consumable *consumable, Rect *dst);
