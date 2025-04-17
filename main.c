@@ -68,9 +68,9 @@ void destroy() {
 
 int main(int argc, char *argv[]) {
   init();
+  uint64_t last_time = sceKernelGetSystemTimeWide();
 
   log_message(LOG_INFO, "Starting main loop...");
-  uint64_t last_time = sceKernelGetSystemTimeWide();
 
   while (state.running) {
     handle_controls();
