@@ -43,14 +43,10 @@ void render_joker(Joker *joker, Rect *dst) {
   render_card_atlas_sprite(&src, dst);
 }
 
-void render_consumable(Consumable *consumable, Rect *dst) {
-  Vector2 src = {.x = 4, .y = 5};
-  render_card_atlas_sprite(&src, dst);
-}
+void render_consumable(Consumable *consumable, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 4, .y = 5}, dst); }
 
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
-  Vector2 src = {.x = 4, .y = 7};
-  render_card_atlas_sprite(&src, dst);
+  render_card_atlas_sprite(&(Vector2){.x = 4, .y = 7}, dst);
 }
 
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
