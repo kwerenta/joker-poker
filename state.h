@@ -61,7 +61,7 @@ typedef struct {
   Controls controls;
   Navigation navigation;
 
-  double delta;
+  float delta;
   uint8_t running;
 
   Stage stage;
