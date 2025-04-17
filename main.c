@@ -1,10 +1,4 @@
-#include <pspctrl.h>
-#include <pspdisplay.h>
-#include <pspgu.h>
 #include <pspkernel.h>
-#include <time.h>
-
-#include "pspthreadman.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
