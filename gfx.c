@@ -17,7 +17,7 @@ void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
   float angle = 3.0f * sinf(state.delta * 1.0f - dst->x / SCREEN_WIDTH * M_PI * 3);
   Rect src = {.x = sprite_index->x * CARD_WIDTH, .y = sprite_index->y * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
 
-  draw_texture(state.cards_atlas, &src, dst, angle);
+  draw_texture(state.cards_atlas, &src, dst, 0xFFFFFFFF, angle);
 }
 
 void render_card(Card *card, Rect *dst) {

@@ -30,7 +30,7 @@ void draw_rectangle(Rect *rect, uint32_t color) {
   sceGuDisable(GU_BLEND);
 }
 
-void draw_texture_ex(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
+void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
   const uint8_t vertices_count = angle == 0 ? 2 : 4;
   TextureVertex *vertices = (TextureVertex *)sceGuGetMemory(vertices_count * sizeof(TextureVertex));
 
@@ -87,10 +87,6 @@ void draw_texture_ex(Texture *texture, Rect *src, Rect *dst, uint32_t color, flo
 
   sceGuDisable(GU_BLEND);
   sceGuDisable(GU_TEXTURE_2D);
-}
-
-void draw_texture(Texture *texture, Rect *src, Rect *dst, float angle) {
-  draw_texture_ex(texture, src, dst, 0xFFFFFFFF, angle);
 }
 
 Texture *load_texture(const char *filename) {
@@ -163,7 +159,7 @@ Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32
     src.x = (xOffset % 13) * CHAR_WIDTH;
     src.y = (floor(xOffset / 13.0) + yOffest) * CHAR_HEIGHT;
 
-    draw_texture_ex(state.font, &src, &dst, color, 0);
+    draw_texture(state.font, &src, &dst, color, 0);
     dst.x += CHAR_WIDTH;
     text++;
   }
