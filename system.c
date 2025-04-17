@@ -30,22 +30,48 @@ void draw_rectangle(Rect *rect, uint32_t color) {
   sceGuDisable(GU_BLEND);
 }
 
-void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color) {
-  TextureVertex *vertices = (TextureVertex *)sceGuGetMemory(2 * sizeof(TextureVertex));
+void draw_texture_ex(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
+  const uint8_t vertices_count = angle == 0 ? 2 : 4;
+  TextureVertex *vertices = (TextureVertex *)sceGuGetMemory(vertices_count * sizeof(TextureVertex));
 
-  vertices[0].u = src->x;
-  vertices[0].v = src->y;
-  vertices[0].color = color;
-  vertices[0].x = dst->x;
-  vertices[0].y = dst->y;
-  vertices[0].z = 0.0f;
+  if (angle != 0) {
+    float cx = dst->x + dst->w / 2.0f;
+    float cy = dst->y + dst->h / 2.0f;
 
-  vertices[1].u = src->x + src->w;
-  vertices[1].v = src->y + src->h;
-  vertices[1].color = color;
-  vertices[1].x = dst->x + dst->w;
-  vertices[1].y = dst->y + dst->h;
-  vertices[1].z = 0.0f;
+    float rad = angle * (M_PI / 180.0f);
+    float cos_a = cosf(rad);
+    float sin_a = sinf(rad);
+
+    // Corners of the rectangle before rotation (relative to center)
+    float dx[4] = {-dst->w / 2.0f, dst->w / 2.0f, dst->w / 2.0f, -dst->w / 2.0f};
+    float dy[4] = {-dst->h / 2.0f, -dst->h / 2.0f, dst->h / 2.0f, dst->h / 2.0f};
+
+    float u[4] = {src->x, src->x + src->w, src->x + src->w, src->x};
+    float v[4] = {src->y, src->y, src->y + src->h, src->y + src->h};
+
+    for (int i = 0; i < 4; ++i) {
+      vertices[i].x = cos_a * dx[i] - sin_a * dy[i] + cx;
+      vertices[i].y = sin_a * dx[i] + cos_a * dy[i] + cy;
+      vertices[i].z = 0.0f;
+      vertices[i].u = u[i];
+      vertices[i].v = v[i];
+      vertices[i].color = color;
+    }
+  } else {
+    vertices[0].u = src->x;
+    vertices[0].v = src->y;
+    vertices[0].color = color;
+    vertices[0].x = dst->x;
+    vertices[0].y = dst->y;
+    vertices[0].z = 0.0f;
+
+    vertices[1].u = src->x + src->w;
+    vertices[1].v = src->y + src->h;
+    vertices[1].color = color;
+    vertices[1].x = dst->x + dst->w;
+    vertices[1].y = dst->y + dst->h;
+    vertices[1].z = 0.0f;
+  }
 
   sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
   sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
@@ -56,13 +82,16 @@ void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color)
   sceGuEnable(GU_BLEND);
 
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-  sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
+  sceGuDrawArray(angle == 0 ? GU_SPRITES : GU_TRIANGLE_FAN,
+                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, vertices_count, 0, vertices);
 
   sceGuDisable(GU_BLEND);
   sceGuDisable(GU_TEXTURE_2D);
 }
 
-void draw_texture(Texture *texture, Rect *src, Rect *dst) { draw_tinted_texture(texture, src, dst, 0xFFFFFFFF); }
+void draw_texture(Texture *texture, Rect *src, Rect *dst, float angle) {
+  draw_texture_ex(texture, src, dst, 0xFFFFFFFF, angle);
+}
 
 Texture *load_texture(const char *filename) {
   Texture *texture = (Texture *)calloc(1, sizeof(Texture));
@@ -134,7 +163,7 @@ Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32
     src.x = (xOffset % 13) * CHAR_WIDTH;
     src.y = (floor(xOffset / 13.0) + yOffest) * CHAR_HEIGHT;
 
-    draw_tinted_texture(state.font, &src, &dst, color);
+    draw_texture_ex(state.font, &src, &dst, color, 0);
     dst.x += CHAR_WIDTH;
     text++;
   }

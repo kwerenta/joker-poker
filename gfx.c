@@ -20,17 +20,17 @@ void render_card(Card *card, Rect *dst) {
     background.x = (5 + enhancement_offset % 4) * CARD_WIDTH;
     background.y = (5 + 2 * floor(enhancement_offset / 4.0)) * CARD_HEIGHT;
   }
-  draw_texture(state.cards_atlas, &background, dst);
+  draw_texture(state.cards_atlas, &background, dst, 0);
 
   Rect face = {.x = (card->rank % 10) * CARD_WIDTH,
                .y = (2 * card->suit + floor(card->rank / 10.0)) * CARD_HEIGHT,
                .w = CARD_WIDTH,
                .h = CARD_HEIGHT};
-  if (card->enhancement != ENHANCEMENT_STONE) draw_texture(state.cards_atlas, &face, dst);
+  if (card->enhancement != ENHANCEMENT_STONE) draw_texture(state.cards_atlas, &face, dst, 0);
 
   if (card->edition != EDITION_BASE) {
     Rect edition = {.x = (5 + card->edition - 1) * CARD_WIDTH, .y = 3 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-    draw_texture(state.cards_atlas, &edition, dst);
+    draw_texture(state.cards_atlas, &edition, dst, 0);
   }
 }
 
@@ -38,17 +38,17 @@ void render_joker(Joker *joker, Rect *dst) {
   Rect src = {.x = 9 * CARD_WIDTH, .y = CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
   if (joker->id == 6) src.y += 2 * CARD_HEIGHT;
 
-  draw_texture(state.cards_atlas, &src, dst);
+  draw_texture(state.cards_atlas, &src, dst, 0);
 }
 
 void render_consumable(Consumable *consumable, Rect *dst) {
   Rect src = {.x = 4 * CARD_WIDTH, .y = 5 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-  draw_texture(state.cards_atlas, &src, dst);
+  draw_texture(state.cards_atlas, &src, dst, 0);
 }
 
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
   Rect src = {.x = 4 * CARD_WIDTH, .y = 7 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-  draw_texture(state.cards_atlas, &src, dst);
+  draw_texture(state.cards_atlas, &src, dst, 0);
 }
 
 void render_spread_items(NavigationSection section, Clay_String parent_id) {

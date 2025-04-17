@@ -35,8 +35,8 @@ typedef struct {
 
 Texture *load_texture(const char *filename);
 void draw_rectangle(Rect *rect, uint32_t color);
-void draw_texture(Texture *texture, Rect *src, Rect *dst);
-void draw_tinted_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color);
+void draw_texture(Texture *texture, Rect *src, Rect *dst, float angle);
+void draw_texture_ex(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle);
 Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color);
 Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32_t color);
 
