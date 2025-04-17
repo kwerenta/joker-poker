@@ -13,52 +13,44 @@
 #include "text.h"
 #include "utils.h"
 
-float get_sprite_angle(float x) { return 3.0f * sinf(state.delta * 1.0f - x / SCREEN_WIDTH * M_PI * 3); }
+void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
+  float angle = 3.0f * sinf(state.delta * 1.0f - dst->x / SCREEN_WIDTH * M_PI * 3);
+  Rect src = {.x = sprite_index->x * CARD_WIDTH, .y = sprite_index->y * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+
+  draw_texture(state.cards_atlas, &src, dst, angle);
+}
 
 void render_card(Card *card, Rect *dst) {
-  float angle = get_sprite_angle(dst->x);
-
-  Rect background = {.x = 9 * CARD_WIDTH, .y = 7 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+  Vector2 background = {.x = 9, .y = 7};
   if (card->enhancement != ENHANCEMENT_NONE) {
     uint8_t enhancement_offset = card->enhancement - 1;
-    background.x = (5 + enhancement_offset % 4) * CARD_WIDTH;
-    background.y = (5 + 2 * floor(enhancement_offset / 4.0)) * CARD_HEIGHT;
+    background.x = 5 + enhancement_offset % 4;
+    background.y = 5 + 2 * floor(enhancement_offset / 4.0);
   }
-  draw_texture(state.cards_atlas, &background, dst, angle);
+  render_card_atlas_sprite(&background, dst);
 
-  Rect face = {.x = (card->rank % 10) * CARD_WIDTH,
-               .y = (2 * card->suit + floor(card->rank / 10.0)) * CARD_HEIGHT,
-               .w = CARD_WIDTH,
-               .h = CARD_HEIGHT};
-  if (card->enhancement != ENHANCEMENT_STONE) draw_texture(state.cards_atlas, &face, dst, angle);
+  Vector2 face = {.x = card->rank % 10, .y = 2 * card->suit + floor(card->rank / 10.0)};
+  if (card->enhancement != ENHANCEMENT_STONE) render_card_atlas_sprite(&face, dst);
 
-  if (card->edition != EDITION_BASE) {
-    Rect edition = {.x = (5 + card->edition - 1) * CARD_WIDTH, .y = 3 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-    draw_texture(state.cards_atlas, &edition, dst, angle);
-  }
+  Vector2 edition = {.x = 5 + card->edition - 1, .y = 3};
+  if (card->edition != EDITION_BASE) render_card_atlas_sprite(&edition, dst);
 }
 
 void render_joker(Joker *joker, Rect *dst) {
-  float angle = get_sprite_angle(dst->x);
+  Vector2 src = {.x = 9, .y = 1};
+  if (joker->id == 6) src.y += 2;
 
-  Rect src = {.x = 9 * CARD_WIDTH, .y = CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-  if (joker->id == 6) src.y += 2 * CARD_HEIGHT;
-
-  draw_texture(state.cards_atlas, &src, dst, angle);
+  render_card_atlas_sprite(&src, dst);
 }
 
 void render_consumable(Consumable *consumable, Rect *dst) {
-  float angle = get_sprite_angle(dst->x);
-
-  Rect src = {.x = 4 * CARD_WIDTH, .y = 5 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-  draw_texture(state.cards_atlas, &src, dst, angle);
+  Vector2 src = {.x = 4, .y = 5};
+  render_card_atlas_sprite(&src, dst);
 }
 
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
-  float angle = get_sprite_angle(dst->x);
-
-  Rect src = {.x = 4 * CARD_WIDTH, .y = 7 * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
-  draw_texture(state.cards_atlas, &src, dst, angle);
+  Vector2 src = {.x = 4, .y = 7};
+  render_card_atlas_sprite(&src, dst);
 }
 
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
