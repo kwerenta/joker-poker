@@ -664,7 +664,8 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 }
 
 void submit_booster_pack() {
-  ShopItem item = {};
+  // Set to impossible value to check later if any item was selected
+  ShopItem item = {.type = 0xFF};
 
   cvector_for_each(state.game.booster_pack.content, BoosterPackContent, content) {
     if (content->selected == 0) continue;
@@ -694,7 +695,7 @@ void submit_booster_pack() {
     }
   }
 
-  change_stage(STAGE_SHOP);
+  if (item.type != 0xFF) change_stage(STAGE_SHOP);
 }
 
 void toggle_booster_pack_item_select() {
