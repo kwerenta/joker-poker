@@ -243,9 +243,9 @@ void handle_controls() {
     case STAGE_BOOSTER_PACK:
       if (button_pressed(PSP_CTRL_CIRCLE)) {
         state.stage = STAGE_SHOP;
-      } else if (button_pressed(PSP_CTRL_UP)) {
+      } else if (button_pressed(PSP_CTRL_LEFT)) {
         set_nav_hovered(state.navigation.hovered - 1);
-      } else if (button_pressed(PSP_CTRL_DOWN)) {
+      } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_CROSS)) {
         toggle_booster_pack_item_select();

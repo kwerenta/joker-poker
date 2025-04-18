@@ -1,43 +1,53 @@
 #include "utils.h"
 
-#include "debug.h"
+#include "game.h"
 #include "renderer.h"
+#include "state.h"
 #include "text.h"
 
 CustomElementData create_spread_item_element(NavigationSection section, uint8_t i) {
   switch (section) {
     case NAVIGATION_HAND:
       return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = state.game.hand.cards[i]};
+
     case NAVIGATION_CONSUMABLES:
       return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE, .consumable = state.game.consumables.items[i]};
+
     case NAVIGATION_JOKERS:
       return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = state.game.jokers.cards[i]};
+
     case NAVIGATION_SHOP_ITEMS: {
       ShopItem *item = &state.game.shop.items[i];
-
       switch (item->type) {
         case SHOP_ITEM_CARD:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
-          break;
         case SHOP_ITEM_PLANET:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
                                      .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
-          break;
         case SHOP_ITEM_JOKER:
           return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
-          break;
       }
-      break;
     }
 
     case NAVIGATION_SHOP_BOOSTER_PACKS:
       return (CustomElementData){.type = CUSTOM_ELEMENT_BOOSTER_PACK, .booster_pack = state.game.shop.booster_packs[i]};
       break;
 
-    default:
-      log_message(LOG_ERROR, "Invalid spread item section type");
-      state.running = 0;
-      return (CustomElementData){};
+    case NAVIGATION_BOOSTER_PACK: {
+      BoosterPack *booster_pack = &state.game.booster_pack;
+      BoosterPackContent *item = &booster_pack->content[i];
+
+      switch (booster_pack->item.type) {
+        case BOOSTER_PACK_STANDARD:
+          return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
+        case BOOSTER_PACK_BUFFON:
+          return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
+        case BOOSTER_PACK_CELESTIAL:
+          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                     .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
+      }
+      break;
+    }
   }
 }
 
@@ -104,7 +114,21 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
       break;
     }
 
-    default:
-      return;
+    case NAVIGATION_BOOSTER_PACK: {
+      BoosterPackContent *item = &state.game.booster_pack.content[state.navigation.hovered];
+      switch (state.game.booster_pack.item.type) {
+        case BOOSTER_PACK_STANDARD:
+          get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_CARD, .card = item->card});
+          break;
+        case BOOSTER_PACK_CELESTIAL:
+          get_shop_item_tooltip_content(name, description,
+                                        &(ShopItem){.type = SHOP_ITEM_PLANET, .planet = item->planet});
+          break;
+        case BOOSTER_PACK_BUFFON:
+          get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_JOKER, .joker = item->joker});
+          break;
+      }
+      break;
+    }
   }
 }

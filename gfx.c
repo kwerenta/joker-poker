@@ -68,7 +68,9 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
       x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
 
     float y_offset = 0;
-    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
+    if ((section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) ||
+        section == NAVIGATION_BOOSTER_PACK && state.game.booster_pack.content[i].selected == 1)
+      y_offset = -40;
 
     uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
 
@@ -121,7 +123,8 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
   Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM,
                                              .element = CLAY_ATTACH_POINT_CENTER_TOP};
 
-  if (section == NAVIGATION_HAND || section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS) {
+  if (section == NAVIGATION_HAND || section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
+      section == NAVIGATION_BOOSTER_PACK) {
     y_offset *= -1;
     attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
     attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
@@ -157,7 +160,7 @@ void render_hand() {
             .padding = {.bottom = 8},
             .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_BOTTOM},
         }}) {
-    CLAY({.id = CLAY_ID("Bottom"),
+    CLAY({.id = CLAY_ID_LOCAL("Bottom"),
           .layout = {
               .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
               .childGap = 8,
@@ -410,43 +413,58 @@ void render_shop() {
 }
 
 void render_booster_pack_content() {
-  CLAY(card_element_config(CLAY_ID("BoosterPack"))) {
-    CLAY(card_content_config()) {
-      for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
-        BoosterPackContent item = state.game.booster_pack.content[i];
-        Clay_String name;
-
-        switch (state.game.booster_pack.item.type) {
-          case BOOSTER_PACK_STANDARD: {
-            name = get_full_card_name(item.card.suit, item.card.rank);
-            break;
-          }
-          case BOOSTER_PACK_CELESTIAL: {
-            name = (Clay_String){.chars = get_planet_card_name(item.planet),
-                                 .length = strlen(get_planet_card_name(item.planet))};
-            break;
-          }
-          case BOOSTER_PACK_BUFFON: {
-            name = (Clay_String){.chars = item.joker.name, .length = strlen(item.joker.name)};
-            break;
-          }
-        }
-
-        CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
-          Clay_Color text_color = state.navigation.section == NAVIGATION_BOOSTER_PACK && state.navigation.hovered == i
-                                      ? (Clay_Color){0, 255, 0, 255}
-                                  : item.selected == 1 ? (Clay_Color){0, 0, 255, 255}
-                                                       : COLOR_WHITE;
-          CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
-
-          if (state.game.booster_pack.item.type == BOOSTER_PACK_BUFFON) {
-            Clay_String description = {.chars = item.joker.description, .length = strlen(item.joker.description)};
-            CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = text_color}));
-          }
-        }
-      }
-    }
+  CLAY({.id = CLAY_ID("BoosterPack"),
+        .layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .padding = {.bottom = 8},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+        }}) {
+    CLAY({.id = CLAY_ID("BoosterPackItems"),
+          .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+          }}) {}
   }
+
+  render_spread_items(NAVIGATION_BOOSTER_PACK, CLAY_STRING("BoosterPackItems"));
+
+  // CLAY(card_element_config(CLAY_ID("BoosterPack"))) {
+  //   CLAY(card_content_config()) {
+  //     for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
+  //       BoosterPackContent item = state.game.booster_pack.content[i];
+  //       Clay_String name;
+
+  //       switch (state.game.booster_pack.item.type) {
+  //         case BOOSTER_PACK_STANDARD: {
+  //           name = get_full_card_name(item.card.suit, item.card.rank);
+  //           break;
+  //         }
+  //         case BOOSTER_PACK_CELESTIAL: {
+  //           name = (Clay_String){.chars = get_planet_card_name(item.planet),
+  //                                .length = strlen(get_planet_card_name(item.planet))};
+  //           break;
+  //         }
+  //         case BOOSTER_PACK_BUFFON: {
+  //           name = (Clay_String){.chars = item.joker.name, .length = strlen(item.joker.name)};
+  //           break;
+  //         }
+  //       }
+
+  //       CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
+  //         Clay_Color text_color = state.navigation.section == NAVIGATION_BOOSTER_PACK && state.navigation.hovered ==
+  //         i
+  //                                     ? (Clay_Color){0, 255, 0, 255}
+  //                                 : item.selected == 1 ? (Clay_Color){0, 0, 255, 255}
+  //                                                      : COLOR_WHITE;
+  //         CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
+
+  //         if (state.game.booster_pack.item.type == BOOSTER_PACK_BUFFON) {
+  //           Clay_String description = {.chars = item.joker.description, .length = strlen(item.joker.description)};
+  //           CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = text_color}));
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 void render_cash_out() {
