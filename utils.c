@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#include "content/tarot.h"
 #include "game.h"
 #include "renderer.h"
 #include "state.h"
@@ -79,8 +80,10 @@ void get_shop_item_tooltip_content(Clay_String *name, Clay_String *description, 
       break;
 
     case SHOP_ITEM_TAROT:
-      append_clay_string(name, "Tarot %d", item->tarot);
-      append_clay_string(description, "Does nothing");
+      *name =
+          (Clay_String){.chars = get_tarot_card_name(item->tarot), .length = strlen(get_tarot_card_name(item->tarot))};
+      *description = (Clay_String){.chars = get_tarot_card_description(item->tarot),
+                                   .length = strlen(get_tarot_card_description(item->tarot))};
       break;
   }
 }
