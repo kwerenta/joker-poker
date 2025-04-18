@@ -568,6 +568,10 @@ void use_consumable(Consumable *consumable_to_use) {
     case CONSUMABLE_PLANET:
       state.game.poker_hands[consumable->planet] += 1;
       break;
+
+    case CONSUMABLE_TAROT:
+      log_message(LOG_INFO, "Used tarrot");
+      break;
   }
 
   if (consumable_to_use == NULL) {
@@ -596,6 +600,13 @@ uint8_t add_item_to_player(ShopItem *item) {
       Consumable planet = {.type = CONSUMABLE_PLANET, .planet = item->planet};
       cvector_push_back(state.game.consumables.items, planet);
       break;
+
+    case SHOP_ITEM_TAROT:
+      if (cvector_size(state.game.consumables.items) >= state.game.consumables.size) return 0;
+
+      Consumable tarot = {.type = CONSUMABLE_TAROT, .tarot = item->tarot};
+      cvector_push_back(state.game.consumables.items, tarot);
+      break;
   }
 
   return 1;
@@ -606,6 +617,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
     case SHOP_ITEM_CARD:
       return 1;
     case SHOP_ITEM_PLANET:
+    case SHOP_ITEM_TAROT:
       return 3;
     case SHOP_ITEM_JOKER:
       return item->joker.base_price;
@@ -723,7 +735,7 @@ void restock_shop() {
   ShopItem item = {0};
 
   for (uint8_t i = 0; i < state.game.shop.size; i++) {
-    switch (rand() % 3) {
+    switch (rand() % 4) {
       case 0:
         item = (ShopItem){.type = SHOP_ITEM_CARD,
                           .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE)};
@@ -733,6 +745,9 @@ void restock_shop() {
         break;
       case 2:
         item = (ShopItem){.type = SHOP_ITEM_PLANET, .planet = rand() % 12};
+        break;
+      case 3:
+        item = (ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22};
         break;
     }
 

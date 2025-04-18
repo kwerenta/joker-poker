@@ -68,6 +68,31 @@ typedef enum {
   PLANET_PLUTO,
 } Planet;
 
+typedef enum {
+  TAROT_FOOL,
+  TAROT_MAGICIAN,
+  TAROT_HIGH_PRIESTESS,
+  TAROT_EMPRESS,
+  TAROT_EMPEROR,
+  TAROT_HIEROPHANT,
+  TAROT_LOVERS,
+  TAROT_CHARIOT,
+  TAROT_JUSTICE,
+  TAROT_HERMIT,
+  TAROT_WHEEL_OF_FORTUNE,
+  TAROT_STRENGTH,
+  TAROT_HANGED_MAN,
+  TAROT_DEATH,
+  TAROT_TEMPERANACE,
+  TAROT_DEVIL,
+  TAROT_TOWER,
+  TAROT_STAR,
+  TAROT_MOON,
+  TAROT_SUN,
+  TAROT_JUDGEMENT,
+  TAROT_WORLD
+} Tarot;
+
 typedef struct {
   double mult;
   uint32_t chips;
@@ -111,13 +136,14 @@ typedef struct {
   cvector_vector_type(Card) cards;
 } Hand;
 
-typedef enum { CONSUMABLE_PLANET } ConsumableType;
+typedef enum { CONSUMABLE_PLANET, CONSUMABLE_TAROT } ConsumableType;
 
 typedef struct {
   ConsumableType type;
 
   union {
     Planet planet;
+    Tarot tarot;
   };
 } Consumable;
 
@@ -139,7 +165,7 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET } ShopItemType;
+typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_TAROT } ShopItemType;
 
 typedef enum { BOOSTER_PACK_BUFFON, BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_STANDARD } BoosterPackType;
 
@@ -174,6 +200,7 @@ typedef struct {
     Joker joker;
     Card card;
     Planet planet;
+    Tarot tarot;
   };
 } ShopItem;
 

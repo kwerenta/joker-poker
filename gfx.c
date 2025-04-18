@@ -43,7 +43,19 @@ void render_joker(Joker *joker, Rect *dst) {
   render_card_atlas_sprite(&src, dst);
 }
 
-void render_consumable(Consumable *consumable, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 4, .y = 5}, dst); }
+void render_consumable(Consumable *consumable, Rect *dst) {
+  Vector2 index = {0};
+  switch (consumable->type) {
+    case CONSUMABLE_PLANET:
+      index = (Vector2){.x = 4, .y = 5};
+      break;
+    case CONSUMABLE_TAROT:
+      index = (Vector2){.x = 4, .y = 1};
+      break;
+  }
+
+  render_card_atlas_sprite(&index, dst);
+}
 
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
   render_card_atlas_sprite(&(Vector2){.x = 4, .y = 7}, dst);

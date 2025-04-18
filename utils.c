@@ -21,11 +21,14 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
       switch (item->type) {
         case SHOP_ITEM_CARD:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
+        case SHOP_ITEM_JOKER:
+          return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
         case SHOP_ITEM_PLANET:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
                                      .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
-        case SHOP_ITEM_JOKER:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
+        case SHOP_ITEM_TAROT:
+          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                     .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
       }
     }
 
@@ -71,6 +74,11 @@ void get_shop_item_tooltip_content(Clay_String *name, Clay_String *description, 
       append_clay_string(description, "%s (+%u chips, +%0.lf mult)", get_poker_hand_name(hand_union), upgrade.chips,
                          upgrade.mult);
       break;
+
+    case SHOP_ITEM_TAROT:
+      append_clay_string(name, "Tarot %d", item->tarot);
+      append_clay_string(description, "Does nothing");
+      break;
   }
 }
 
@@ -90,12 +98,16 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
 
     case NAVIGATION_CONSUMABLES: {
       Consumable *consumable = &state.game.consumables.items[state.navigation.hovered];
+
       switch (consumable->type) {
-        case CONSUMABLE_PLANET: {
-          ShopItem item = {.type = SHOP_ITEM_PLANET, .planet = consumable->planet};
-          get_shop_item_tooltip_content(name, description, &item);
+        case CONSUMABLE_PLANET:
+          get_shop_item_tooltip_content(name, description,
+                                        &(ShopItem){.type = SHOP_ITEM_PLANET, .planet = consumable->planet});
           break;
-        }
+        case CONSUMABLE_TAROT:
+          get_shop_item_tooltip_content(name, description,
+                                        &(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = consumable->tarot});
+          break;
       }
       break;
     }
