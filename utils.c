@@ -48,6 +48,9 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
         case BOOSTER_PACK_CELESTIAL:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
                                      .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
+        case BOOSTER_PACK_ARCANA:
+          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                     .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
       }
       break;
     }
@@ -138,6 +141,9 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
           break;
         case BOOSTER_PACK_BUFFON:
           get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_JOKER, .joker = item->joker});
+          break;
+        case BOOSTER_PACK_ARCANA:
+          get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = item->tarot});
           break;
       }
       break;

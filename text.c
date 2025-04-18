@@ -131,6 +131,8 @@ char *get_booster_pack_type_name(BoosterPackType type) {
       return "Buffon";
     case BOOSTER_PACK_CELESTIAL:
       return "Celestial";
+    case BOOSTER_PACK_ARCANA:
+      return "Arcana";
   }
 }
 

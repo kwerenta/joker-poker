@@ -669,6 +669,10 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
       case BOOSTER_PACK_CELESTIAL:
         content.planet = rand() % 12;
         break;
+
+      case BOOSTER_PACK_ARCANA:
+        content.tarot = rand() % 22;
+        break;
     }
 
     cvector_push_back(state.game.booster_pack.content, content);
@@ -697,14 +701,21 @@ void submit_booster_pack() {
         item.type = SHOP_ITEM_PLANET;
         item.planet = content->planet;
         break;
+
+      case BOOSTER_PACK_ARCANA:
+        item.type = SHOP_ITEM_TAROT;
+        item.tarot = content->tarot;
+        break;
     }
 
-    if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL) {
+    if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL ||
+        state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) {
       Consumable planet = {.type = CONSUMABLE_PLANET, .planet = content->planet};
       use_consumable(&planet);
-    } else {
-      add_item_to_player(&item);
+      continue;
     }
+
+    add_item_to_player(&item);
   }
 
   if (item.type != 0xFF) change_stage(STAGE_SHOP);
@@ -755,7 +766,7 @@ void restock_shop() {
   }
 
   for (uint8_t i = 0; i < 2; i++) {
-    BoosterPackItem booster_pack = {.type = rand() % 3, .size = rand() % 3};
+    BoosterPackItem booster_pack = {.type = rand() % 4, .size = rand() % 3};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 }

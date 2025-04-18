@@ -167,7 +167,12 @@ typedef struct {
 
 typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_TAROT } ShopItemType;
 
-typedef enum { BOOSTER_PACK_BUFFON, BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_STANDARD } BoosterPackType;
+typedef enum {
+  BOOSTER_PACK_BUFFON,
+  BOOSTER_PACK_STANDARD,
+  BOOSTER_PACK_CELESTIAL,
+  BOOSTER_PACK_ARCANA
+} BoosterPackType;
 
 typedef enum {
   BOOSTER_PACK_NORMAL,
@@ -186,6 +191,7 @@ typedef struct {
     Card card;
     Joker joker;
     Planet planet;
+    Tarot tarot;
   };
 } BoosterPackContent;
 
