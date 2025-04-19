@@ -690,45 +690,31 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 }
 
 void submit_booster_pack() {
-  // Set to impossible value to check later if any item was selected
-  ShopItem item = {.type = 0xFF};
+  uint8_t is_any_selected = 0;
 
   cvector_for_each(state.game.booster_pack.content, BoosterPackContent, content) {
     if (content->selected == 0) continue;
 
+    is_any_selected = 1;
+
     switch (state.game.booster_pack.item.type) {
       case BOOSTER_PACK_STANDARD:
-        item.type = SHOP_ITEM_CARD;
-        item.card = content->card;
+        add_item_to_player(&(ShopItem){.type = SHOP_ITEM_CARD, .card = content->card});
         break;
-
       case BOOSTER_PACK_BUFFON:
-        item.type = SHOP_ITEM_JOKER;
-        item.joker = content->joker;
+        add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = content->joker});
         break;
 
       case BOOSTER_PACK_CELESTIAL:
-        item.type = SHOP_ITEM_PLANET;
-        item.planet = content->planet;
+        use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = content->planet});
         break;
-
       case BOOSTER_PACK_ARCANA:
-        item.type = SHOP_ITEM_TAROT;
-        item.tarot = content->tarot;
+        use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
         break;
     }
-
-    if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL ||
-        state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) {
-      Consumable planet = {.type = CONSUMABLE_PLANET, .planet = content->planet};
-      use_consumable(&planet);
-      continue;
-    }
-
-    add_item_to_player(&item);
   }
 
-  if (item.type != 0xFF) change_stage(STAGE_SHOP);
+  if (is_any_selected != 0) change_stage(STAGE_SHOP);
 }
 
 void toggle_booster_pack_item_select() {
