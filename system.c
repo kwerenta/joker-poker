@@ -242,7 +242,7 @@ void handle_controls() {
 
     case STAGE_BOOSTER_PACK:
       if (button_pressed(PSP_CTRL_CIRCLE)) {
-        state.stage = STAGE_SHOP;
+        skip_booster_pack();
       } else if (button_pressed(PSP_CTRL_LEFT)) {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RIGHT)) {

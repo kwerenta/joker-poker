@@ -127,8 +127,9 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
     case NAVIGATION_SHOP_BOOSTER_PACKS: {
       BoosterPackItem *booster_pack = &state.game.shop.booster_packs[state.navigation.hovered];
       *name = get_full_booster_pack_name(booster_pack->size, booster_pack->type);
-      append_clay_string(description, "Choose up to %d from %d", booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1,
-                         booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5);
+      append_clay_string(description, "Choose %d of up to %d %s", booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1,
+                         get_booster_pack_items_count(booster_pack),
+                         get_booster_pack_description_suffix(booster_pack->type));
       break;
     }
 
