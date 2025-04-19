@@ -248,6 +248,7 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack);
 void buy_shop_item();
 void open_booster_pack(BoosterPackItem *booster_pack);
 void submit_booster_pack();
+void skip_booster_pack();
 void toggle_booster_pack_item_select();
 void restock_shop();
 void exit_shop();

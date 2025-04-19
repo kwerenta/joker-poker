@@ -702,6 +702,8 @@ void submit_booster_pack() {
   if (item.type != 0xFF) change_stage(STAGE_SHOP);
 }
 
+void skip_booster_pack() { change_stage(STAGE_SHOP); }
+
 void toggle_booster_pack_item_select() {
   BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
 
