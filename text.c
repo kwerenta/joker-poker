@@ -134,6 +134,17 @@ char *get_booster_pack_type_name(BoosterPackType type) {
   }
 }
 
+char *get_booster_pack_description_suffix(BoosterPackType type) {
+  switch (type) {
+    case BOOSTER_PACK_STANDARD:
+      return "Playing cards to add to your deck";
+    case BOOSTER_PACK_BUFFON:
+      return "Joker cards";
+    case BOOSTER_PACK_CELESTIAL:
+      return "Planet cards to be used immediately";
+  }
+}
+
 Clay_String get_full_booster_pack_name(BoosterPackSize size, BoosterPackType type) {
   Clay_String booster_pack_name;
   append_clay_string(&booster_pack_name, "%s%s%s Pack", get_booster_pack_size_name(size),

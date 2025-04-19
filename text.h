@@ -14,6 +14,7 @@ Clay_String get_full_card_name(Suit suit, Rank rank);
 
 char *get_booster_pack_size_name(BoosterPackSize size);
 char *get_booster_pack_type_name(BoosterPackType type);
+char *get_booster_pack_description_suffix(BoosterPackType type);
 Clay_String get_full_booster_pack_name(BoosterPackSize size, BoosterPackType type);
 
 #endif
