@@ -136,6 +136,8 @@ uint8_t get_tarot_max_selected(Tarot tarot) {
 }
 
 void tarot_create_consumable(ConsumableType type) {
+  // FIX This +1 is temporary solution to the problem of removing tarot card from consumables only after use and it
+  // does not work correctly for cards from a booster pack
   uint8_t available_space = state.game.consumables.size - cvector_size(state.game.consumables.items) + 1;
   for (uint8_t i = 0; i < available_space; i++) {
     Consumable consumable = {.type = type};
@@ -191,6 +193,7 @@ void use_tarot_card(Tarot tarot) {
 
   switch (tarot) {
     case TAROT_FOOL:
+      // FIX This +1 has the same problem as in tarot_create_consumable function
       if (cvector_size(state.game.consumables.items) >= state.game.consumables.size + 1 ||
           state.game.fool_last_used.was_used == 0 ||
           (state.game.fool_last_used.consumable.type == CONSUMABLE_TAROT &&
