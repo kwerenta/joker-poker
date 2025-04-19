@@ -613,6 +613,11 @@ uint8_t get_shop_item_price(ShopItem *item) {
 }
 
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return 4 + booster_pack->size * 2; }
+uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
+  uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
+  if (booster_pack->type == BOOSTER_PACK_BUFFON) count--;
+  return count;
+}
 
 void buy_shop_item() {
   uint8_t item_index = state.navigation.hovered;
@@ -641,8 +646,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
   state.game.booster_pack.item = *booster_pack;
   change_stage(STAGE_BOOSTER_PACK);
 
-  uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
-  for (uint8_t i = 0; i < count; i++) {
+  for (uint8_t i = 0; i < get_booster_pack_items_count(booster_pack); i++) {
     BoosterPackContent content = {.selected = 0};
 
     switch (booster_pack->type) {
