@@ -193,7 +193,9 @@ void use_tarot_card(Tarot tarot) {
 
   switch (tarot) {
     case TAROT_FOOL:
-      if (cvector_size(state.game.consumables.items) >= state.game.consumables.size + 1) break;
+      if (cvector_size(state.game.consumables.items) >= state.game.consumables.size + 1 ||
+          state.game.fool_last_used.was_used == 0)
+        break;
       cvector_push_back(state.game.consumables.items, state.game.fool_last_used.consumable);
       break;
     case TAROT_HERMIT:
