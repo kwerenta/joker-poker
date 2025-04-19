@@ -135,6 +135,19 @@ uint8_t get_tarot_max_selected(Tarot tarot) {
   }
 }
 
+void tarot_change_enhancement(Card **selected_cards, uint8_t selected_count, Enhancement new_enhancement) {
+  for (uint8_t i = 0; i < selected_count; i++) {
+    cvector_for_each(state.game.full_deck, Card, card) {
+      if (compare_cards(selected_cards[i], card)) {
+        selected_cards[i]->enhancement = new_enhancement;
+        break;
+      }
+    }
+
+    selected_cards[i]->enhancement = new_enhancement;
+  }
+}
+
 void tarot_change_suit(Card **selected_cards, uint8_t selected_count, Suit new_suit) {
   for (uint8_t i = 0; i < selected_count; i++) {
     cvector_for_each(state.game.full_deck, Card, card) {
@@ -166,6 +179,31 @@ void use_tarot_card(Tarot tarot) {
     return;
 
   switch (tarot) {
+    case TAROT_LOVERS:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_WILD);
+      break;
+    case TAROT_CHARIOT:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_STEEL);
+      break;
+    case TAROT_JUSTICE:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_GLASS);
+      break;
+    case TAROT_DEVIL:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_GOLD);
+      break;
+    case TAROT_TOWER:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_STONE);
+      break;
+    case TAROT_MAGICIAN:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_LUCKY);
+      break;
+    case TAROT_EMPRESS:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_MULT);
+      break;
+    case TAROT_HIEROPHANT:
+      tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_BONUS);
+      break;
+
     case TAROT_STAR:
       tarot_change_suit(selected_cards, selected_count, SUIT_DIAMONDS);
       break;
