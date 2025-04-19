@@ -3,6 +3,7 @@
 #include <cvector.h>
 #include <stdint.h>
 
+#include "content/tarot.h"
 #include "debug.h"
 #include "state.h"
 
@@ -61,6 +62,11 @@ void game_destroy() {
   log_message(LOG_INFO, "Game has been destroyed.");
 }
 
+uint8_t compare_cards(Card *a, Card *b) {
+  return a->chips == b->chips && a->enhancement == b->enhancement && a->edition == b->edition && a->rank == b->rank &&
+         a->suit == b->suit;
+}
+
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
   uint16_t chips = rank == RANK_ACE ? 11 : rank + 1;
   if (rank != RANK_ACE && chips > 10) chips = 10;
@@ -112,8 +118,7 @@ void play_hand() {
         if (rand() % 4 == 0) {
           for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
             Card *other = &state.game.full_deck[i];
-            if (card->chips == other->chips && card->enhancement == other->enhancement &&
-                card->edition == other->edition && card->rank == other->rank && card->suit == other->suit) {
+            if (compare_cards(card, other)) {
               cvector_erase(state.game.full_deck, i);
               break;
             }
@@ -570,7 +575,7 @@ void use_consumable(Consumable *consumable_to_use) {
       break;
 
     case CONSUMABLE_TAROT:
-      log_message(LOG_INFO, "Used tarrot");
+      use_tarot_card(consumable->tarot);
       break;
   }
 

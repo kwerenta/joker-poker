@@ -1,5 +1,8 @@
 #include "tarot.h"
 
+#include "../state.h"
+#include "cvector.h"
+
 const char *get_tarot_card_name(Tarot tarot) {
   switch (tarot) {
     case TAROT_FOOL:
@@ -95,5 +98,89 @@ const char *get_tarot_card_description(Tarot tarot) {
       return "Creates a random Joker card (Must have room)";
     case TAROT_WORLD:
       return "Converts up to 3 selected cards to Spades";
+  }
+}
+
+uint8_t get_tarot_max_selected(Tarot tarot) {
+  switch (tarot) {
+    case TAROT_FOOL:
+    case TAROT_EMPEROR:
+    case TAROT_HERMIT:
+    case TAROT_WHEEL_OF_FORTUNE:
+    case TAROT_TEMPERANCE:
+    case TAROT_JUDGEMENT:
+      return 0;
+
+    case TAROT_LOVERS:
+    case TAROT_CHARIOT:
+    case TAROT_JUSTICE:
+    case TAROT_DEVIL:
+    case TAROT_TOWER:
+      return 1;
+
+    case TAROT_MAGICIAN:
+    case TAROT_HIGH_PRIESTESS:
+    case TAROT_EMPRESS:
+    case TAROT_HIEROPHANT:
+    case TAROT_STRENGTH:
+    case TAROT_HANGED_MAN:
+    case TAROT_DEATH:
+      return 2;
+
+    case TAROT_STAR:
+    case TAROT_MOON:
+    case TAROT_SUN:
+    case TAROT_WORLD:
+      return 3;
+  }
+}
+
+void tarot_change_suit(Card **selected_cards, uint8_t selected_count, Suit new_suit) {
+  for (uint8_t i = 0; i < selected_count; i++) {
+    cvector_for_each(state.game.full_deck, Card, card) {
+      if (compare_cards(selected_cards[i], card)) {
+        selected_cards[i]->suit = new_suit;
+        break;
+      }
+    }
+
+    selected_cards[i]->suit = new_suit;
+  }
+}
+
+void use_tarot_card(Tarot tarot) {
+  Card *selected_cards[3] = {0};
+  uint8_t selected_count = 0;
+
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->selected == 0) continue;
+
+    selected_cards[selected_count] = card;
+    selected_count++;
+    if (selected_count > 3) return;
+  }
+
+  uint8_t max_selected_count = get_tarot_max_selected(tarot);
+  if ((max_selected_count != 0 && selected_count > max_selected_count) ||
+      (tarot == TAROT_DEATH && selected_count != max_selected_count))
+    return;
+
+  switch (tarot) {
+    case TAROT_STAR:
+      tarot_change_suit(selected_cards, selected_count, SUIT_DIAMONDS);
+      break;
+    case TAROT_MOON:
+      tarot_change_suit(selected_cards, selected_count, SUIT_CLUBS);
+      break;
+    case TAROT_SUN:
+      tarot_change_suit(selected_cards, selected_count, SUIT_HEARTS);
+      break;
+    case TAROT_WORLD:
+      tarot_change_suit(selected_cards, selected_count, SUIT_SPADES);
+      break;
+
+    default:
+      // TODO Implement rest of the tarot cards
+      return;
   }
 }

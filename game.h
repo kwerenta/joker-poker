@@ -221,6 +221,7 @@ typedef struct {
 void game_init();
 void game_destroy();
 
+uint8_t compare_cards(Card *a, Card *b);
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement);
 void shuffle_deck();
 void draw_card();
