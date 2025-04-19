@@ -152,12 +152,11 @@ void tarot_change_enhancement(Card **selected_cards, uint8_t selected_count, Enh
   for (uint8_t i = 0; i < selected_count; i++) {
     cvector_for_each(state.game.full_deck, Card, card) {
       if (compare_cards(selected_cards[i], card)) {
+        card->enhancement = new_enhancement;
         selected_cards[i]->enhancement = new_enhancement;
         break;
       }
     }
-
-    selected_cards[i]->enhancement = new_enhancement;
   }
 }
 
@@ -165,12 +164,11 @@ void tarot_change_suit(Card **selected_cards, uint8_t selected_count, Suit new_s
   for (uint8_t i = 0; i < selected_count; i++) {
     cvector_for_each(state.game.full_deck, Card, card) {
       if (compare_cards(selected_cards[i], card)) {
+        card->suit = new_suit;
         selected_cards[i]->suit = new_suit;
         break;
       }
     }
-
-    selected_cards[i]->suit = new_suit;
   }
 }
 
