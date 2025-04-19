@@ -81,7 +81,7 @@ const char *get_tarot_card_description(Tarot tarot) {
     case TAROT_HANGED_MAN:
       return "Destroys up to 2 selected cards";
     case TAROT_DEATH:
-      return "Select 2 cards, convert the left card into the right card (Drag to rearrange)";
+      return "Select 2 cards, convert the left card into the right card (Move to rearrange)";
     case TAROT_TEMPERANCE:
       return "Gives the total sell value of all current Jokers (Max of $50)";
     case TAROT_DEVIL:
