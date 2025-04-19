@@ -237,6 +237,7 @@ void use_tarot_card(Tarot tarot) {
         if (compare_cards(selected_cards[0], card)) {
           *(selected_cards[0]) = *(selected_cards[1]);
           *card = *(selected_cards[1]);
+          card->selected = 0;
           break;
         }
       }
