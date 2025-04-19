@@ -104,6 +104,7 @@ const char *get_tarot_card_description(Tarot tarot) {
 uint8_t get_tarot_max_selected(Tarot tarot) {
   switch (tarot) {
     case TAROT_FOOL:
+    case TAROT_HIGH_PRIESTESS:
     case TAROT_EMPEROR:
     case TAROT_HERMIT:
     case TAROT_WHEEL_OF_FORTUNE:
@@ -119,7 +120,6 @@ uint8_t get_tarot_max_selected(Tarot tarot) {
       return 1;
 
     case TAROT_MAGICIAN:
-    case TAROT_HIGH_PRIESTESS:
     case TAROT_EMPRESS:
     case TAROT_HIEROPHANT:
     case TAROT_STRENGTH:
@@ -132,6 +132,19 @@ uint8_t get_tarot_max_selected(Tarot tarot) {
     case TAROT_SUN:
     case TAROT_WORLD:
       return 3;
+  }
+}
+
+void tarot_create_consumable(ConsumableType type) {
+  uint8_t available_space = state.game.consumables.size - cvector_size(state.game.consumables.items) + 1;
+  for (uint8_t i = 0; i < available_space; i++) {
+    Consumable consumable = {.type = type};
+    if (type == CONSUMABLE_PLANET)
+      consumable.planet = rand() % 12;
+    else if (type == CONSUMABLE_TAROT)
+      consumable.tarot = rand() % 22;
+
+    cvector_push_back(state.game.consumables.items, consumable);
   }
 }
 
@@ -179,6 +192,13 @@ void use_tarot_card(Tarot tarot) {
     return;
 
   switch (tarot) {
+    case TAROT_HIGH_PRIESTESS:
+      tarot_create_consumable(CONSUMABLE_PLANET);
+      break;
+    case TAROT_EMPEROR:
+      tarot_create_consumable(CONSUMABLE_TAROT);
+      break;
+
     case TAROT_LOVERS:
       tarot_change_enhancement(selected_cards, selected_count, ENHANCEMENT_WILD);
       break;
