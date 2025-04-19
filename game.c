@@ -42,6 +42,8 @@ void game_init() {
   state.navigation.hovered = 0;
   state.navigation.section = NAVIGATION_HAND;
 
+  state.game.fool_last_used.was_used = 0;
+
   memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
 
   state.stage = STAGE_GAME;
@@ -578,6 +580,9 @@ void use_consumable(Consumable *consumable_to_use) {
       use_tarot_card(consumable->tarot);
       break;
   }
+
+  state.game.fool_last_used.was_used = 1;
+  state.game.fool_last_used.consumable = *consumable;
 
   if (consumable_to_use == NULL) {
     cvector_erase(state.game.consumables.items, state.navigation.hovered);

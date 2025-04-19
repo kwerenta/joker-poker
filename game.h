@@ -125,6 +125,11 @@ typedef struct {
 } Consumable;
 
 typedef struct {
+  uint8_t was_used;
+  Consumable consumable;
+} FoolLastUsed;
+
+typedef struct {
   int8_t hovered;
   uint8_t size;
   cvector_vector_type(Consumable) items;
@@ -215,7 +220,9 @@ typedef struct {
 
   uint16_t money;
   Shop shop;
+
   BoosterPack booster_pack;
+  FoolLastUsed fool_last_used;
 } Game;
 
 void game_init();

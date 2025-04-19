@@ -192,6 +192,61 @@ void use_tarot_card(Tarot tarot) {
     return;
 
   switch (tarot) {
+    case TAROT_FOOL:
+      if (cvector_size(state.game.consumables.items) >= state.game.consumables.size + 1) break;
+      cvector_push_back(state.game.consumables.items, state.game.fool_last_used.consumable);
+      break;
+    case TAROT_HERMIT:
+      if (state.game.money > 0) state.game.money += state.game.money > 20 ? 20 : state.game.money;
+      break;
+    case TAROT_WHEEL_OF_FORTUNE:
+      // TODO Add this when RNG utilities will be added
+      break;
+    case TAROT_STRENGTH:
+      for (uint8_t i = 0; i < selected_count; i++) {
+        cvector_for_each(state.game.full_deck, Card, card) {
+          if (compare_cards(selected_cards[i], card)) {
+            card->rank = (card->rank + 1) % 12;
+            selected_cards[i]->rank = card->rank;
+            break;
+          }
+        }
+      }
+      break;
+    case TAROT_HANGED_MAN:
+      for (uint8_t i = 0; i < selected_count; i++) {
+        for (size_t j = 0; j < cvector_size(state.game.full_deck); j++) {
+          if (compare_cards(selected_cards[i], &state.game.full_deck[j])) {
+            cvector_erase(state.game.full_deck, j);
+            break;
+          }
+        }
+
+        for (uint8_t j = 0; j < cvector_size(state.game.hand.cards); j++) {
+          if (compare_cards(selected_cards[i], &state.game.hand.cards[j])) {
+            cvector_erase(state.game.hand.cards, j);
+            break;
+          }
+        }
+      }
+      break;
+    case TAROT_DEATH:
+      cvector_for_each(state.game.full_deck, Card, card) {
+        if (compare_cards(selected_cards[0], card)) {
+          *(selected_cards[0]) = *(selected_cards[1]);
+          *card = *(selected_cards[1]);
+          break;
+        }
+      }
+      break;
+    case TAROT_TEMPERANCE:
+      // TODO Add this when selling items will be added
+      break;
+    case TAROT_JUDGEMENT:
+      if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) break;
+      cvector_push_back(state.game.jokers.cards, JOKERS[rand() % JOKER_COUNT]);
+      break;
+
     case TAROT_HIGH_PRIESTESS:
       tarot_create_consumable(CONSUMABLE_PLANET);
       break;
