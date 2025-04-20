@@ -590,8 +590,10 @@ void use_consumable(Consumable *consumable_to_use) {
     return;
   }
 
-  state.game.fool_last_used.was_used = 1;
-  state.game.fool_last_used.consumable = consumable;
+  if (consumable.type != CONSUMABLE_TAROT || consumable.tarot != TAROT_FOOL) {
+    state.game.fool_last_used.was_used = 1;
+    state.game.fool_last_used.consumable = consumable;
+  }
 
   if (consumable_to_use == NULL && state.navigation.hovered > 0) state.navigation.hovered--;
 }
