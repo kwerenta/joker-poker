@@ -424,45 +424,6 @@ void render_booster_pack_content() {
   }
 
   render_spread_items(NAVIGATION_BOOSTER_PACK, CLAY_STRING("BoosterPackItems"));
-
-  // CLAY(card_element_config(CLAY_ID("BoosterPack"))) {
-  //   CLAY(card_content_config()) {
-  //     for (uint8_t i = 0; i < cvector_size(state.game.booster_pack.content); i++) {
-  //       BoosterPackContent item = state.game.booster_pack.content[i];
-  //       Clay_String name;
-
-  //       switch (state.game.booster_pack.item.type) {
-  //         case BOOSTER_PACK_STANDARD: {
-  //           name = get_full_card_name(item.card.suit, item.card.rank);
-  //           break;
-  //         }
-  //         case BOOSTER_PACK_CELESTIAL: {
-  //           name = (Clay_String){.chars = get_planet_card_name(item.planet),
-  //                                .length = strlen(get_planet_card_name(item.planet))};
-  //           break;
-  //         }
-  //         case BOOSTER_PACK_BUFFON: {
-  //           name = (Clay_String){.chars = item.joker.name, .length = strlen(item.joker.name)};
-  //           break;
-  //         }
-  //       }
-
-  //       CLAY({.id = CLAY_IDI_LOCAL("Item", i), .layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
-  //         Clay_Color text_color = state.navigation.section == NAVIGATION_BOOSTER_PACK && state.navigation.hovered ==
-  //         i
-  //                                     ? (Clay_Color){0, 255, 0, 255}
-  //                                 : item.selected == 1 ? (Clay_Color){0, 0, 255, 255}
-  //                                                      : COLOR_WHITE;
-  //         CLAY_TEXT(name, CLAY_TEXT_CONFIG({.textColor = text_color}));
-
-  //         if (state.game.booster_pack.item.type == BOOSTER_PACK_BUFFON) {
-  //           Clay_String description = {.chars = item.joker.description, .length = strlen(item.joker.description)};
-  //           CLAY_TEXT(description, CLAY_TEXT_CONFIG({.textColor = text_color}));
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
 }
 
 void render_cash_out() {
