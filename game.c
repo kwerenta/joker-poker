@@ -674,6 +674,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
   state.game.booster_pack.item = *booster_pack;
   state.game.booster_pack.uses = booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1;
 
+  shuffle_deck();
   fill_hand();
 
   change_stage(STAGE_BOOSTER_PACK);
