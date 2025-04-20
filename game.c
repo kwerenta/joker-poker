@@ -563,33 +563,37 @@ uint8_t get_interest_money() {
 
 // If consumable is NULL then hovered item from consumables section will be used
 void use_consumable(Consumable *consumable_to_use) {
-  Consumable *consumable = consumable_to_use;
+  Consumable consumable;
 
   if (consumable_to_use == NULL) {
     if (cvector_size(state.game.consumables.items) == 0) return;
 
-    consumable = &cvector_at(state.game.consumables.items, state.navigation.hovered);
+    consumable = cvector_at(state.game.consumables.items, state.navigation.hovered);
+    cvector_erase(state.game.consumables.items, state.navigation.hovered);
+  } else {
+    consumable = *consumable_to_use;
   }
 
-  switch (consumable->type) {
+  uint8_t was_used = 1;
+  switch (consumable.type) {
     case CONSUMABLE_PLANET:
-      state.game.poker_hands[consumable->planet] += 1;
+      state.game.poker_hands[consumable.planet] += 1;
       break;
 
     case CONSUMABLE_TAROT:
-      use_tarot_card(consumable->tarot);
+      was_used = use_tarot_card(consumable.tarot);
       break;
   }
 
-  state.game.fool_last_used.was_used = 1;
-  state.game.fool_last_used.consumable = *consumable;
-
-  if (consumable_to_use == NULL) {
-    cvector_erase(state.game.consumables.items, state.navigation.hovered);
-
-    if (cvector_size(state.game.consumables.items) >= state.navigation.hovered && state.navigation.hovered > 0)
-      state.navigation.hovered--;
+  if (was_used == 0 && consumable_to_use == NULL) {
+    cvector_insert(state.game.consumables.items, state.navigation.hovered, consumable);
+    return;
   }
+
+  state.game.fool_last_used.was_used = 1;
+  state.game.fool_last_used.consumable = consumable;
+
+  if (consumable_to_use == NULL && state.navigation.hovered > 0) state.navigation.hovered--;
 }
 
 uint8_t add_item_to_player(ShopItem *item) {
@@ -722,7 +726,7 @@ void select_booster_pack_item() {
 
   state.game.booster_pack.uses--;
   cvector_erase(state.game.booster_pack.content, state.navigation.hovered);
-  if (state.navigation.hovered >= cvector_size(state.game.booster_pack.content) - 1) state.navigation.hovered--;
+  if (state.navigation.hovered > 0) state.navigation.hovered--;
 
   if (state.game.booster_pack.uses == 0) close_booster_pack();
 }
@@ -754,6 +758,13 @@ void restock_shop() {
 
     cvector_push_back(state.game.shop.items, item);
   }
+
+  item.type = SHOP_ITEM_TAROT;
+  item.tarot = TAROT_EMPEROR;
+  cvector_push_back(state.game.shop.items, item);
+
+  item.tarot = TAROT_FOOL;
+  cvector_push_back(state.game.shop.items, item);
 
   for (uint8_t i = 0; i < 2; i++) {
     BoosterPackItem booster_pack = {.type = rand() % 4, .size = rand() % 3};

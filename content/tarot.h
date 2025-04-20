@@ -32,6 +32,6 @@ const char *get_tarot_card_name(Tarot tarot);
 const char *get_tarot_card_description(Tarot tarot);
 
 uint8_t get_tarot_max_selected(Tarot tarot);
-void use_tarot_card(Tarot tarot);
+uint8_t use_tarot_card(Tarot tarot);
 
 #endif
