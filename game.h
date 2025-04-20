@@ -167,17 +167,15 @@ typedef struct {
   BoosterPackSize size;
 } BoosterPackItem;
 
-typedef struct {
-  uint8_t selected;
-  union {
-    Card card;
-    Joker joker;
-    Planet planet;
-    Tarot tarot;
-  };
+typedef union {
+  Card card;
+  Joker joker;
+  Planet planet;
+  Tarot tarot;
 } BoosterPackContent;
 
 typedef struct {
+  uint8_t uses;
   BoosterPackItem item;
   cvector_vector_type(BoosterPackContent) content;
 } BoosterPack;
@@ -265,9 +263,8 @@ uint8_t get_booster_pack_price(BoosterPackItem *booster_pack);
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack);
 void buy_shop_item();
 void open_booster_pack(BoosterPackItem *booster_pack);
-void submit_booster_pack();
+void select_booster_pack_item();
 void skip_booster_pack();
-void toggle_booster_pack_item_select();
 void restock_shop();
 void exit_shop();
 

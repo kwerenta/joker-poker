@@ -666,12 +666,14 @@ void buy_shop_item() {
 void open_booster_pack(BoosterPackItem *booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = *booster_pack;
+  state.game.booster_pack.uses = booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1;
+
   fill_hand();
 
   change_stage(STAGE_BOOSTER_PACK);
 
   for (uint8_t i = 0; i < get_booster_pack_items_count(booster_pack); i++) {
-    BoosterPackContent content = {.selected = 0};
+    BoosterPackContent content = {0};
 
     switch (booster_pack->type) {
       case BOOSTER_PACK_STANDARD:
@@ -702,53 +704,33 @@ void close_booster_pack() {
   change_stage(STAGE_SHOP);
 }
 
-void submit_booster_pack() {
-  uint8_t is_any_selected = 0;
+void select_booster_pack_item() {
+  BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
 
-  cvector_for_each(state.game.booster_pack.content, BoosterPackContent, content) {
-    if (content->selected == 0) continue;
+  switch (state.game.booster_pack.item.type) {
+    case BOOSTER_PACK_STANDARD:
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_CARD, .card = content->card});
+      break;
+    case BOOSTER_PACK_BUFFON:
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = content->joker});
+      break;
 
-    is_any_selected = 1;
-
-    switch (state.game.booster_pack.item.type) {
-      case BOOSTER_PACK_STANDARD:
-        add_item_to_player(&(ShopItem){.type = SHOP_ITEM_CARD, .card = content->card});
-        break;
-      case BOOSTER_PACK_BUFFON:
-        add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = content->joker});
-        break;
-
-      case BOOSTER_PACK_CELESTIAL:
-        use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = content->planet});
-        break;
-      case BOOSTER_PACK_ARCANA:
-        use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
-        break;
-    }
+    case BOOSTER_PACK_CELESTIAL:
+      use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = content->planet});
+      break;
+    case BOOSTER_PACK_ARCANA:
+      use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
+      break;
   }
 
-  if (is_any_selected != 0) close_booster_pack();
+  state.game.booster_pack.uses--;
+  cvector_erase(state.game.booster_pack.content, state.navigation.hovered);
+  if (state.navigation.hovered >= cvector_size(state.game.booster_pack.content) - 1) state.navigation.hovered--;
+
+  if (state.game.booster_pack.uses == 0) close_booster_pack();
 }
 
 void skip_booster_pack() { close_booster_pack(); }
-
-void toggle_booster_pack_item_select() {
-  BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
-
-  if (content->selected == 1) {
-    content->selected = 0;
-    return;
-  }
-
-  uint8_t selected_count = 0;
-  const uint8_t max_count = state.game.booster_pack.item.size == BOOSTER_PACK_MEGA ? 2 : 1;
-
-  cvector_for_each(state.game.booster_pack.content, BoosterPackContent, c) {
-    if (c->selected == 1) selected_count++;
-  }
-
-  if (selected_count < max_count) content->selected = 1;
-}
 
 void restock_shop() {
   cvector_clear(state.game.shop.items);

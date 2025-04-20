@@ -80,9 +80,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
       x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
 
     float y_offset = 0;
-    if ((section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) ||
-        section == NAVIGATION_BOOSTER_PACK && state.game.booster_pack.content[i].selected == 1)
-      y_offset = -40;
+    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
 
     uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
 
@@ -428,8 +426,9 @@ void render_booster_pack_content() {
   CLAY({.id = CLAY_ID("BoosterPack"),
         .layout = {
             .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-            .padding = {.top = 16, .bottom = 8},
+            .padding = {.top = 16},
             .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            .childGap = 8,
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
         }}) {
     if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) {
@@ -441,7 +440,17 @@ void render_booster_pack_content() {
     }
 
     CLAY({.id = CLAY_ID("BoosterPackItems"),
-          .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
+          .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+          }}) {}
+
+    CLAY({.id = CLAY_ID_LOCAL("Name"),
+          .layout = {.sizing = CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0), .padding = CLAY_PADDING_ALL(4)},
+          .backgroundColor = COLOR_CARD_BG}) {
+      Clay_String name =
+          get_full_booster_pack_name(state.game.booster_pack.item.size, state.game.booster_pack.item.type);
+      CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+    }
   }
 
   render_spread_items(NAVIGATION_BOOSTER_PACK, CLAY_STRING("BoosterPackItems"));
