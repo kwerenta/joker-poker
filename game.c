@@ -679,15 +679,12 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
       case BOOSTER_PACK_STANDARD:
         content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE);
         break;
-
       case BOOSTER_PACK_BUFFON:
         content.joker = JOKERS[rand() % JOKER_COUNT];
         break;
-
       case BOOSTER_PACK_CELESTIAL:
         content.planet = rand() % 12;
         break;
-
       case BOOSTER_PACK_ARCANA:
         content.tarot = rand() % 22;
         break;

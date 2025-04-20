@@ -297,9 +297,5 @@ void use_tarot_card(Tarot tarot) {
     case TAROT_WORLD:
       tarot_change_suit(selected_cards, selected_count, SUIT_SPADES);
       break;
-
-    default:
-      // TODO Implement rest of the tarot cards
-      return;
   }
 }
