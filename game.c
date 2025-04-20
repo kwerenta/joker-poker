@@ -687,6 +687,8 @@ void submit_booster_pack() {
   }
 
   state.game.booster_pack.uses--;
+  cvector_erase(state.game.booster_pack.content, state.navigation.hovered);
+  if (state.navigation.hovered >= cvector_size(state.game.booster_pack.content) - 1) state.navigation.hovered--;
 
   if (state.game.booster_pack.uses == 0) change_stage(STAGE_SHOP);
 }
