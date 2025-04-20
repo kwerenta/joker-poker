@@ -426,7 +426,6 @@ void render_booster_pack_content() {
   CLAY({.id = CLAY_ID("BoosterPack"),
         .layout = {
             .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-            .padding = {.top = 16},
             .layoutDirection = CLAY_TOP_TO_BOTTOM,
             .childGap = 8,
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
@@ -435,8 +434,6 @@ void render_booster_pack_content() {
       CLAY({.id = CLAY_ID("BoosterPackHand"),
             .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
       render_spread_items(NAVIGATION_HAND, CLAY_STRING("BoosterPackHand"));
-
-      CLAY({.layout = {.sizing = CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}) {}
     }
 
     CLAY({.id = CLAY_ID("BoosterPackItems"),
