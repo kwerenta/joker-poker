@@ -209,7 +209,7 @@ uint8_t use_tarot_card(Tarot tarot) {
       for (uint8_t i = 0; i < selected_count; i++) {
         cvector_for_each(state.game.full_deck, Card, card) {
           if (compare_cards(selected_cards[i], card)) {
-            card->rank = (card->rank + 1) % 12;
+            card->rank = (card->rank + 1) % 13;
             selected_cards[i]->rank = card->rank;
             break;
           }
