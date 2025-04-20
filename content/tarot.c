@@ -296,5 +296,6 @@ uint8_t use_tarot_card(Tarot tarot) {
       break;
   }
 
+  if (max_selected_count != 0) deselect_all_cards();
   return 1;
 }
