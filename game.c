@@ -761,13 +761,6 @@ void restock_shop() {
     cvector_push_back(state.game.shop.items, item);
   }
 
-  item.type = SHOP_ITEM_TAROT;
-  item.tarot = TAROT_EMPEROR;
-  cvector_push_back(state.game.shop.items, item);
-
-  item.tarot = TAROT_FOOL;
-  cvector_push_back(state.game.shop.items, item);
-
   for (uint8_t i = 0; i < 2; i++) {
     BoosterPackItem booster_pack = {.type = rand() % 4, .size = rand() % 3};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
