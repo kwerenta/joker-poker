@@ -79,10 +79,13 @@ uint8_t get_nav_section_size(NavigationSection section) {
   return max_value;
 }
 
-void set_nav_hovered(uint8_t new_hovered) {
+void set_nav_hovered(int8_t new_hovered) {
   uint8_t max_value = get_nav_section_size(state.navigation.section);
 
-  if (new_hovered >= max_value || new_hovered < 0) return;
+  if (new_hovered >= max_value)
+    new_hovered = max_value - 1;
+  else if (new_hovered < 0)
+    new_hovered = 0;
 
   state.navigation.hovered = new_hovered;
 }

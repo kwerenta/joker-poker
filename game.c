@@ -595,7 +595,7 @@ uint8_t use_consumable(Consumable *consumable_to_use) {
     state.game.fool_last_used.consumable = consumable;
   }
 
-  if (consumable_to_use == NULL && state.navigation.hovered > 0) state.navigation.hovered--;
+  if (consumable_to_use == NULL) set_nav_hovered(state.navigation.hovered);
   return was_used;
 }
 
@@ -667,7 +667,7 @@ void buy_shop_item() {
 
   state.game.money -= price;
 
-  if (state.stage == STAGE_SHOP && state.navigation.hovered > 0) state.navigation.hovered--;
+  if (state.stage == STAGE_SHOP) set_nav_hovered(state.navigation.hovered);
 }
 
 void open_booster_pack(BoosterPackItem *booster_pack) {
@@ -733,7 +733,7 @@ void select_booster_pack_item() {
 
   state.game.booster_pack.uses--;
   cvector_erase(state.game.booster_pack.content, state.navigation.hovered);
-  if (state.navigation.hovered > 0) state.navigation.hovered--;
+  set_nav_hovered(state.navigation.hovered);
 
   if (state.game.booster_pack.uses == 0) close_booster_pack();
 }

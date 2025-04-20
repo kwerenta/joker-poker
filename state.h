@@ -47,7 +47,7 @@ int append_clay_string(Clay_String *dest, const char *format, ...);
 uint8_t get_nav_section_size(NavigationSection section);
 void change_nav_section(NavigationSection section);
 
-void set_nav_hovered(uint8_t new_hovered);
+void set_nav_hovered(int8_t new_hovered);
 void move_nav_hovered(uint8_t new_position);
 
 void change_stage(Stage stage);
