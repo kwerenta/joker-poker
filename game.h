@@ -257,7 +257,7 @@ uint8_t get_interest_money();
 
 void get_cash_out();
 
-void use_consumable(Consumable *consumable);
+uint8_t use_consumable(Consumable *consumable);
 uint8_t get_shop_item_price(ShopItem *item);
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack);
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack);

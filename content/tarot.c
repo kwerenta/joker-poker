@@ -185,7 +185,8 @@ uint8_t use_tarot_card(Tarot tarot) {
   }
 
   uint8_t max_selected_count = get_tarot_max_selected(tarot);
-  if ((max_selected_count != 0 && selected_count > max_selected_count) ||
+  if ((selected_count == 0 && max_selected_count != 0) ||
+      (max_selected_count != 0 && selected_count > max_selected_count) ||
       (tarot == TAROT_DEATH && selected_count != max_selected_count))
     return 0;
 

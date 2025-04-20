@@ -562,11 +562,11 @@ uint8_t get_interest_money() {
 }
 
 // If consumable is NULL then hovered item from consumables section will be used
-void use_consumable(Consumable *consumable_to_use) {
+uint8_t use_consumable(Consumable *consumable_to_use) {
   Consumable consumable;
 
   if (consumable_to_use == NULL) {
-    if (cvector_size(state.game.consumables.items) == 0) return;
+    if (cvector_size(state.game.consumables.items) == 0) return 0;
 
     consumable = cvector_at(state.game.consumables.items, state.navigation.hovered);
     cvector_erase(state.game.consumables.items, state.navigation.hovered);
@@ -587,7 +587,7 @@ void use_consumable(Consumable *consumable_to_use) {
 
   if (was_used == 0 && consumable_to_use == NULL) {
     cvector_insert(state.game.consumables.items, state.navigation.hovered, consumable);
-    return;
+    return 0;
   }
 
   if (consumable.type != CONSUMABLE_TAROT || consumable.tarot != TAROT_FOOL) {
@@ -596,6 +596,7 @@ void use_consumable(Consumable *consumable_to_use) {
   }
 
   if (consumable_to_use == NULL && state.navigation.hovered > 0) state.navigation.hovered--;
+  return was_used;
 }
 
 uint8_t add_item_to_player(ShopItem *item) {
@@ -711,21 +712,24 @@ void close_booster_pack() {
 void select_booster_pack_item() {
   BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
 
+  uint8_t was_used = 1;
   switch (state.game.booster_pack.item.type) {
     case BOOSTER_PACK_STANDARD:
-      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_CARD, .card = content->card});
+      was_used = add_item_to_player(&(ShopItem){.type = SHOP_ITEM_CARD, .card = content->card});
       break;
     case BOOSTER_PACK_BUFFON:
-      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = content->joker});
+      was_used = add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = content->joker});
       break;
 
     case BOOSTER_PACK_CELESTIAL:
-      use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = content->planet});
+      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = content->planet});
       break;
     case BOOSTER_PACK_ARCANA:
-      use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
+      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
       break;
   }
+
+  if (was_used == 0) return;
 
   state.game.booster_pack.uses--;
   cvector_erase(state.game.booster_pack.content, state.navigation.hovered);
