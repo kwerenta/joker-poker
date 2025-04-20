@@ -196,7 +196,7 @@ uint8_t use_tarot_card(Tarot tarot) {
           state.game.fool_last_used.was_used == 0 ||
           (state.game.fool_last_used.consumable.type == CONSUMABLE_TAROT &&
            state.game.fool_last_used.consumable.tarot == TAROT_FOOL))
-        break;
+        return 0;
       cvector_push_back(state.game.consumables.items, state.game.fool_last_used.consumable);
       break;
     case TAROT_HERMIT:
