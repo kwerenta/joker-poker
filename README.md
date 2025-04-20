@@ -73,6 +73,8 @@ There are currently no in-game control hints.
   - LTRIGGER/RTRIGGER - move hovered item to the left/right
   - UP/DOWN - sort hand by rank/suit
 - SHOP
-  - LEFT/RIGHT - change between booster packs and other items
-  - TRIANGLE - submit booster pack with selected items
+  - UP/DOWN - switch between booster packs and other shop items
+- BOOSTER PACK
+  - UP/DOWN - switch between hand and booster pack items
+  - CROSS - select/use hovered booster pack item
   - CIRCLE - skip booster pack
