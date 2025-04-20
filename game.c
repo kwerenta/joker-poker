@@ -669,7 +669,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
   }
 }
 
-void submit_booster_pack() {
+void select_booster_pack_item() {
   BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
 
   switch (state.game.booster_pack.item.type) {
