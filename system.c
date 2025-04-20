@@ -247,8 +247,15 @@ void handle_controls() {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
+      } else if (button_pressed(PSP_CTRL_UP)) {
+        if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) change_nav_section(NAVIGATION_HAND);
+      } else if (button_pressed(PSP_CTRL_DOWN)) {
+        if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) change_nav_section(NAVIGATION_BOOSTER_PACK);
       } else if (button_pressed(PSP_CTRL_CROSS)) {
-        toggle_booster_pack_item_select();
+        if (state.navigation.section == NAVIGATION_HAND)
+          toggle_card_select(state.navigation.hovered);
+        else
+          toggle_booster_pack_item_select();
       } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
         submit_booster_pack();
       }

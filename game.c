@@ -666,6 +666,8 @@ void buy_shop_item() {
 void open_booster_pack(BoosterPackItem *booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = *booster_pack;
+  fill_hand();
+
   change_stage(STAGE_BOOSTER_PACK);
 
   for (uint8_t i = 0; i < get_booster_pack_items_count(booster_pack); i++) {
@@ -693,6 +695,13 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
   }
 }
 
+void close_booster_pack() {
+  cvector_clear(state.game.hand.cards);
+  cvector_copy(state.game.full_deck, state.game.deck);
+
+  change_stage(STAGE_SHOP);
+}
+
 void submit_booster_pack() {
   uint8_t is_any_selected = 0;
 
@@ -718,10 +727,10 @@ void submit_booster_pack() {
     }
   }
 
-  if (is_any_selected != 0) change_stage(STAGE_SHOP);
+  if (is_any_selected != 0) close_booster_pack();
 }
 
-void skip_booster_pack() { change_stage(STAGE_SHOP); }
+void skip_booster_pack() { close_booster_pack(); }
 
 void toggle_booster_pack_item_select() {
   BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
