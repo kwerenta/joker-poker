@@ -26,7 +26,7 @@ const char *get_tarot_card_name(Tarot tarot) {
     case TAROT_HERMIT:
       return "The Hermit (IX)";
     case TAROT_WHEEL_OF_FORTUNE:
-      return "The Wheel of Fortune (X)";
+      return "The Wheel of Fortune (X) NOT IMPLEMENTED";
     case TAROT_STRENGTH:
       return "Strength (XI)";
     case TAROT_HANGED_MAN:
@@ -34,7 +34,7 @@ const char *get_tarot_card_name(Tarot tarot) {
     case TAROT_DEATH:
       return "Death (XIII)";
     case TAROT_TEMPERANCE:
-      return "Temperance (XIV)";
+      return "Temperance (XIV) NOT IMPLEMENTED";
     case TAROT_DEVIL:
       return "The Devil (XV)";
     case TAROT_TOWER:
