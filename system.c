@@ -226,6 +226,8 @@ void handle_controls() {
     case STAGE_SHOP:
       if (button_pressed(PSP_CTRL_CIRCLE)) {
         exit_shop();
+      } else if (button_pressed(PSP_CTRL_CROSS)) {
+        buy_shop_item();
       } else if (button_pressed(PSP_CTRL_UP)) {
         if (state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS) change_nav_section(NAVIGATION_SHOP_ITEMS);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
@@ -234,8 +236,6 @@ void handle_controls() {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
-      } else if (button_pressed(PSP_CTRL_CROSS)) {
-        buy_shop_item();
       }
 
       break;
@@ -243,14 +243,24 @@ void handle_controls() {
     case STAGE_BOOSTER_PACK:
       if (button_pressed(PSP_CTRL_CIRCLE)) {
         skip_booster_pack();
+      } else if (button_pressed(PSP_CTRL_CROSS)) {
+        if (state.navigation.section == NAVIGATION_HAND)
+          toggle_card_select(state.navigation.hovered);
+        else
+          select_booster_pack_item();
       } else if (button_pressed(PSP_CTRL_LEFT)) {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
-      } else if (button_pressed(PSP_CTRL_CROSS)) {
-        select_booster_pack_item();
+      } else if (button_pressed(PSP_CTRL_UP)) {
+        if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) change_nav_section(NAVIGATION_HAND);
+      } else if (button_pressed(PSP_CTRL_DOWN)) {
+        if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) change_nav_section(NAVIGATION_BOOSTER_PACK);
+      } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+        move_nav_hovered(state.navigation.hovered - 1);
+      } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+        move_nav_hovered(state.navigation.hovered + 1);
       }
-
       break;
 
     case STAGE_GAME_OVER:

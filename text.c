@@ -131,6 +131,8 @@ char *get_booster_pack_type_name(BoosterPackType type) {
       return "Buffon";
     case BOOSTER_PACK_CELESTIAL:
       return "Celestial";
+    case BOOSTER_PACK_ARCANA:
+      return "Arcana";
   }
 }
 
@@ -142,6 +144,8 @@ char *get_booster_pack_description_suffix(BoosterPackType type) {
       return "Joker cards";
     case BOOSTER_PACK_CELESTIAL:
       return "Planet cards to be used immediately";
+    case BOOSTER_PACK_ARCANA:
+      return "Tarot cards to be used immediately";
   }
 }
 

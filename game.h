@@ -4,6 +4,8 @@
 #include <cvector.h>
 #include <stdint.h>
 
+#include "content/tarot.h"
+
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
@@ -111,15 +113,21 @@ typedef struct {
   cvector_vector_type(Card) cards;
 } Hand;
 
-typedef enum { CONSUMABLE_PLANET } ConsumableType;
+typedef enum { CONSUMABLE_PLANET, CONSUMABLE_TAROT } ConsumableType;
 
 typedef struct {
   ConsumableType type;
 
   union {
     Planet planet;
+    Tarot tarot;
   };
 } Consumable;
+
+typedef struct {
+  uint8_t was_used;
+  Consumable consumable;
+} FoolLastUsed;
 
 typedef struct {
   int8_t hovered;
@@ -139,9 +147,14 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET } ShopItemType;
+typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_TAROT } ShopItemType;
 
-typedef enum { BOOSTER_PACK_BUFFON, BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_STANDARD } BoosterPackType;
+typedef enum {
+  BOOSTER_PACK_BUFFON,
+  BOOSTER_PACK_STANDARD,
+  BOOSTER_PACK_CELESTIAL,
+  BOOSTER_PACK_ARCANA
+} BoosterPackType;
 
 typedef enum {
   BOOSTER_PACK_NORMAL,
@@ -158,6 +171,7 @@ typedef union {
   Card card;
   Joker joker;
   Planet planet;
+  Tarot tarot;
 } BoosterPackContent;
 
 typedef struct {
@@ -172,6 +186,7 @@ typedef struct {
     Joker joker;
     Card card;
     Planet planet;
+    Tarot tarot;
   };
 } ShopItem;
 
@@ -203,12 +218,15 @@ typedef struct {
 
   uint16_t money;
   Shop shop;
+
   BoosterPack booster_pack;
+  FoolLastUsed fool_last_used;
 } Game;
 
 void game_init();
 void game_destroy();
 
+uint8_t compare_cards(Card *a, Card *b);
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement);
 void shuffle_deck();
 void draw_card();
@@ -239,7 +257,7 @@ uint8_t get_interest_money();
 
 void get_cash_out();
 
-void use_consumable(Consumable *consumable);
+uint8_t use_consumable(Consumable *consumable);
 uint8_t get_shop_item_price(ShopItem *item);
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack);
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack);

@@ -43,7 +43,19 @@ void render_joker(Joker *joker, Rect *dst) {
   render_card_atlas_sprite(&src, dst);
 }
 
-void render_consumable(Consumable *consumable, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 4, .y = 5}, dst); }
+void render_consumable(Consumable *consumable, Rect *dst) {
+  Vector2 index = {0};
+  switch (consumable->type) {
+    case CONSUMABLE_PLANET:
+      index = (Vector2){.x = 4, .y = 5};
+      break;
+    case CONSUMABLE_TAROT:
+      index = (Vector2){.x = 4, .y = 1};
+      break;
+  }
+
+  render_card_atlas_sprite(&index, dst);
+}
 
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
   render_card_atlas_sprite(&(Vector2){.x = 4, .y = 7}, dst);
@@ -414,10 +426,16 @@ void render_booster_pack_content() {
   CLAY({.id = CLAY_ID("BoosterPack"),
         .layout = {
             .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
             .childGap = 8,
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
-            .layoutDirection = CLAY_TOP_TO_BOTTOM,
         }}) {
+    if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) {
+      CLAY({.id = CLAY_ID("BoosterPackHand"),
+            .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
+      render_spread_items(NAVIGATION_HAND, CLAY_STRING("BoosterPackHand"));
+    }
+
     CLAY({.id = CLAY_ID("BoosterPackItems"),
           .layout = {
               .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
