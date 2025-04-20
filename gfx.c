@@ -414,13 +414,22 @@ void render_booster_pack_content() {
   CLAY({.id = CLAY_ID("BoosterPack"),
         .layout = {
             .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-            .padding = {.bottom = 8},
+            .childGap = 8,
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
         }}) {
     CLAY({.id = CLAY_ID("BoosterPackItems"),
           .layout = {
               .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
           }}) {}
+
+    CLAY({.id = CLAY_ID_LOCAL("Name"),
+          .layout = {.sizing = CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0), .padding = CLAY_PADDING_ALL(4)},
+          .backgroundColor = COLOR_CARD_BG}) {
+      Clay_String name =
+          get_full_booster_pack_name(state.game.booster_pack.item.size, state.game.booster_pack.item.type);
+      CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+    }
   }
 
   render_spread_items(NAVIGATION_BOOSTER_PACK, CLAY_STRING("BoosterPackItems"));
