@@ -248,9 +248,7 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_CROSS)) {
-        toggle_booster_pack_item_select();
-      } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
-        submit_booster_pack();
+        select_booster_pack_item();
       }
 
       break;
