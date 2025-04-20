@@ -68,9 +68,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
       x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
 
     float y_offset = 0;
-    if ((section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) ||
-        section == NAVIGATION_BOOSTER_PACK && state.game.booster_pack.content[i].selected == 1)
-      y_offset = -40;
+    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
 
     uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
 
