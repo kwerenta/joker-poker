@@ -74,21 +74,18 @@ void *frame_arena_allocate(size_t size) {
   return ptr;
 }
 
-// void change_nav_section(NavigationSection section) {
-// state.navigation.hovered = 0;
-// state.navigation.section = section;
-// }
-
 void move_navigation_cursor(int d_row, int d_col) {
   const NavigationLayout *layout = &nav_layouts[state.stage];
   NavigationCursor *cursor = &state.navigation.cursor;
 
   int new_row = (cursor->row + d_row + layout->row_count) % layout->row_count;
-  int new_col = cursor->col;
 
   uint8_t col_count = layout->rows[new_row].count;
-  if (col_count == 0) return;
-  new_col = (new_col + d_col + col_count) % col_count;
+  if (col_count == 0) {
+    log_message(LOG_WARNING, "Moved navigation cursor to row with 0 columns.");
+    return;
+  }
+  int new_col = (cursor->col + d_col + col_count) % col_count;
 
   if (new_col >= col_count) new_col = col_count - 1;
 
