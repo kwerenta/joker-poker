@@ -175,6 +175,8 @@ void handle_controls() {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
+  const NavigationSection section = get_current_section();
+
   switch (state.stage) {
     case STAGE_GAME:
       if (button_pressed(PSP_CTRL_RIGHT)) {
@@ -182,9 +184,9 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_LEFT)) {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_CROSS)) {
-        if (state.navigation.section == NAVIGATION_CONSUMABLES)
+        if (section == NAVIGATION_CONSUMABLES)
           use_consumable(NULL);
-        else if (state.navigation.section == NAVIGATION_HAND)
+        else if (section == NAVIGATION_HAND)
           toggle_card_select(state.navigation.hovered);
       } else if (button_pressed(PSP_CTRL_SQUARE)) {
         play_hand();
@@ -197,24 +199,26 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
         move_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_UP)) {
-        sort_hand(0);
+        move_navigation_cursor(-1, 0);
+        // sort_hand(0);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
-        sort_hand(1);
+        move_navigation_cursor(1, 0);
+        // sort_hand(1);
       } else if (button_pressed(PSP_CTRL_SELECT)) {
-        switch (state.navigation.section) {
-          case NAVIGATION_HAND:
-            change_nav_section(NAVIGATION_JOKERS);
-            break;
-          case NAVIGATION_JOKERS:
-            change_nav_section(NAVIGATION_CONSUMABLES);
-            break;
-          case NAVIGATION_CONSUMABLES:
-            change_nav_section(NAVIGATION_HAND);
-            break;
+        // switch (section) {
+        //   case NAVIGATION_HAND:
+        //     change_nav_section(NAVIGATION_JOKERS);
+        //     break;
+        //   case NAVIGATION_JOKERS:
+        //     change_nav_section(NAVIGATION_CONSUMABLES);
+        //     break;
+        //   case NAVIGATION_CONSUMABLES:
+        //     change_nav_section(NAVIGATION_HAND);
+        //     break;
 
-          default:
-            break;
-        }
+        //   default:
+        //     break;
+        // }
       }
 
       break;
@@ -229,9 +233,9 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_CROSS)) {
         buy_shop_item();
       } else if (button_pressed(PSP_CTRL_UP)) {
-        if (state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS) change_nav_section(NAVIGATION_SHOP_ITEMS);
+        move_navigation_cursor(-1, 0);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
-        if (state.navigation.section == NAVIGATION_SHOP_ITEMS) change_nav_section(NAVIGATION_SHOP_BOOSTER_PACKS);
+        move_navigation_cursor(1, 0);
       } else if (button_pressed(PSP_CTRL_LEFT)) {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
@@ -244,7 +248,7 @@ void handle_controls() {
       if (button_pressed(PSP_CTRL_CIRCLE)) {
         skip_booster_pack();
       } else if (button_pressed(PSP_CTRL_CROSS)) {
-        if (state.navigation.section == NAVIGATION_HAND)
+        if (section == NAVIGATION_HAND)
           toggle_card_select(state.navigation.hovered);
         else
           select_booster_pack_item();
@@ -253,9 +257,9 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_UP)) {
-        if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) change_nav_section(NAVIGATION_HAND);
+        move_navigation_cursor(-1, 0);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
-        if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) change_nav_section(NAVIGATION_BOOSTER_PACK);
+        move_navigation_cursor(1, 0);
       } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
         move_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
@@ -270,6 +274,13 @@ void handle_controls() {
       }
 
       break;
+  }
+
+  if (button_pressed(PSP_CTRL_RIGHT) && section == NAVIGATION_JOKERS &&
+      state.navigation.hovered + 1 >= get_nav_section_size(NAVIGATION_JOKERS)) {
+    move_navigation_cursor(0, 1);
+  } else if (button_pressed(PSP_CTRL_LEFT) && section == NAVIGATION_CONSUMABLES && state.navigation.hovered - 1 <= 0) {
+    move_navigation_cursor(0, -1);
   }
 
   controls->state = controls->data.Buttons;

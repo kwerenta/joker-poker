@@ -39,14 +39,11 @@ void game_init() {
   state.game.shop.size = 2;
   cvector_reserve(state.game.shop.booster_packs, 2);
 
-  state.navigation.hovered = 0;
-  state.navigation.section = NAVIGATION_HAND;
+  change_stage(STAGE_GAME);
 
   state.game.fool_last_used.was_used = 0;
 
   memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
-
-  state.stage = STAGE_GAME;
 
   log_message(LOG_INFO, "Game has been initialized.");
 }
@@ -650,7 +647,7 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
 
 void buy_shop_item() {
   uint8_t item_index = state.navigation.hovered;
-  uint8_t is_booster_pack = state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS;
+  uint8_t is_booster_pack = get_current_section() == NAVIGATION_SHOP_BOOSTER_PACKS;
 
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
                                   : get_shop_item_price(&state.game.shop.items[item_index]);

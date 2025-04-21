@@ -82,7 +82,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     float y_offset = 0;
     if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
 
-    uint8_t is_hovered = state.navigation.hovered == i && state.navigation.section == section;
+    uint8_t is_hovered = state.navigation.hovered == i && get_current_section() == section;
 
     CLAY({.id = CLAY_SIDI(parent_id, i + 1),
           .floating = {
@@ -123,7 +123,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     }
   }
 
-  if (state.navigation.section != section) return;
+  if (get_current_section() != section) return;
 
   Clay_String name;
   Clay_String description;
