@@ -175,6 +175,7 @@ void move_nav_hovered(uint8_t new_position) {
 
 void change_stage(Stage stage) {
   state.stage = stage;
+  state.navigation.hovered = 0;
 
   switch (stage) {
     case STAGE_GAME:
