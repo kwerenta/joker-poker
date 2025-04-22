@@ -73,5 +73,4 @@ There are currently no in-game control hints.
   - TRIANGLE - discard selected cards
   - CIRCLE - deselect all cards
 - BOOSTER PACK
-  - CROSS - select/use hovered booster pack item
   - CIRCLE - skip booster pack
