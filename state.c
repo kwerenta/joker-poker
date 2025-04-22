@@ -8,19 +8,21 @@
 
 #include "debug.h"
 
+const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
+
 static const NavigationLayout nav_layouts[] = {
     {.row_count = 2,
      .rows =
          {
-             {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}},
+             jokers_consumables_row,
              {1, {NAVIGATION_HAND}},
          }},
-    {.row_count = 0},
+    {.row_count = 1, .rows = {jokers_consumables_row}},
     {
         .row_count = 3,
         .rows =
             {
-                {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}},
+                jokers_consumables_row,
                 {1, {NAVIGATION_SHOP_ITEMS}},
                 {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
             },
@@ -28,7 +30,7 @@ static const NavigationLayout nav_layouts[] = {
     {.row_count = 3,
      .rows =
          {
-             {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}},
+             jokers_consumables_row,
              {1, {NAVIGATION_HAND}},
              {1, {NAVIGATION_BOOSTER_PACK}},
          }},
