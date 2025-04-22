@@ -171,11 +171,52 @@ Vector2 draw_text(const char *text, const Vector2 *pos, uint32_t color) {
   return draw_text_len(text, strlen(text), pos, color);
 }
 
+uint8_t handle_navigation_controls() {
+  NavigationSection section = get_current_section();
+  uint8_t hovered = state.navigation.hovered;
+  uint8_t section_size = get_nav_section_size(section);
+
+  if (section == NAVIGATION_JOKERS) {
+    if (button_pressed(PSP_CTRL_RIGHT)) {
+      if (hovered < section_size - 1)
+        set_nav_hovered(hovered + 1);
+      else
+        move_navigation_cursor(0, 1);
+
+      return 1;
+    } else if (button_pressed(PSP_CTRL_LEFT)) {
+      if (hovered > 0) set_nav_hovered(hovered - 1);
+
+      return 1;
+    }
+  } else if (section == NAVIGATION_CONSUMABLES) {
+    if (button_pressed(PSP_CTRL_LEFT)) {
+      if (hovered == 0)
+        move_navigation_cursor(0, 1);
+      else
+        set_nav_hovered(hovered - 1);
+
+      return 1;
+    } else if (button_pressed(PSP_CTRL_RIGHT)) {
+      if (hovered < section_size - 1) set_nav_hovered(hovered + 1);
+
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 void handle_controls() {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
   const NavigationSection section = get_current_section();
+
+  if (handle_navigation_controls() == 1) {
+    state.controls.state = controls->data.Buttons;
+    return;
+  }
 
   switch (state.stage) {
     case STAGE_GAME:
@@ -274,13 +315,6 @@ void handle_controls() {
       }
 
       break;
-  }
-
-  if (button_pressed(PSP_CTRL_RIGHT) && section == NAVIGATION_JOKERS &&
-      state.navigation.hovered + 1 >= get_nav_section_size(NAVIGATION_JOKERS)) {
-    move_navigation_cursor(0, 1);
-  } else if (button_pressed(PSP_CTRL_LEFT) && section == NAVIGATION_CONSUMABLES && state.navigation.hovered - 1 <= 0) {
-    move_navigation_cursor(0, -1);
   }
 
   controls->state = controls->data.Buttons;
