@@ -211,23 +211,19 @@ void move_nav_hovered(uint8_t new_position) {
 void change_stage(Stage stage) {
   state.stage = stage;
   state.navigation.hovered = 0;
+  state.navigation.cursor.col = 0;
+  state.navigation.cursor.row = 1;
 
   switch (stage) {
-    case STAGE_GAME:
-      state.navigation.cursor.col = 0;
-      state.navigation.cursor.row = 1;
-      break;
-
     case STAGE_SHOP:
-      state.navigation.cursor.col = 0;
-      state.navigation.cursor.row = 1;
+      if (get_nav_section_size(get_current_section()) == 0) move_nav_cursor(NAVIGATION_DOWN);
       break;
 
     case STAGE_BOOSTER_PACK:
-      state.navigation.cursor.col = 0;
       state.navigation.cursor.row = 2;
       break;
 
+    case STAGE_GAME:
     case STAGE_CASH_OUT:
     case STAGE_GAME_OVER:
       break;
