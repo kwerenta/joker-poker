@@ -176,44 +176,35 @@ uint8_t handle_navigation_controls() {
   uint8_t hovered = state.navigation.hovered;
   uint8_t section_size = get_nav_section_size(section);
 
-  if (section == NAVIGATION_JOKERS) {
-    if (button_pressed(PSP_CTRL_RIGHT)) {
-      if (hovered < section_size - 1)
-        set_nav_hovered(hovered + 1);
-      else
-        move_nav_cursor(NAVIGATION_RIGHT);
+  if (button_pressed(PSP_CTRL_RIGHT)) {
+    if (hovered < section_size - 1)
+      set_nav_hovered(hovered + 1);
+    else
+      move_nav_cursor(NAVIGATION_RIGHT);
 
-      return 1;
-    } else if (button_pressed(PSP_CTRL_LEFT)) {
-      if (hovered > 0) set_nav_hovered(hovered - 1);
-      return 1;
-    } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-      move_nav_hovered(state.navigation.hovered - 1);
-      return 1;
-    } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-      move_nav_hovered(state.navigation.hovered + 1);
-      return 1;
-    }
-  } else if (section == NAVIGATION_CONSUMABLES) {
-    if (button_pressed(PSP_CTRL_LEFT)) {
-      if (hovered == 0)
-        move_nav_cursor(NAVIGATION_LEFT);
-      else
-        set_nav_hovered(hovered - 1);
+    return 1;
+  } else if (button_pressed(PSP_CTRL_LEFT)) {
+    if (hovered > 0)
+      set_nav_hovered(hovered - 1);
+    else
+      move_nav_cursor(NAVIGATION_LEFT);
 
-      return 1;
-    } else if (button_pressed(PSP_CTRL_RIGHT)) {
-      if (hovered < section_size - 1) set_nav_hovered(hovered + 1);
+    return 1;
+  } else if (button_pressed(PSP_CTRL_UP)) {
+    move_nav_cursor(NAVIGATION_UP);
+  } else if (button_pressed(PSP_CTRL_DOWN)) {
+    move_nav_cursor(NAVIGATION_DOWN);
+  } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+    move_nav_hovered(hovered - 1);
+    return 1;
+  } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+    move_nav_hovered(hovered + 1);
+    return 1;
+  }
 
-      return 1;
-    } else if (button_pressed(PSP_CTRL_CROSS)) {
+  if (section == NAVIGATION_CONSUMABLES) {
+    if (button_pressed(PSP_CTRL_CROSS)) {
       use_consumable(NULL);
-      return 1;
-    } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-      move_nav_hovered(state.navigation.hovered - 1);
-      return 1;
-    } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-      move_nav_hovered(state.navigation.hovered + 1);
       return 1;
     }
   }
@@ -225,8 +216,6 @@ void handle_controls() {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
-  const NavigationSection section = get_current_section();
-
   if (handle_navigation_controls() == 1) {
     state.controls.state = controls->data.Buttons;
     return;
@@ -234,11 +223,7 @@ void handle_controls() {
 
   switch (state.stage) {
     case STAGE_GAME:
-      if (button_pressed(PSP_CTRL_RIGHT)) {
-        set_nav_hovered(state.navigation.hovered + 1);
-      } else if (button_pressed(PSP_CTRL_LEFT)) {
-        set_nav_hovered(state.navigation.hovered - 1);
-      } else if (button_pressed(PSP_CTRL_CROSS)) {
+      if (button_pressed(PSP_CTRL_CROSS)) {
         toggle_card_select(state.navigation.hovered);
       } else if (button_pressed(PSP_CTRL_SQUARE)) {
         play_hand();
@@ -246,14 +231,6 @@ void handle_controls() {
         deselect_all_cards();
       } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
         discard_hand();
-      } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-        move_nav_hovered(state.navigation.hovered - 1);
-      } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-        move_nav_hovered(state.navigation.hovered + 1);
-      } else if (button_pressed(PSP_CTRL_UP)) {
-        move_nav_cursor(NAVIGATION_UP);
-      } else if (button_pressed(PSP_CTRL_DOWN)) {
-        move_nav_cursor(NAVIGATION_DOWN);
       } else if (button_pressed(PSP_CTRL_SELECT)) {
         sort_hand(state.game.sorting_mode == SORTING_BY_SUIT ? SORTING_BY_RANK : SORTING_BY_SUIT);
       }
@@ -269,38 +246,17 @@ void handle_controls() {
         exit_shop();
       } else if (button_pressed(PSP_CTRL_CROSS)) {
         buy_shop_item();
-      } else if (button_pressed(PSP_CTRL_UP)) {
-        move_nav_cursor(NAVIGATION_UP);
-      } else if (button_pressed(PSP_CTRL_DOWN)) {
-        move_nav_cursor(NAVIGATION_DOWN);
-      } else if (button_pressed(PSP_CTRL_LEFT)) {
-        set_nav_hovered(state.navigation.hovered - 1);
-      } else if (button_pressed(PSP_CTRL_RIGHT)) {
-        set_nav_hovered(state.navigation.hovered + 1);
       }
-
       break;
 
     case STAGE_BOOSTER_PACK:
       if (button_pressed(PSP_CTRL_CIRCLE)) {
         skip_booster_pack();
       } else if (button_pressed(PSP_CTRL_CROSS)) {
-        if (section == NAVIGATION_HAND)
+        if (get_current_section() == NAVIGATION_HAND)
           toggle_card_select(state.navigation.hovered);
         else
           select_booster_pack_item();
-      } else if (button_pressed(PSP_CTRL_LEFT)) {
-        set_nav_hovered(state.navigation.hovered - 1);
-      } else if (button_pressed(PSP_CTRL_RIGHT)) {
-        set_nav_hovered(state.navigation.hovered + 1);
-      } else if (button_pressed(PSP_CTRL_UP)) {
-        move_nav_cursor(NAVIGATION_UP);
-      } else if (button_pressed(PSP_CTRL_DOWN)) {
-        move_nav_cursor(NAVIGATION_DOWN);
-      } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
-        move_nav_hovered(state.navigation.hovered - 1);
-      } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
-        move_nav_hovered(state.navigation.hovered + 1);
       }
       break;
 
