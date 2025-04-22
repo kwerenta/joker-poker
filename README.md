@@ -63,18 +63,15 @@ After the first build, running last step is enough to get an `EBOOT.PBP` file wh
 There are currently no in-game control hints.
 
 - General
+  - UP/DOWN/LEFT/RIGHT - move between different sections
   - LEFT/RIGHT - change currently hovered item
-  - CROSS - select currently hovered item
+  - CROSS - select/buy/use currently hovered item
+  - LTRIGGER/RTRIGGER - move hovered item to the left/right
 - Game
-  - SELECT - switch between hand, jokers and consumables slots
+  - SELECT - sort hand by rank/suit
   - SQUARE - play selected cards
   - TRIANGLE - discard selected cards
   - CIRCLE - deselect all cards
-  - LTRIGGER/RTRIGGER - move hovered item to the left/right
-  - UP/DOWN - sort hand by rank/suit
-- SHOP
-  - UP/DOWN - switch between booster packs and other shop items
 - BOOSTER PACK
-  - UP/DOWN - switch between hand and booster pack items
   - CROSS - select/use hovered booster pack item
   - CIRCLE - skip booster pack
