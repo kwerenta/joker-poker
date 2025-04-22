@@ -90,9 +90,12 @@ uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
   return (uint8_t)new_hovered;
 }
 
-void move_navigation_cursor(int d_row, int d_col) {
+void move_nav_cursor(NavigationDirection direction) {
   const NavigationLayout *layout = &nav_layouts[state.stage];
   NavigationCursor *cursor = &state.navigation.cursor;
+
+  int8_t d_row = direction == NAVIGATION_UP ? -1 : direction == NAVIGATION_DOWN ? 1 : 0;
+  int8_t d_col = direction == NAVIGATION_LEFT ? -1 : direction == NAVIGATION_RIGHT ? 1 : 0;
 
   int new_row = (cursor->row + d_row + layout->row_count) % layout->row_count;
 

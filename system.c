@@ -181,7 +181,7 @@ uint8_t handle_navigation_controls() {
       if (hovered < section_size - 1)
         set_nav_hovered(hovered + 1);
       else
-        move_navigation_cursor(0, 1);
+        move_nav_cursor(NAVIGATION_RIGHT);
 
       return 1;
     } else if (button_pressed(PSP_CTRL_LEFT)) {
@@ -197,7 +197,7 @@ uint8_t handle_navigation_controls() {
   } else if (section == NAVIGATION_CONSUMABLES) {
     if (button_pressed(PSP_CTRL_LEFT)) {
       if (hovered == 0)
-        move_navigation_cursor(0, 1);
+        move_nav_cursor(NAVIGATION_LEFT);
       else
         set_nav_hovered(hovered - 1);
 
@@ -251,10 +251,10 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
         move_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_UP)) {
-        move_navigation_cursor(-1, 0);
+        move_nav_cursor(NAVIGATION_UP);
         // sort_hand(0);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
-        move_navigation_cursor(1, 0);
+        move_nav_cursor(NAVIGATION_DOWN);
         // sort_hand(1);
       } else if (button_pressed(PSP_CTRL_SELECT)) {
         // switch (section) {
@@ -285,9 +285,9 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_CROSS)) {
         buy_shop_item();
       } else if (button_pressed(PSP_CTRL_UP)) {
-        move_navigation_cursor(-1, 0);
+        move_nav_cursor(NAVIGATION_UP);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
-        move_navigation_cursor(1, 0);
+        move_nav_cursor(NAVIGATION_DOWN);
       } else if (button_pressed(PSP_CTRL_LEFT)) {
         set_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
@@ -309,9 +309,9 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_RIGHT)) {
         set_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_UP)) {
-        move_navigation_cursor(-1, 0);
+        move_nav_cursor(NAVIGATION_UP);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
-        move_navigation_cursor(1, 0);
+        move_nav_cursor(NAVIGATION_DOWN);
       } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
         move_nav_hovered(state.navigation.hovered - 1);
       } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
