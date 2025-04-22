@@ -94,6 +94,8 @@ uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
 
 void move_nav_cursor(NavigationDirection direction) {
   const NavigationLayout *layout = &nav_layouts[state.stage];
+  if (layout->row_count == 0) return;
+
   NavigationCursor *cursor = &state.navigation.cursor;
   NavigationSection initial_section = get_current_section();
 
