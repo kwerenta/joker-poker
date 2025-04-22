@@ -93,25 +93,28 @@ uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
 void move_nav_cursor(NavigationDirection direction) {
   const NavigationLayout *layout = &nav_layouts[state.stage];
   NavigationCursor *cursor = &state.navigation.cursor;
+  NavigationSection initial_section = get_current_section();
 
   int8_t d_row = direction == NAVIGATION_UP ? -1 : direction == NAVIGATION_DOWN ? 1 : 0;
   int8_t d_col = direction == NAVIGATION_LEFT ? -1 : direction == NAVIGATION_RIGHT ? 1 : 0;
 
-  int new_row = (cursor->row + d_row + layout->row_count) % layout->row_count;
+  do {
+    int new_row = (cursor->row + d_row + layout->row_count) % layout->row_count;
 
-  uint8_t col_count = layout->rows[new_row].count;
-  if (col_count == 0) {
-    log_message(LOG_WARNING, "Moved navigation cursor to row with 0 columns.");
-    return;
-  }
+    uint8_t col_count = layout->rows[new_row].count;
+    if (col_count == 0) {
+      log_message(LOG_WARNING, "Moved navigation cursor to row with 0 columns.");
+      return;
+    }
 
-  int new_col = (cursor->col + d_col + col_count) % col_count;
-  if (new_col >= col_count) new_col = col_count - 1;
+    int new_col = (cursor->col + d_col + col_count) % col_count;
+    if (new_col >= col_count) new_col = col_count - 1;
 
-  uint8_t prev_section_size = get_nav_section_size(get_current_section());
+    cursor->row = new_row;
+    cursor->col = new_col;
+  } while (get_nav_section_size(get_current_section()) == 0 && initial_section != get_current_section());
 
-  cursor->row = new_row;
-  cursor->col = new_col;
+  uint8_t prev_section_size = get_nav_section_size(initial_section);
   state.navigation.hovered = calc_proportional_hovered(prev_section_size, get_nav_section_size(get_current_section()));
 }
 
