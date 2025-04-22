@@ -115,7 +115,11 @@ void move_nav_cursor(NavigationDirection direction) {
   } while (get_nav_section_size(get_current_section()) == 0 && initial_section != get_current_section());
 
   uint8_t prev_section_size = get_nav_section_size(initial_section);
-  state.navigation.hovered = calc_proportional_hovered(prev_section_size, get_nav_section_size(get_current_section()));
+  if (d_row != 0)
+    state.navigation.hovered =
+        calc_proportional_hovered(prev_section_size, get_nav_section_size(get_current_section()));
+  else
+    state.navigation.hovered = state.navigation.hovered == 0 ? get_nav_section_size(get_current_section()) - 1 : 0;
 }
 
 NavigationSection get_current_section() {
