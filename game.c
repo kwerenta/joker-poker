@@ -39,14 +39,11 @@ void game_init() {
   state.game.shop.size = 2;
   cvector_reserve(state.game.shop.booster_packs, 2);
 
-  state.navigation.hovered = 0;
-  state.navigation.section = NAVIGATION_HAND;
+  change_stage(STAGE_GAME);
 
   state.game.fool_last_used.was_used = 0;
 
   memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
-
-  state.stage = STAGE_GAME;
 
   log_message(LOG_INFO, "Game has been initialized.");
 }
@@ -283,10 +280,11 @@ int compare_by_suit(const void *a, const void *b) {
   return by_suit;
 }
 
-void sort_hand(uint8_t by_suit) {
+void sort_hand(SortingMode sorting_mode) {
   int (*comparator)(const void *a, const void *b) = compare_by_rank;
-  if (by_suit == 1) comparator = compare_by_suit;
+  if (sorting_mode == SORTING_BY_SUIT) comparator = compare_by_suit;
 
+  state.game.sorting_mode = sorting_mode;
   qsort(state.game.hand.cards, cvector_size(state.game.hand.cards), sizeof(Card), comparator);
 }
 
@@ -595,7 +593,7 @@ uint8_t use_consumable(Consumable *consumable_to_use) {
     state.game.fool_last_used.consumable = consumable;
   }
 
-  if (consumable_to_use == NULL && state.navigation.hovered > 0) state.navigation.hovered--;
+  if (consumable_to_use == NULL) set_nav_hovered(state.navigation.hovered);
   return was_used;
 }
 
@@ -650,7 +648,7 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
 
 void buy_shop_item() {
   uint8_t item_index = state.navigation.hovered;
-  uint8_t is_booster_pack = state.navigation.section == NAVIGATION_SHOP_BOOSTER_PACKS;
+  uint8_t is_booster_pack = get_current_section() == NAVIGATION_SHOP_BOOSTER_PACKS;
 
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
@@ -667,7 +665,7 @@ void buy_shop_item() {
 
   state.game.money -= price;
 
-  if (state.stage == STAGE_SHOP && state.navigation.hovered > 0) state.navigation.hovered--;
+  if (state.stage == STAGE_SHOP) set_nav_hovered(state.navigation.hovered);
 }
 
 void open_booster_pack(BoosterPackItem *booster_pack) {
@@ -733,7 +731,7 @@ void select_booster_pack_item() {
 
   state.game.booster_pack.uses--;
   cvector_erase(state.game.booster_pack.content, state.navigation.hovered);
-  if (state.navigation.hovered > 0) state.navigation.hovered--;
+  set_nav_hovered(state.navigation.hovered);
 
   if (state.game.booster_pack.uses == 0) close_booster_pack();
 }

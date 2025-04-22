@@ -9,6 +9,9 @@
 
 #define FRAME_ARENA_CAPACITY (5120)
 
+#define MAX_NAV_ROWS 3
+#define MAX_NAV_SECTIONS_PER_ROW 2
+
 typedef enum {
   STAGE_GAME,
   STAGE_CASH_OUT,
@@ -32,8 +35,25 @@ typedef enum {
 } NavigationSection;
 
 typedef struct {
+  uint8_t count;
+  NavigationSection sections[MAX_NAV_SECTIONS_PER_ROW];
+} NavigationRow;
+
+typedef struct {
+  uint8_t row_count;
+  NavigationRow rows[MAX_NAV_ROWS];
+} NavigationLayout;
+
+typedef struct {
+  uint8_t row;
+  uint8_t col;
+} NavigationCursor;
+
+typedef enum { NAVIGATION_UP, NAVIGATION_DOWN, NAVIGATION_LEFT, NAVIGATION_RIGHT } NavigationDirection;
+
+typedef struct {
   uint8_t hovered;
-  NavigationSection section;
+  NavigationCursor cursor;
 } Navigation;
 
 typedef struct {
@@ -45,9 +65,10 @@ void *frame_arena_allocate(size_t size);
 int append_clay_string(Clay_String *dest, const char *format, ...);
 
 uint8_t get_nav_section_size(NavigationSection section);
-void change_nav_section(NavigationSection section);
+void move_nav_cursor(NavigationDirection direction);
+NavigationSection get_current_section();
 
-void set_nav_hovered(uint8_t new_hovered);
+void set_nav_hovered(int8_t new_hovered);
 void move_nav_hovered(uint8_t new_position);
 
 void change_stage(Stage stage);

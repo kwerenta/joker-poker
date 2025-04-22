@@ -2,10 +2,40 @@
 
 #include <clay.h>
 #include <cvector.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 
 #include "debug.h"
+
+const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
+
+static const NavigationLayout nav_layouts[] = {
+    {.row_count = 2,
+     .rows =
+         {
+             jokers_consumables_row,
+             {1, {NAVIGATION_HAND}},
+         }},
+    {.row_count = 1, .rows = {jokers_consumables_row}},
+    {
+        .row_count = 3,
+        .rows =
+            {
+                jokers_consumables_row,
+                {1, {NAVIGATION_SHOP_ITEMS}},
+                {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
+            },
+    },
+    {.row_count = 3,
+     .rows =
+         {
+             jokers_consumables_row,
+             {1, {NAVIGATION_HAND}},
+             {1, {NAVIGATION_BOOSTER_PACK}},
+         }},
+    {.row_count = 0},
+};
 
 int append_clay_string(Clay_String *dest, const char *format, ...) {
   size_t remaining = FRAME_ARENA_CAPACITY - state.frame_arena.offset;
@@ -47,9 +77,64 @@ void *frame_arena_allocate(size_t size) {
   return ptr;
 }
 
-void change_nav_section(NavigationSection section) {
-  state.navigation.hovered = 0;
-  state.navigation.section = section;
+uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
+  uint8_t current_hovered = state.navigation.hovered;
+
+  if (current_count <= 1 || next_count <= 1) return 0;
+  if (current_count == next_count) return current_hovered < next_count ? current_hovered : next_count - 1;
+
+  float ratio = (float)current_hovered / (float)(current_count - 1);
+  int new_hovered = (int)roundf(ratio * (next_count - 1));
+
+  if (new_hovered < 0) new_hovered = 0;
+  if (new_hovered >= next_count) new_hovered = next_count - 1;
+
+  return (uint8_t)new_hovered;
+}
+
+void move_nav_cursor(NavigationDirection direction) {
+  const NavigationLayout *layout = &nav_layouts[state.stage];
+  if (layout->row_count == 0) return;
+
+  NavigationCursor *cursor = &state.navigation.cursor;
+  NavigationSection initial_section = get_current_section();
+
+  int8_t d_row = direction == NAVIGATION_UP ? -1 : direction == NAVIGATION_DOWN ? 1 : 0;
+  int8_t d_col = direction == NAVIGATION_LEFT ? -1 : direction == NAVIGATION_RIGHT ? 1 : 0;
+
+  do {
+    int new_row = (cursor->row + d_row + layout->row_count) % layout->row_count;
+
+    uint8_t col_count = layout->rows[new_row].count;
+    if (col_count == 0) {
+      log_message(LOG_WARNING, "Moved navigation cursor to row with 0 columns.");
+      return;
+    }
+
+    uint8_t curr_column = 0;
+
+    do {
+      int new_col = (cursor->col + d_col + col_count) % col_count;
+      if (new_col >= col_count) new_col = col_count - 1;
+
+      cursor->row = new_row;
+      cursor->col = new_col + (d_col == 0 ? curr_column : 0);
+      curr_column++;
+    } while (get_nav_section_size(get_current_section()) == 0 && curr_column < col_count);
+  } while (get_nav_section_size(get_current_section()) == 0 && initial_section != get_current_section());
+
+  uint8_t initial_section_size = get_nav_section_size(initial_section);
+  uint8_t new_section_size = get_nav_section_size(get_current_section());
+  if (d_row != 0)
+    state.navigation.hovered = calc_proportional_hovered(initial_section_size, new_section_size);
+  else if (state.navigation.hovered == 0 && direction == NAVIGATION_LEFT)
+    state.navigation.hovered = new_section_size - 1;
+  else
+    state.navigation.hovered = 0;
+}
+
+NavigationSection get_current_section() {
+  return nav_layouts[state.stage].rows[state.navigation.cursor.row].sections[state.navigation.cursor.col];
 }
 
 uint8_t get_nav_section_size(NavigationSection section) {
@@ -79,22 +164,26 @@ uint8_t get_nav_section_size(NavigationSection section) {
   return max_value;
 }
 
-void set_nav_hovered(uint8_t new_hovered) {
-  uint8_t max_value = get_nav_section_size(state.navigation.section);
+void set_nav_hovered(int8_t new_hovered) {
+  uint8_t max_value = get_nav_section_size(get_current_section());
 
-  if (new_hovered >= max_value || new_hovered < 0) return;
+  if (new_hovered >= max_value)
+    new_hovered = max_value - 1;
+  else if (new_hovered < 0)
+    new_hovered = 0;
 
   state.navigation.hovered = new_hovered;
 }
 
 void move_nav_hovered(uint8_t new_position) {
-  uint8_t max_position = get_nav_section_size(state.navigation.section);
+  const NavigationSection section = get_current_section();
+  uint8_t max_position = get_nav_section_size(section);
 
   if (new_position >= max_position) return;
 
   uint8_t *hovered = &state.navigation.hovered;
 
-  switch (state.navigation.section) {
+  switch (section) {
     case NAVIGATION_HAND: {
       Card temp = state.game.hand.cards[*hovered];
       state.game.hand.cards[*hovered] = state.game.hand.cards[new_position];
@@ -125,20 +214,20 @@ void move_nav_hovered(uint8_t new_position) {
 
 void change_stage(Stage stage) {
   state.stage = stage;
+  state.navigation.hovered = 0;
+  state.navigation.cursor.col = 0;
+  state.navigation.cursor.row = nav_layouts[stage].row_count > 1 ? 1 : 0;
 
   switch (stage) {
-    case STAGE_GAME:
-      change_nav_section(NAVIGATION_HAND);
-      break;
-
     case STAGE_SHOP:
-      change_nav_section(NAVIGATION_SHOP_ITEMS);
+      if (get_nav_section_size(get_current_section()) == 0) move_nav_cursor(NAVIGATION_DOWN);
       break;
 
     case STAGE_BOOSTER_PACK:
-      change_nav_section(NAVIGATION_BOOSTER_PACK);
+      state.navigation.cursor.row = 2;
       break;
 
+    case STAGE_GAME:
     case STAGE_CASH_OUT:
     case STAGE_GAME_OVER:
       break;
