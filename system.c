@@ -186,7 +186,12 @@ uint8_t handle_navigation_controls() {
       return 1;
     } else if (button_pressed(PSP_CTRL_LEFT)) {
       if (hovered > 0) set_nav_hovered(hovered - 1);
-
+      return 1;
+    } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+      move_nav_hovered(state.navigation.hovered - 1);
+      return 1;
+    } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+      move_nav_hovered(state.navigation.hovered + 1);
       return 1;
     }
   } else if (section == NAVIGATION_CONSUMABLES) {
@@ -203,6 +208,12 @@ uint8_t handle_navigation_controls() {
       return 1;
     } else if (button_pressed(PSP_CTRL_CROSS)) {
       use_consumable(NULL);
+      return 1;
+    } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
+      move_nav_hovered(state.navigation.hovered - 1);
+      return 1;
+    } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
+      move_nav_hovered(state.navigation.hovered + 1);
       return 1;
     }
   }
