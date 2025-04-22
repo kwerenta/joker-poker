@@ -127,10 +127,10 @@ void move_nav_cursor(NavigationDirection direction) {
   uint8_t new_section_size = get_nav_section_size(get_current_section());
   if (d_row != 0)
     state.navigation.hovered = calc_proportional_hovered(initial_section_size, new_section_size);
+  else if (state.navigation.hovered == 0 && direction == NAVIGATION_LEFT)
+    state.navigation.hovered = new_section_size - 1;
   else
-    state.navigation.hovered = state.navigation.hovered == 0 && state.navigation.hovered != initial_section_size - 1
-                                   ? new_section_size - 1
-                                   : 0;
+    state.navigation.hovered = 0;
 }
 
 NavigationSection get_current_section() {
@@ -216,7 +216,7 @@ void change_stage(Stage stage) {
   state.stage = stage;
   state.navigation.hovered = 0;
   state.navigation.cursor.col = 0;
-  state.navigation.cursor.row = 1;
+  state.navigation.cursor.row = nav_layouts[stage].row_count > 1 ? 1 : 0;
 
   switch (stage) {
     case STAGE_SHOP:
