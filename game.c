@@ -280,10 +280,11 @@ int compare_by_suit(const void *a, const void *b) {
   return by_suit;
 }
 
-void sort_hand(uint8_t by_suit) {
+void sort_hand(SortingMode sorting_mode) {
   int (*comparator)(const void *a, const void *b) = compare_by_rank;
-  if (by_suit == 1) comparator = compare_by_suit;
+  if (sorting_mode == SORTING_BY_SUIT) comparator = compare_by_suit;
 
+  state.game.sorting_mode = sorting_mode;
   qsort(state.game.hand.cards, cvector_size(state.game.hand.cards), sizeof(Card), comparator);
 }
 

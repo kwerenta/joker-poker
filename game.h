@@ -196,6 +196,8 @@ typedef struct {
   cvector_vector_type(BoosterPackItem) booster_packs;
 } Shop;
 
+typedef enum { SORTING_BY_SUIT, SORTING_BY_RANK } SortingMode;
+
 typedef struct {
   cvector_vector_type(Card) full_deck;
   cvector_vector_type(Card) deck;
@@ -221,6 +223,8 @@ typedef struct {
 
   BoosterPack booster_pack;
   FoolLastUsed fool_last_used;
+
+  SortingMode sorting_mode;
 } Game;
 
 void game_init();
@@ -233,7 +237,7 @@ void draw_card();
 void play_hand();
 void discard_hand();
 void fill_hand();
-void sort_hand(uint8_t by_suit);
+void sort_hand(SortingMode sorting_mode);
 
 void toggle_card_select(uint8_t index);
 void deselect_all_cards();

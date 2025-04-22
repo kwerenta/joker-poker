@@ -252,25 +252,10 @@ void handle_controls() {
         move_nav_hovered(state.navigation.hovered + 1);
       } else if (button_pressed(PSP_CTRL_UP)) {
         move_nav_cursor(NAVIGATION_UP);
-        // sort_hand(0);
       } else if (button_pressed(PSP_CTRL_DOWN)) {
         move_nav_cursor(NAVIGATION_DOWN);
-        // sort_hand(1);
       } else if (button_pressed(PSP_CTRL_SELECT)) {
-        // switch (section) {
-        //   case NAVIGATION_HAND:
-        //     change_nav_section(NAVIGATION_JOKERS);
-        //     break;
-        //   case NAVIGATION_JOKERS:
-        //     change_nav_section(NAVIGATION_CONSUMABLES);
-        //     break;
-        //   case NAVIGATION_CONSUMABLES:
-        //     change_nav_section(NAVIGATION_HAND);
-        //     break;
-
-        //   default:
-        //     break;
-        // }
+        sort_hand(state.game.sorting_mode == SORTING_BY_SUIT ? SORTING_BY_RANK : SORTING_BY_SUIT);
       }
 
       break;
