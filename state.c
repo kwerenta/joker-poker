@@ -2,6 +2,7 @@
 
 #include <clay.h>
 #include <cvector.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -74,6 +75,21 @@ void *frame_arena_allocate(size_t size) {
   return ptr;
 }
 
+uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
+  uint8_t current_hovered = state.navigation.hovered;
+
+  if (current_count <= 1 || next_count <= 1) return 0;
+  if (current_count == next_count) return current_hovered < next_count ? current_hovered : next_count - 1;
+
+  float ratio = (float)current_hovered / (float)(current_count - 1);
+  int new_hovered = (int)roundf(ratio * (next_count - 1));
+
+  if (new_hovered < 0) new_hovered = 0;
+  if (new_hovered >= next_count) new_hovered = next_count - 1;
+
+  return (uint8_t)new_hovered;
+}
+
 void move_navigation_cursor(int d_row, int d_col) {
   const NavigationLayout *layout = &nav_layouts[state.stage];
   NavigationCursor *cursor = &state.navigation.cursor;
@@ -85,13 +101,15 @@ void move_navigation_cursor(int d_row, int d_col) {
     log_message(LOG_WARNING, "Moved navigation cursor to row with 0 columns.");
     return;
   }
-  int new_col = (cursor->col + d_col + col_count) % col_count;
 
+  int new_col = (cursor->col + d_col + col_count) % col_count;
   if (new_col >= col_count) new_col = col_count - 1;
+
+  uint8_t prev_section_size = get_nav_section_size(get_current_section());
 
   cursor->row = new_row;
   cursor->col = new_col;
-  state.navigation.hovered = 0;
+  state.navigation.hovered = calc_proportional_hovered(prev_section_size, get_nav_section_size(get_current_section()));
 }
 
 NavigationSection get_current_section() {
