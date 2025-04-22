@@ -192,8 +192,10 @@ uint8_t handle_navigation_controls() {
     return 1;
   } else if (button_pressed(PSP_CTRL_UP)) {
     move_nav_cursor(NAVIGATION_UP);
+    return 1;
   } else if (button_pressed(PSP_CTRL_DOWN)) {
     move_nav_cursor(NAVIGATION_DOWN);
+    return 1;
   } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
     move_nav_hovered(hovered - 1);
     return 1;
