@@ -107,11 +107,16 @@ void move_nav_cursor(NavigationDirection direction) {
       return;
     }
 
-    int new_col = (cursor->col + d_col + col_count) % col_count;
-    if (new_col >= col_count) new_col = col_count - 1;
+    uint8_t curr_column = 0;
 
-    cursor->row = new_row;
-    cursor->col = new_col;
+    do {
+      int new_col = (cursor->col + d_col + col_count) % col_count;
+      if (new_col >= col_count) new_col = col_count - 1;
+
+      cursor->row = new_row;
+      cursor->col = new_col + (d_col == 0 ? curr_column : 0);
+      curr_column++;
+    } while (get_nav_section_size(get_current_section()) == 0 && curr_column < col_count);
   } while (get_nav_section_size(get_current_section()) == 0 && initial_section != get_current_section());
 
   uint8_t prev_section_size = get_nav_section_size(initial_section);
