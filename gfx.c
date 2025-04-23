@@ -312,7 +312,7 @@ void render_sidebar() {
       Clay_String hand;
       if (state.game.selected_hand.count != 0)
         append_clay_string(&hand, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
-                           state.game.poker_hands[ffs(state.game.selected_hand.hand_union) - 1] + 1);
+                           get_poker_hand_stats(state.game.selected_hand.hand_union)->level + 1);
       CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
                 CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
 

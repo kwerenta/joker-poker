@@ -87,6 +87,7 @@ void play_hand() {
   if (state.game.hands == 0 || state.game.selected_hand.count == 0) return;
 
   update_scoring_hand();
+  get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
 
   for (uint8_t i = 0; i < 5; i++) {
     Card *card = state.game.selected_hand.scoring_cards[i];
@@ -511,13 +512,15 @@ ScorePair get_planet_card_base_score(uint16_t hand_union) {
   }
 }
 
+PokerHandStats *get_poker_hand_stats(uint16_t hand_union) { return &state.game.poker_hands[ffs(hand_union) - 1]; }
+
 ScorePair get_poker_hand_total_score(uint16_t hand_union) {
   ScorePair poker_hand_score = get_poker_hand_base_score(hand_union);
   ScorePair planet_score = get_planet_card_base_score(hand_union);
 
-  uint8_t poker_hand_index = ffs(hand_union) - 1;
-  poker_hand_score.chips += planet_score.chips * state.game.poker_hands[poker_hand_index];
-  poker_hand_score.mult += planet_score.mult * state.game.poker_hands[poker_hand_index];
+  uint8_t poker_hand_level = get_poker_hand_stats(hand_union)->level;
+  poker_hand_score.chips += planet_score.chips * poker_hand_level;
+  poker_hand_score.mult += planet_score.mult * poker_hand_level;
 
   return poker_hand_score;
 }
@@ -575,7 +578,7 @@ uint8_t use_consumable(Consumable *consumable_to_use) {
   uint8_t was_used = 1;
   switch (consumable.type) {
     case CONSUMABLE_PLANET:
-      state.game.poker_hands[consumable.planet] += 1;
+      state.game.poker_hands[consumable.planet].level += 1;
       break;
 
     case CONSUMABLE_TAROT:

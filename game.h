@@ -71,6 +71,11 @@ typedef enum {
 } Planet;
 
 typedef struct {
+  uint8_t level;
+  uint16_t played;
+} PokerHandStats;
+
+typedef struct {
   double mult;
   uint32_t chips;
 } ScorePair;
@@ -216,7 +221,7 @@ typedef struct {
   uint8_t hands;
   uint8_t discards;
 
-  uint8_t poker_hands[12];
+  PokerHandStats poker_hands[12];
 
   uint16_t money;
   Shop shop;
@@ -249,6 +254,7 @@ PokerHand get_poker_hand(uint16_t hand_union);
 void update_scoring_hand();
 void update_scoring_edition(Edition edition);
 
+PokerHandStats *get_poker_hand_stats(uint16_t hand_union);
 ScorePair get_poker_hand_base_score(uint16_t hand_union);
 ScorePair get_planet_card_base_score(uint16_t hand_union);
 ScorePair get_poker_hand_total_score(uint16_t hand_union);
