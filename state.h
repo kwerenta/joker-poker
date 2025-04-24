@@ -12,6 +12,11 @@
 #define MAX_NAV_ROWS 3
 #define MAX_NAV_SECTIONS_PER_ROW 2
 
+typedef struct {
+  SceCtrlData data;
+  unsigned int state;
+} Controls;
+
 typedef enum {
   STAGE_GAME,
   STAGE_CASH_OUT,
@@ -20,10 +25,7 @@ typedef enum {
   STAGE_GAME_OVER,
 } Stage;
 
-typedef struct {
-  SceCtrlData data;
-  unsigned int state;
-} Controls;
+typedef enum { OVERLAY_NONE, OVERLAY_MENU } Overlay;
 
 typedef enum {
   NAVIGATION_HAND,
@@ -80,12 +82,14 @@ typedef struct {
   Texture *font;
 
   Controls controls;
+
+  Stage stage;
+  Overlay overlay;
   Navigation navigation;
 
   float delta;
   uint8_t running;
 
-  Stage stage;
   Game game;
 } State;
 

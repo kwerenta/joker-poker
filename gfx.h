@@ -45,4 +45,6 @@ void render_cash_out();
 
 void render_game_over();
 
+void render_overlay_menu();
+
 #endif

@@ -498,3 +498,21 @@ void render_game_over() {
   Vector2 pos = {10, 10};
   draw_text("You've lost:(", &pos, 0xFFFFFFFF);
 }
+
+void render_overlay_menu() {
+  CLAY({.id = CLAY_ID("Overlay"),
+        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
+        .layout =
+            {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            },
+        .backgroundColor = {0, 0, 0, 150}}) {
+    CLAY({.id = CLAY_ID_LOCAL("ContinueButton"),
+          .backgroundColor = COLOR_MULT,
+          .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
+      CLAY_TEXT(CLAY_STRING("Continue"), WHITE_TEXT_CONFIG);
+    }
+  }
+}
