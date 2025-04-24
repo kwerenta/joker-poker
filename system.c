@@ -202,6 +202,9 @@ uint8_t handle_navigation_controls() {
   } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
     move_nav_hovered(hovered + 1);
     return 1;
+  } else if (button_pressed(PSP_CTRL_START)) {
+    state.overlay = state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE;
+    return 1;
   }
 
   if (section == NAVIGATION_CONSUMABLES) {
