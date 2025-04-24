@@ -204,6 +204,9 @@ uint8_t handle_navigation_controls() {
     return 1;
   } else if (button_pressed(PSP_CTRL_START)) {
     state.overlay = state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE;
+
+    state.navigation.cursor = (NavigationCursor){0, 0};
+    set_nav_hovered(0);
     return 1;
   }
 
@@ -221,7 +224,7 @@ void handle_controls() {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
-  if (handle_navigation_controls() == 1) {
+  if (handle_navigation_controls() == 1 || state.overlay != OVERLAY_NONE) {
     state.controls.state = controls->data.Buttons;
     return;
   }

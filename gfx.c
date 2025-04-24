@@ -507,12 +507,19 @@ void render_overlay_menu() {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                 .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
                 .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                .childGap = 4,
             },
         .backgroundColor = {0, 0, 0, 150}}) {
     CLAY({.id = CLAY_ID_LOCAL("ContinueButton"),
-          .backgroundColor = COLOR_MULT,
+          .backgroundColor = state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MULT,
           .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
       CLAY_TEXT(CLAY_STRING("Continue"), WHITE_TEXT_CONFIG);
+    }
+
+    CLAY({.id = CLAY_ID_LOCAL("RestartButton"),
+          .backgroundColor = state.navigation.hovered == 1 ? COLOR_CHIPS : COLOR_MULT,
+          .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
+      CLAY_TEXT(CLAY_STRING("Restart"), WHITE_TEXT_CONFIG);
     }
   }
 }

@@ -10,7 +10,7 @@
 
 const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
 
-static const NavigationLayout nav_layouts[] = {
+static const NavigationLayout stage_nav_layouts[] = {
     {.row_count = 2,
      .rows =
          {
@@ -18,15 +18,13 @@ static const NavigationLayout nav_layouts[] = {
              {1, {NAVIGATION_HAND}},
          }},
     {.row_count = 1, .rows = {jokers_consumables_row}},
-    {
-        .row_count = 3,
-        .rows =
-            {
-                jokers_consumables_row,
-                {1, {NAVIGATION_SHOP_ITEMS}},
-                {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
-            },
-    },
+    {.row_count = 3,
+     .rows =
+         {
+             jokers_consumables_row,
+             {1, {NAVIGATION_SHOP_ITEMS}},
+             {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
+         }},
     {.row_count = 3,
      .rows =
          {
@@ -35,6 +33,15 @@ static const NavigationLayout nav_layouts[] = {
              {1, {NAVIGATION_BOOSTER_PACK}},
          }},
     {.row_count = 0},
+};
+
+static const NavigationLayout overlay_nav_layouts[] = {
+    {.row_count = 0},
+    {.row_count = 1,
+     .rows =
+         {
+             {1, {NAVIGATION_OVERLAY_MENU}},
+         }},
 };
 
 int append_clay_string(Clay_String *dest, const char *format, ...) {
@@ -93,7 +100,8 @@ uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
 }
 
 void move_nav_cursor(NavigationDirection direction) {
-  const NavigationLayout *layout = &nav_layouts[state.stage];
+  const NavigationLayout *layout =
+      state.overlay == OVERLAY_NONE ? &stage_nav_layouts[state.stage] : &overlay_nav_layouts[state.overlay];
   if (layout->row_count == 0) return;
 
   NavigationCursor *cursor = &state.navigation.cursor;
@@ -134,7 +142,9 @@ void move_nav_cursor(NavigationDirection direction) {
 }
 
 NavigationSection get_current_section() {
-  return nav_layouts[state.stage].rows[state.navigation.cursor.row].sections[state.navigation.cursor.col];
+  const NavigationLayout *layout =
+      state.overlay == OVERLAY_NONE ? &stage_nav_layouts[state.stage] : &overlay_nav_layouts[state.overlay];
+  return layout->rows[state.navigation.cursor.row].sections[state.navigation.cursor.col];
 }
 
 uint8_t get_nav_section_size(NavigationSection section) {
@@ -158,6 +168,10 @@ uint8_t get_nav_section_size(NavigationSection section) {
       break;
     case NAVIGATION_SHOP_BOOSTER_PACKS:
       max_value = cvector_size(state.game.shop.booster_packs);
+      break;
+
+    case NAVIGATION_OVERLAY_MENU:
+      max_value = 2;
       break;
   }
 
@@ -216,7 +230,7 @@ void change_stage(Stage stage) {
   state.stage = stage;
   state.navigation.hovered = 0;
   state.navigation.cursor.col = 0;
-  state.navigation.cursor.row = nav_layouts[stage].row_count > 1 ? 1 : 0;
+  state.navigation.cursor.row = stage_nav_layouts[stage].row_count > 1 ? 1 : 0;
 
   switch (stage) {
     case STAGE_SHOP:
