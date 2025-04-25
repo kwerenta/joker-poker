@@ -43,7 +43,7 @@ void game_init() {
 
   state.game.fool_last_used.was_used = 0;
 
-  memset(state.game.poker_hands, 0, 12 * sizeof(uint8_t));
+  memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
 
   log_message(LOG_INFO, "Game has been initialized.");
 }
