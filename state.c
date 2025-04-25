@@ -7,10 +7,11 @@
 #include <stdio.h>
 
 #include "debug.h"
+#include "game.h"
 
 const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
 
-static const NavigationLayout nav_layouts[] = {
+static const NavigationLayout stage_nav_layouts[] = {
     {.row_count = 2,
      .rows =
          {
@@ -18,15 +19,13 @@ static const NavigationLayout nav_layouts[] = {
              {1, {NAVIGATION_HAND}},
          }},
     {.row_count = 1, .rows = {jokers_consumables_row}},
-    {
-        .row_count = 3,
-        .rows =
-            {
-                jokers_consumables_row,
-                {1, {NAVIGATION_SHOP_ITEMS}},
-                {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
-            },
-    },
+    {.row_count = 3,
+     .rows =
+         {
+             jokers_consumables_row,
+             {1, {NAVIGATION_SHOP_ITEMS}},
+             {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
+         }},
     {.row_count = 3,
      .rows =
          {
@@ -35,6 +34,15 @@ static const NavigationLayout nav_layouts[] = {
              {1, {NAVIGATION_BOOSTER_PACK}},
          }},
     {.row_count = 0},
+};
+
+static const NavigationLayout overlay_nav_layouts[] = {
+    {.row_count = 0},
+    {.row_count = 1,
+     .rows =
+         {
+             {1, {NAVIGATION_OVERLAY_MENU}},
+         }},
 };
 
 int append_clay_string(Clay_String *dest, const char *format, ...) {
@@ -93,8 +101,9 @@ uint8_t calc_proportional_hovered(uint8_t current_count, uint8_t next_count) {
 }
 
 void move_nav_cursor(NavigationDirection direction) {
-  const NavigationLayout *layout = &nav_layouts[state.stage];
-  if (layout->row_count == 0) return;
+  const NavigationLayout *layout =
+      state.overlay == OVERLAY_NONE ? &stage_nav_layouts[state.stage] : &overlay_nav_layouts[state.overlay];
+  if (layout->row_count == 0 || (layout->row_count == 1 && layout->rows[0].count == 1)) return;
 
   NavigationCursor *cursor = &state.navigation.cursor;
   NavigationSection initial_section = get_current_section();
@@ -134,13 +143,18 @@ void move_nav_cursor(NavigationDirection direction) {
 }
 
 NavigationSection get_current_section() {
-  return nav_layouts[state.stage].rows[state.navigation.cursor.row].sections[state.navigation.cursor.col];
+  const NavigationLayout *layout =
+      state.overlay == OVERLAY_NONE ? &stage_nav_layouts[state.stage] : &overlay_nav_layouts[state.overlay];
+  return layout->rows[state.navigation.cursor.row].sections[state.navigation.cursor.col];
 }
 
 uint8_t get_nav_section_size(NavigationSection section) {
   uint8_t max_value = 0;
 
   switch (section) {
+    case NAVIGATION_NONE:
+      max_value = 0;
+      break;
     case NAVIGATION_HAND:
       max_value = cvector_size(state.game.hand.cards);
       break;
@@ -159,9 +173,19 @@ uint8_t get_nav_section_size(NavigationSection section) {
     case NAVIGATION_SHOP_BOOSTER_PACKS:
       max_value = cvector_size(state.game.shop.booster_packs);
       break;
+
+    case NAVIGATION_OVERLAY_MENU:
+      max_value = 2;
+      break;
   }
 
   return max_value;
+}
+
+uint8_t is_nav_section_horizontal(NavigationSection section) {
+  if (section == NAVIGATION_OVERLAY_MENU) return 0;
+
+  return 1;
 }
 
 void set_nav_hovered(int8_t new_hovered) {
@@ -214,9 +238,11 @@ void move_nav_hovered(uint8_t new_position) {
 
 void change_stage(Stage stage) {
   state.stage = stage;
+  state.overlay = OVERLAY_NONE;
+
   state.navigation.hovered = 0;
   state.navigation.cursor.col = 0;
-  state.navigation.cursor.row = nav_layouts[stage].row_count > 1 ? 1 : 0;
+  state.navigation.cursor.row = stage_nav_layouts[stage].row_count > 1 ? 1 : 0;
 
   switch (stage) {
     case STAGE_SHOP:
@@ -231,5 +257,35 @@ void change_stage(Stage stage) {
     case STAGE_CASH_OUT:
     case STAGE_GAME_OVER:
       break;
+  }
+}
+
+void change_overlay(Overlay overlay) {
+  if (state.overlay == OVERLAY_NONE && overlay != OVERLAY_NONE) state.prev_navigation = state.navigation;
+
+  state.overlay = overlay;
+
+  if (overlay == OVERLAY_NONE) {
+    state.navigation = state.prev_navigation;
+    return;
+  }
+
+  state.navigation.cursor = (NavigationCursor){0, 0};
+  state.navigation.hovered = 0;
+}
+
+void overlay_menu_button_click() {
+  switch (state.navigation.hovered) {
+    case 0:
+      change_overlay(OVERLAY_NONE);
+      break;
+
+    case 1:
+      game_destroy();
+      game_init();
+      break;
+
+    default:
+      return;
   }
 }

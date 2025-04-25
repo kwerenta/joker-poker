@@ -175,26 +175,35 @@ uint8_t handle_navigation_controls() {
   NavigationSection section = get_current_section();
   uint8_t hovered = state.navigation.hovered;
   uint8_t section_size = get_nav_section_size(section);
+  uint8_t is_horizontal = is_nav_section_horizontal(section);
 
   if (button_pressed(PSP_CTRL_RIGHT)) {
-    if (hovered < section_size - 1)
+    if (is_horizontal && hovered < section_size - 1)
       set_nav_hovered(hovered + 1);
     else
       move_nav_cursor(NAVIGATION_RIGHT);
 
     return 1;
   } else if (button_pressed(PSP_CTRL_LEFT)) {
-    if (hovered > 0)
+    if (is_horizontal && hovered > 0)
       set_nav_hovered(hovered - 1);
     else
       move_nav_cursor(NAVIGATION_LEFT);
 
     return 1;
   } else if (button_pressed(PSP_CTRL_UP)) {
-    move_nav_cursor(NAVIGATION_UP);
+    if (!is_horizontal && hovered > 0)
+      set_nav_hovered(hovered - 1);
+    else
+      move_nav_cursor(NAVIGATION_UP);
+
     return 1;
   } else if (button_pressed(PSP_CTRL_DOWN)) {
-    move_nav_cursor(NAVIGATION_DOWN);
+    if (!is_horizontal && hovered < section_size - 1)
+      set_nav_hovered(hovered + 1);
+    else
+      move_nav_cursor(NAVIGATION_DOWN);
+
     return 1;
   } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
     move_nav_hovered(hovered - 1);
@@ -202,11 +211,19 @@ uint8_t handle_navigation_controls() {
   } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
     move_nav_hovered(hovered + 1);
     return 1;
+  } else if (button_pressed(PSP_CTRL_START)) {
+    change_overlay(state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE);
+    return 1;
   }
 
   if (section == NAVIGATION_CONSUMABLES) {
     if (button_pressed(PSP_CTRL_CROSS)) {
       use_consumable(NULL);
+      return 1;
+    }
+  } else if (section == NAVIGATION_OVERLAY_MENU) {
+    if (button_pressed(PSP_CTRL_CROSS)) {
+      overlay_menu_button_click();
       return 1;
     }
   }
@@ -218,7 +235,7 @@ void handle_controls() {
   Controls *controls = &state.controls;
   sceCtrlReadBufferPositive(&controls->data, 1);
 
-  if (handle_navigation_controls() == 1) {
+  if (handle_navigation_controls() == 1 || state.overlay != OVERLAY_NONE) {
     state.controls.state = controls->data.Buttons;
     return;
   }
