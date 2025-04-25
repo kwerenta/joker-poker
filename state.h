@@ -12,6 +12,11 @@
 #define MAX_NAV_ROWS 3
 #define MAX_NAV_SECTIONS_PER_ROW 2
 
+typedef struct {
+  SceCtrlData data;
+  unsigned int state;
+} Controls;
+
 typedef enum {
   STAGE_GAME,
   STAGE_CASH_OUT,
@@ -20,18 +25,17 @@ typedef enum {
   STAGE_GAME_OVER,
 } Stage;
 
-typedef struct {
-  SceCtrlData data;
-  unsigned int state;
-} Controls;
+typedef enum { OVERLAY_NONE, OVERLAY_MENU } Overlay;
 
 typedef enum {
+  NAVIGATION_NONE,
   NAVIGATION_HAND,
   NAVIGATION_SHOP_ITEMS,
   NAVIGATION_SHOP_BOOSTER_PACKS,
   NAVIGATION_BOOSTER_PACK,
   NAVIGATION_CONSUMABLES,
-  NAVIGATION_JOKERS
+  NAVIGATION_JOKERS,
+  NAVIGATION_OVERLAY_MENU
 } NavigationSection;
 
 typedef struct {
@@ -65,6 +69,7 @@ void *frame_arena_allocate(size_t size);
 int append_clay_string(Clay_String *dest, const char *format, ...);
 
 uint8_t get_nav_section_size(NavigationSection section);
+uint8_t is_nav_section_horizontal(NavigationSection section);
 void move_nav_cursor(NavigationDirection direction);
 NavigationSection get_current_section();
 
@@ -72,6 +77,9 @@ void set_nav_hovered(int8_t new_hovered);
 void move_nav_hovered(uint8_t new_position);
 
 void change_stage(Stage stage);
+void change_overlay(Overlay overlay);
+
+void overlay_menu_button_click();
 
 typedef struct {
   Arena frame_arena;
@@ -80,12 +88,15 @@ typedef struct {
   Texture *font;
 
   Controls controls;
+
+  Stage stage;
+  Overlay overlay;
   Navigation navigation;
+  Navigation prev_navigation;
 
   float delta;
   uint8_t running;
 
-  Stage stage;
   Game game;
 } State;
 
