@@ -67,6 +67,7 @@ There are currently no in-game control hints.
   - LEFT/RIGHT - change currently hovered item
   - CROSS - select/buy/use currently hovered item
   - LTRIGGER/RTRIGGER - move hovered item to the left/right
+  - START - open/close overlay menu
 - Game
   - SELECT - sort hand by rank/suit
   - SQUARE - play selected cards
