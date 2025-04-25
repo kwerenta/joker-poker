@@ -212,10 +212,7 @@ uint8_t handle_navigation_controls() {
     move_nav_hovered(hovered + 1);
     return 1;
   } else if (button_pressed(PSP_CTRL_START)) {
-    state.overlay = state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE;
-
-    state.navigation.cursor = (NavigationCursor){0, 0};
-    set_nav_hovered(0);
+    change_overlay(state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE);
     return 1;
   }
 

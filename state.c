@@ -257,12 +257,24 @@ void change_stage(Stage stage) {
   }
 }
 
+void change_overlay(Overlay overlay) {
+  if (state.overlay == OVERLAY_NONE && overlay != OVERLAY_NONE) state.prev_navigation = state.navigation;
+
+  state.overlay = overlay;
+
+  if (overlay == OVERLAY_NONE) {
+    state.navigation = state.prev_navigation;
+    return;
+  }
+
+  state.navigation.cursor = (NavigationCursor){0, 0};
+  set_nav_hovered(0);
+}
+
 void overlay_menu_button_click() {
   switch (state.navigation.hovered) {
     case 0:
-      state.overlay = OVERLAY_NONE;
-      state.navigation.cursor = (NavigationCursor){1, 0};
-      set_nav_hovered(0);
+      change_overlay(OVERLAY_NONE);
       break;
 
     case 1:

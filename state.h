@@ -76,6 +76,7 @@ void set_nav_hovered(int8_t new_hovered);
 void move_nav_hovered(uint8_t new_position);
 
 void change_stage(Stage stage);
+void change_overlay(Overlay overlay);
 
 void overlay_menu_button_click();
 
@@ -90,6 +91,7 @@ typedef struct {
   Stage stage;
   Overlay overlay;
   Navigation navigation;
+  Navigation prev_navigation;
 
   float delta;
   uint8_t running;
