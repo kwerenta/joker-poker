@@ -28,6 +28,7 @@ typedef enum {
 typedef enum { OVERLAY_NONE, OVERLAY_MENU } Overlay;
 
 typedef enum {
+  NAVIGATION_NONE,
   NAVIGATION_HAND,
   NAVIGATION_SHOP_ITEMS,
   NAVIGATION_SHOP_BOOSTER_PACKS,

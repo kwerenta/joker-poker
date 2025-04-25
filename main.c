@@ -110,8 +110,12 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (state.overlay == OVERLAY_MENU) {
-      render_overlay_menu();
+    switch (state.overlay) {
+      case OVERLAY_NONE:
+        break;
+      case OVERLAY_MENU:
+        render_overlay_menu();
+        break;
     }
 
     Clay_RenderCommandArray render_commands = Clay_EndLayout();

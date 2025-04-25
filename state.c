@@ -152,6 +152,9 @@ uint8_t get_nav_section_size(NavigationSection section) {
   uint8_t max_value = 0;
 
   switch (section) {
+    case NAVIGATION_NONE:
+      max_value = 0;
+      break;
     case NAVIGATION_HAND:
       max_value = cvector_size(state.game.hand.cards);
       break;
@@ -268,7 +271,7 @@ void change_overlay(Overlay overlay) {
   }
 
   state.navigation.cursor = (NavigationCursor){0, 0};
-  set_nav_hovered(0);
+  state.navigation.hovered = 0;
 }
 
 void overlay_menu_button_click() {
