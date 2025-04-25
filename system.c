@@ -8,7 +8,6 @@
 #include <stb_image.h>
 #include <stdlib.h>
 
-#include "debug.h"
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
@@ -193,18 +192,16 @@ uint8_t handle_navigation_controls() {
 
     return 1;
   } else if (button_pressed(PSP_CTRL_UP)) {
-    if (!is_horizontal && hovered > 0) {
+    if (!is_horizontal && hovered > 0)
       set_nav_hovered(hovered - 1);
-      log_message(LOG_INFO, "Vertical UP");
-    } else
+    else
       move_nav_cursor(NAVIGATION_UP);
 
     return 1;
   } else if (button_pressed(PSP_CTRL_DOWN)) {
-    if (!is_horizontal && hovered < section_size - 1) {
+    if (!is_horizontal && hovered < section_size - 1)
       set_nav_hovered(hovered + 1);
-      log_message(LOG_INFO, "Vertical DOWN");
-    } else
+    else
       move_nav_cursor(NAVIGATION_DOWN);
 
     return 1;
