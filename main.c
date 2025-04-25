@@ -116,6 +116,9 @@ int main(int argc, char *argv[]) {
       case OVERLAY_MENU:
         render_overlay_menu();
         break;
+      case OVERLAY_POKER_HANDS:
+        render_overlay_poker_hands();
+        break;
     }
 
     Clay_RenderCommandArray render_commands = Clay_EndLayout();

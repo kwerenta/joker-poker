@@ -499,7 +499,8 @@ void render_game_over() {
   draw_text("You've lost:(", &pos, 0xFFFFFFFF);
 }
 
-const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Restart")};
+const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"),
+                                            CLAY_STRING("Restart")};
 
 void render_overlay_menu() {
   CLAY({.id = CLAY_ID("Overlay"),
@@ -517,6 +518,51 @@ void render_overlay_menu() {
             .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
             .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
         CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+      }
+    }
+  }
+}
+
+void render_overlay_poker_hands() {
+  CLAY({.id = CLAY_ID("Overlay"),
+        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
+        .layout =
+            {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                .childGap = 4,
+                .padding = CLAY_PADDING_ALL(8),
+            },
+        .backgroundColor = {0, 0, 0, 150}}) {
+    for (uint8_t i = 0; i < 12; i++) {
+      CLAY({.id = CLAY_IDI_LOCAL("PokerHand", i + 1),
+            .backgroundColor = {255, 255, 255, 30},
+            .layout = {
+                .padding = CLAY_PADDING_ALL(2),
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+            }}) {
+        CLAY({.id = CLAY_ID_LOCAL("Level"),
+              .backgroundColor = COLOR_WHITE,
+              .layout = {.sizing = {CLAY_SIZING_FIXED(7 * CHAR_WIDTH), CLAY_SIZING_FIT(0)}}}) {
+          Clay_String level;
+          append_clay_string(&level, "lvl.%d", state.game.poker_hands[i].level + 1);
+          CLAY_TEXT(level, CLAY_TEXT_CONFIG({.textColor = {0, 0, 0, 255}}));
+        }
+
+        CLAY({.id = CLAY_ID_LOCAL("Name"),
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+                         .childAlignment = {CLAY_ALIGN_X_CENTER}}}) {
+          const char *name_chars = get_poker_hand_name(1 << i);
+          Clay_String name = {.chars = name_chars, .length = strlen(name_chars)};
+          CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+        }
+
+        CLAY({.id = CLAY_ID_LOCAL("Played"), .layout = {.sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)}}}) {
+          Clay_String played;
+          append_clay_string(&played, "# %d", state.game.poker_hands[i].played);
+          CLAY_TEXT(played, WHITE_TEXT_CONFIG);
+        }
       }
     }
   }

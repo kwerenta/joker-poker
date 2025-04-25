@@ -46,5 +46,6 @@ void render_cash_out();
 void render_game_over();
 
 void render_overlay_menu();
+void render_overlay_poker_hands();
 
 #endif
