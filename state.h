@@ -77,6 +77,8 @@ void move_nav_hovered(uint8_t new_position);
 
 void change_stage(Stage stage);
 
+void overlay_menu_button_click();
+
 typedef struct {
   Arena frame_arena;
 

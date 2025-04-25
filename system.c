@@ -224,6 +224,11 @@ uint8_t handle_navigation_controls() {
       use_consumable(NULL);
       return 1;
     }
+  } else if (section == NAVIGATION_OVERLAY_MENU) {
+    if (button_pressed(PSP_CTRL_CROSS)) {
+      overlay_menu_button_click();
+      return 1;
+    }
   }
 
   return 0;

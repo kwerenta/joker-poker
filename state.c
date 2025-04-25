@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "debug.h"
+#include "game.h"
 
 const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
 
@@ -234,6 +235,8 @@ void move_nav_hovered(uint8_t new_position) {
 
 void change_stage(Stage stage) {
   state.stage = stage;
+  state.overlay = OVERLAY_NONE;
+
   state.navigation.hovered = 0;
   state.navigation.cursor.col = 0;
   state.navigation.cursor.row = stage_nav_layouts[stage].row_count > 1 ? 1 : 0;
@@ -251,5 +254,23 @@ void change_stage(Stage stage) {
     case STAGE_CASH_OUT:
     case STAGE_GAME_OVER:
       break;
+  }
+}
+
+void overlay_menu_button_click() {
+  switch (state.navigation.hovered) {
+    case 0:
+      state.overlay = OVERLAY_NONE;
+      state.navigation.cursor = (NavigationCursor){1, 0};
+      set_nav_hovered(0);
+      break;
+
+    case 1:
+      game_destroy();
+      game_init();
+      break;
+
+    default:
+      return;
   }
 }
