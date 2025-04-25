@@ -499,6 +499,8 @@ void render_game_over() {
   draw_text("You've lost:(", &pos, 0xFFFFFFFF);
 }
 
+const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Restart")};
+
 void render_overlay_menu() {
   CLAY({.id = CLAY_ID("Overlay"),
         .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
@@ -510,16 +512,12 @@ void render_overlay_menu() {
                 .childGap = 4,
             },
         .backgroundColor = {0, 0, 0, 150}}) {
-    CLAY({.id = CLAY_ID_LOCAL("ContinueButton"),
-          .backgroundColor = state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MULT,
-          .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
-      CLAY_TEXT(CLAY_STRING("Continue"), WHITE_TEXT_CONFIG);
-    }
-
-    CLAY({.id = CLAY_ID_LOCAL("RestartButton"),
-          .backgroundColor = state.navigation.hovered == 1 ? COLOR_CHIPS : COLOR_MULT,
-          .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
-      CLAY_TEXT(CLAY_STRING("Restart"), WHITE_TEXT_CONFIG);
+    for (uint8_t i = 0; i < sizeof(overlay_menu_buttons) / sizeof(overlay_menu_buttons[0]); i++) {
+      CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
+            .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
+            .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
+        CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+      }
     }
   }
 }
