@@ -68,6 +68,7 @@ void *frame_arena_allocate(size_t size);
 int append_clay_string(Clay_String *dest, const char *format, ...);
 
 uint8_t get_nav_section_size(NavigationSection section);
+uint8_t is_nav_section_horizontal(NavigationSection section);
 void move_nav_cursor(NavigationDirection direction);
 NavigationSection get_current_section();
 

@@ -8,6 +8,7 @@
 #include <stb_image.h>
 #include <stdlib.h>
 
+#include "debug.h"
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
@@ -175,26 +176,37 @@ uint8_t handle_navigation_controls() {
   NavigationSection section = get_current_section();
   uint8_t hovered = state.navigation.hovered;
   uint8_t section_size = get_nav_section_size(section);
+  uint8_t is_horizontal = is_nav_section_horizontal(section);
 
   if (button_pressed(PSP_CTRL_RIGHT)) {
-    if (hovered < section_size - 1)
+    if (is_horizontal && hovered < section_size - 1)
       set_nav_hovered(hovered + 1);
     else
       move_nav_cursor(NAVIGATION_RIGHT);
 
     return 1;
   } else if (button_pressed(PSP_CTRL_LEFT)) {
-    if (hovered > 0)
+    if (is_horizontal && hovered > 0)
       set_nav_hovered(hovered - 1);
     else
       move_nav_cursor(NAVIGATION_LEFT);
 
     return 1;
   } else if (button_pressed(PSP_CTRL_UP)) {
-    move_nav_cursor(NAVIGATION_UP);
+    if (!is_horizontal && hovered > 0) {
+      set_nav_hovered(hovered - 1);
+      log_message(LOG_INFO, "Vertical UP");
+    } else
+      move_nav_cursor(NAVIGATION_UP);
+
     return 1;
   } else if (button_pressed(PSP_CTRL_DOWN)) {
-    move_nav_cursor(NAVIGATION_DOWN);
+    if (!is_horizontal && hovered < section_size - 1) {
+      set_nav_hovered(hovered + 1);
+      log_message(LOG_INFO, "Vertical DOWN");
+    } else
+      move_nav_cursor(NAVIGATION_DOWN);
+
     return 1;
   } else if (button_pressed(PSP_CTRL_LTRIGGER)) {
     move_nav_hovered(hovered - 1);

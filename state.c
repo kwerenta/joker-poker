@@ -178,6 +178,12 @@ uint8_t get_nav_section_size(NavigationSection section) {
   return max_value;
 }
 
+uint8_t is_nav_section_horizontal(NavigationSection section) {
+  if (section == NAVIGATION_OVERLAY_MENU) return 0;
+
+  return 1;
+}
+
 void set_nav_hovered(int8_t new_hovered) {
   uint8_t max_value = get_nav_section_size(get_current_section());
 
