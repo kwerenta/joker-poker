@@ -535,33 +535,52 @@ void render_overlay_poker_hands() {
                 .padding = CLAY_PADDING_ALL(8),
             },
         .backgroundColor = {0, 0, 0, 150}}) {
-    for (uint8_t i = 0; i < 12; i++) {
-      CLAY({.id = CLAY_IDI_LOCAL("PokerHand", i + 1),
-            .backgroundColor = {255, 255, 255, 30},
-            .layout = {
-                .padding = CLAY_PADDING_ALL(2),
-                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
-            }}) {
-        CLAY({.id = CLAY_ID_LOCAL("Level"),
-              .backgroundColor = COLOR_WHITE,
-              .layout = {.sizing = {CLAY_SIZING_FIXED(7 * CHAR_WIDTH), CLAY_SIZING_FIT(0)}}}) {
-          Clay_String level;
-          append_clay_string(&level, "lvl.%d", state.game.poker_hands[i].level + 1);
-          CLAY_TEXT(level, CLAY_TEXT_CONFIG({.textColor = {0, 0, 0, 255}}));
-        }
+    Clay_Color bg = COLOR_CARD_BG;
+    bg.a = 200;
 
-        CLAY({.id = CLAY_ID_LOCAL("Name"),
-              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
-                         .childAlignment = {CLAY_ALIGN_X_CENTER}}}) {
-          const char *name_chars = get_poker_hand_name(1 << i);
-          Clay_String name = {.chars = name_chars, .length = strlen(name_chars)};
-          CLAY_TEXT(name, WHITE_TEXT_CONFIG);
-        }
+    CLAY({.id = CLAY_ID_LOCAL("Wrapper"),
+          .backgroundColor = bg,
+          .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+              .padding = CLAY_PADDING_ALL(4),
+              .childGap = 4,
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          }}) {
+      for (uint8_t i = 0; i < 12; i++) {
+        CLAY({.id = CLAY_IDI_LOCAL("PokerHand", i + 1),
+              .backgroundColor = {255, 255, 255, 30},
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)}}}) {
+          CLAY({.id = CLAY_ID_LOCAL("Level"),
+                .backgroundColor = COLOR_WHITE,
+                .layout = {.padding = CLAY_PADDING_ALL(2),
+                           .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                           .sizing = {CLAY_SIZING_FIXED(7 * CHAR_WIDTH), CLAY_SIZING_FIT(0)}}}) {
+            Clay_String level;
+            append_clay_string(&level, "lvl.%d", state.game.poker_hands[i].level + 1);
+            CLAY_TEXT(level, CLAY_TEXT_CONFIG({.textColor = {0, 0, 0, 255}}));
+          }
 
-        CLAY({.id = CLAY_ID_LOCAL("Played"), .layout = {.sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)}}}) {
-          Clay_String played;
-          append_clay_string(&played, "# %d", state.game.poker_hands[i].played);
-          CLAY_TEXT(played, WHITE_TEXT_CONFIG);
+          CLAY({.id = CLAY_ID_LOCAL("Name"),
+                .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                           .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
+            const char *name_chars = get_poker_hand_name(1 << i);
+            Clay_String name = {.chars = name_chars, .length = strlen(name_chars)};
+            CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+          }
+
+          CLAY({.id = CLAY_ID_LOCAL("Played"),
+                .layout = {.childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                           .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_GROW(0)}}}) {
+            CLAY_TEXT(CLAY_STRING("#"), WHITE_TEXT_CONFIG);
+
+            CLAY({.layout = {.padding = {.right = 2, .left = 2},
+                             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                             .sizing = {CLAY_SIZING_FIXED(3 * CHAR_WIDTH), CLAY_SIZING_GROW(0)}}}) {
+              Clay_String played;
+              append_clay_string(&played, "%d", state.game.poker_hands[i].played);
+              CLAY_TEXT(played, CLAY_TEXT_CONFIG({.textColor = COLOR_MONEY}));
+            }
+          }
         }
       }
     }
