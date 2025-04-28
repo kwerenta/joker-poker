@@ -608,7 +608,7 @@ void render_overlay_poker_hands() {
                       .padding = {.left = 2, .right = 2},
                   }}) {
               Clay_String mult;
-              append_clay_string(&mult, "%0.lf", score.mult);
+              append_clay_string(&mult, "%.0lf", score.mult);
               CLAY_TEXT(mult, WHITE_TEXT_CONFIG);
             }
           }
