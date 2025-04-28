@@ -38,11 +38,8 @@ static const NavigationLayout stage_nav_layouts[] = {
 
 static const NavigationLayout overlay_nav_layouts[] = {
     {.row_count = 0},
-    {.row_count = 1,
-     .rows =
-         {
-             {1, {NAVIGATION_OVERLAY_MENU}},
-         }},
+    {.row_count = 1, .rows = {{1, {NAVIGATION_OVERLAY_MENU}}}},
+    {.row_count = 0},
 };
 
 int append_clay_string(Clay_String *dest, const char *format, ...) {
@@ -175,7 +172,7 @@ uint8_t get_nav_section_size(NavigationSection section) {
       break;
 
     case NAVIGATION_OVERLAY_MENU:
-      max_value = 2;
+      max_value = 3;
       break;
   }
 
@@ -281,6 +278,10 @@ void overlay_menu_button_click() {
       break;
 
     case 1:
+      change_overlay(OVERLAY_POKER_HANDS);
+      break;
+
+    case 2:
       game_destroy();
       game_init();
       break;

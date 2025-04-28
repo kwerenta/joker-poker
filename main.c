@@ -13,7 +13,7 @@
 #include "state.h"
 #include "system.h"
 
-PSP_MODULE_INFO("Joker Poker", 0, 0, 1);
+PSP_MODULE_INFO("Joker Poker", 0, 0, 10);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
 
 char list[0x20000] __attribute__((aligned(64)));
@@ -115,6 +115,9 @@ int main(int argc, char *argv[]) {
         break;
       case OVERLAY_MENU:
         render_overlay_menu();
+        break;
+      case OVERLAY_POKER_HANDS:
+        render_overlay_poker_hands();
         break;
     }
 

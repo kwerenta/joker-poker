@@ -247,7 +247,7 @@ void render_topbar() {
 }
 
 const Clay_ElementDeclaration sidebar_block_config = {
-    .backgroundColor = {72, 84, 96, 255},
+    .backgroundColor = COLOR_CARD_LIGHT_BG,
     .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
                .padding = {.top = SIDEBAR_GAP, .left = SIDEBAR_GAP, .right = SIDEBAR_GAP, .bottom = SIDEBAR_GAP},
                .layoutDirection = CLAY_TOP_TO_BOTTOM,
@@ -312,7 +312,7 @@ void render_sidebar() {
       Clay_String hand;
       if (state.game.selected_hand.count != 0)
         append_clay_string(&hand, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
-                           state.game.poker_hands[ffs(state.game.selected_hand.hand_union) - 1] + 1);
+                           get_poker_hand_stats(state.game.selected_hand.hand_union)->level + 1);
       CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
                 CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
 
@@ -499,7 +499,8 @@ void render_game_over() {
   draw_text("You've lost:(", &pos, 0xFFFFFFFF);
 }
 
-const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Restart")};
+const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"),
+                                            CLAY_STRING("Restart")};
 
 void render_overlay_menu() {
   CLAY({.id = CLAY_ID("Overlay"),
@@ -517,6 +518,115 @@ void render_overlay_menu() {
             .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
             .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
         CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+      }
+    }
+  }
+}
+
+void render_overlay_poker_hands() {
+  CLAY({.id = CLAY_ID("Overlay"),
+        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
+        .layout =
+            {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                .childGap = 4,
+                .padding = CLAY_PADDING_ALL(8),
+            },
+        .backgroundColor = {0, 0, 0, 150}}) {
+    Clay_Color bg = COLOR_CARD_BG;
+    bg.a = 200;
+
+    CLAY({.id = CLAY_ID_LOCAL("Wrapper"),
+          .backgroundColor = bg,
+          .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+              .padding = CLAY_PADDING_ALL(4),
+              .childGap = 4,
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          }}) {
+      for (uint8_t i = 0; i < 12; i++) {
+        CLAY({.id = CLAY_IDI_LOCAL("PokerHand", i + 1),
+              .backgroundColor = {255, 255, 255, 30},
+              .layout = {
+                  .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+                  .childGap = 4,
+              }}) {
+          CLAY({.id = CLAY_ID_LOCAL("Level"),
+                .backgroundColor = COLOR_WHITE,
+                .layout = {.padding = CLAY_PADDING_ALL(2),
+                           .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                           .sizing = {CLAY_SIZING_FIXED(7 * CHAR_WIDTH), CLAY_SIZING_FIT(0)}}}) {
+            Clay_String level;
+            append_clay_string(&level, "lvl.%d", state.game.poker_hands[i].level + 1);
+            CLAY_TEXT(level, CLAY_TEXT_CONFIG({.textColor = COLOR_BLACK}));
+          }
+
+          CLAY({.id = CLAY_ID_LOCAL("Name"),
+                .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                           .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}}}) {
+            const char *name_chars = get_poker_hand_name(1 << i);
+            Clay_String name = {.chars = name_chars, .length = strlen(name_chars)};
+            CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+          }
+
+          CLAY({.id = CLAY_ID_LOCAL("Score"),
+                .backgroundColor = COLOR_CARD_LIGHT_BG,
+                .layout = {
+                    .childAlignment = {.y = CLAY_ALIGN_Y_CENTER},
+                    .padding = {.left = 2, .right = 2},
+                    .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_GROW(0)},
+                }}) {
+            ScorePair score = get_poker_hand_total_score(1 << i);
+
+            CLAY({.id = CLAY_ID_LOCAL("Chips"),
+                  .backgroundColor = COLOR_CHIPS,
+                  .layout = {
+                      .sizing = {CLAY_SIZING_FIXED(4 * CHAR_WIDTH + 4)},
+                      .childAlignment = {CLAY_ALIGN_X_RIGHT, CLAY_ALIGN_Y_CENTER},
+                      .padding = {.left = 2, .right = 2},
+                  }}) {
+              Clay_String chips;
+              append_clay_string(&chips, "%d", score.chips);
+              CLAY_TEXT(chips, WHITE_TEXT_CONFIG);
+            }
+
+            CLAY({.layout = {
+                      .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_GROW(0)},
+                      .padding = {.left = 2, .right = 2},
+                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                  }}) {
+              CLAY_TEXT(CLAY_STRING("x"), WHITE_TEXT_CONFIG);
+            }
+
+            CLAY({.id = CLAY_ID_LOCAL("Mult"),
+                  .backgroundColor = COLOR_MULT,
+                  .layout = {
+                      .sizing = {CLAY_SIZING_FIXED(4 * CHAR_WIDTH + 4)},
+                      .childAlignment = {CLAY_ALIGN_X_LEFT, CLAY_ALIGN_Y_CENTER},
+                      .padding = {.left = 2, .right = 2},
+                  }}) {
+              Clay_String mult;
+              append_clay_string(&mult, "%.0lf", score.mult);
+              CLAY_TEXT(mult, WHITE_TEXT_CONFIG);
+            }
+          }
+
+          CLAY({.id = CLAY_ID_LOCAL("Played"),
+                .layout = {.childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                           .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_GROW(0)}}}) {
+            CLAY_TEXT(CLAY_STRING("#"), WHITE_TEXT_CONFIG);
+
+            CLAY({.layout = {.padding = {.right = 2, .left = 2},
+                             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                             .sizing = {CLAY_SIZING_FIXED(3 * CHAR_WIDTH), CLAY_SIZING_GROW(0)}}}) {
+              Clay_String played;
+              append_clay_string(&played, "%d", state.game.poker_hands[i].played);
+              CLAY_TEXT(played, CLAY_TEXT_CONFIG({.textColor = COLOR_MONEY}));
+            }
+          }
+        }
       }
     }
   }

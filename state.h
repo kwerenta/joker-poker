@@ -25,7 +25,7 @@ typedef enum {
   STAGE_GAME_OVER,
 } Stage;
 
-typedef enum { OVERLAY_NONE, OVERLAY_MENU } Overlay;
+typedef enum { OVERLAY_NONE, OVERLAY_MENU, OVERLAY_POKER_HANDS } Overlay;
 
 typedef enum {
   NAVIGATION_NONE,

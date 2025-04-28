@@ -221,9 +221,18 @@ uint8_t handle_navigation_controls() {
       use_consumable(NULL);
       return 1;
     }
-  } else if (section == NAVIGATION_OVERLAY_MENU) {
+  }
+
+  if (section == NAVIGATION_OVERLAY_MENU) {
     if (button_pressed(PSP_CTRL_CROSS)) {
       overlay_menu_button_click();
+      return 1;
+    }
+  }
+
+  if (state.overlay != OVERLAY_NONE && state.overlay != OVERLAY_MENU) {
+    if (button_pressed(PSP_CTRL_CIRCLE)) {
+      change_overlay(OVERLAY_MENU);
       return 1;
     }
   }
