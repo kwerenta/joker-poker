@@ -642,7 +642,7 @@ void init_sine_tab() {
 }
 
 void render_background() {
-  float time = state.delta;
+  float time = state.time;
 
   for (uint8_t y = 0; y < BGH; ++y) {
     for (uint8_t x = 0; x < BGW; ++x) {
