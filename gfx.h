@@ -50,4 +50,7 @@ void render_game_over();
 void render_overlay_menu();
 void render_overlay_poker_hands();
 
+void init_sine_tab();
+void render_background();
+
 #endif
