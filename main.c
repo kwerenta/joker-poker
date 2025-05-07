@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 
     uint64_t curr_time = sceKernelGetSystemTimeWide();
     state.delta = (curr_time - last_time) / 1000000.0f;
-    curr_time = last_time;
+    last_time = curr_time;
 
     state.frame_arena.offset = 0;
 
