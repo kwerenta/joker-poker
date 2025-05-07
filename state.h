@@ -96,6 +96,7 @@ typedef struct {
   Navigation prev_navigation;
 
   float delta;
+  float time;
   uint8_t running;
 
   Game game;
