@@ -635,22 +635,13 @@ void render_overlay_poker_hands() {
   }
 }
 
-#define BGW 120
-#define BGH 68
-
-static float sine_tab[256];
-
-void init_sine_tab() {
-  for (int i = 0; i < 256; ++i) sine_tab[i] = sinf(i * 2.0f * M_PI / 256.0f);
-}
-
 void render_background() {
   float time = state.time;
 
-  for (uint8_t y = 0; y < BGH; ++y) {
-    for (uint8_t x = 0; x < BGW; ++x) {
-      uint8_t u = (x * 256) / BGW;
-      uint8_t v = (y * 256) / BGH;
+  for (uint8_t y = 0; y < BG_TEXTURE_HEIGHT; y++) {
+    for (uint8_t x = 0; x < BG_TEXTURE_WIDTH; x++) {
+      uint8_t u = (x * 256) / BG_TEXTURE_WIDTH;
+      uint8_t v = (y * 256) / BG_TEXTURE_HEIGHT;
       float v1 = sine_tab[(u + (uint8_t)(time * 10)) & 255];
       float v2 = sine_tab[(v + (uint8_t)(time * 8)) & 255];
       float v3 = sine_tab[((u + v) / 2 + (uint8_t)(time * 15)) & 255];
@@ -664,6 +655,10 @@ void render_background() {
     }
   }
 
-  draw_texture(state.bg, &(Rect){.x = 0, .y = 0, .w = BGW, .h = BGH},
+  draw_texture(state.bg, &(Rect){.x = 0, .y = 0, .w = BG_TEXTURE_WIDTH, .h = BG_TEXTURE_HEIGHT},
                &(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, 0xFFFFFFFF, 0);
+}
+
+void init_sine_tab() {
+  for (uint8_t i = 0; i <= 255; ++i) sine_tab[i] = sinf(i * 2.0f * M_PI / 256.0f);
 }

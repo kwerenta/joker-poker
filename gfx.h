@@ -8,6 +8,9 @@
 #define SCREEN_WIDTH (480)
 #define SCREEN_HEIGHT (272)
 
+#define BG_TEXTURE_WIDTH (120)
+#define BG_TEXTURE_HEIGHT (68)
+
 #define CARD_WIDTH (48)
 #define CARD_HEIGHT (64)
 
@@ -28,6 +31,8 @@
 #define COLOR_CARD_LIGHT_BG (Clay_Color){72, 84, 96, 255}
 
 #define WHITE_TEXT_CONFIG CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE})
+
+static float sine_tab[256];
 
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst);
 void render_card(Card *card, Rect *dst);
@@ -52,7 +57,8 @@ void render_game_over();
 void render_overlay_menu();
 void render_overlay_poker_hands();
 
-void init_sine_tab();
 void render_background();
+
+void init_sine_tab();
 
 #endif
