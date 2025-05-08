@@ -23,7 +23,7 @@
 #define COLOR_CHIPS (Clay_Color){15, 188, 249, 255}
 #define COLOR_MONEY (Clay_Color){255, 168, 1, 255}
 #define COLOR_CARD_BG (Clay_Color){30, 39, 46, 255}
-#define COLOR_CARD_BG_TRANSPARENT (Clay_Color){30, 39, 46, 80}
+#define COLOR_SECTION_BG (Clay_Color){0, 0, 0, 60}
 #define COLOR_CARD_LIGHT_BG (Clay_Color){72, 84, 96, 255}
 
 #define WHITE_TEXT_CONFIG CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE})

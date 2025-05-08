@@ -177,6 +177,7 @@ void render_hand() {
               .layoutDirection = CLAY_LEFT_TO_RIGHT,
           }}) {
       CLAY({.id = CLAY_ID("Hand"),
+            .backgroundColor = COLOR_SECTION_BG,
             .layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
             }}) {}
@@ -204,7 +205,7 @@ void render_topbar() {
             .childGap = 4,
         }}) {
     CLAY({.id = CLAY_ID("Jokers"),
-          .backgroundColor = COLOR_CARD_BG_TRANSPARENT,
+          .backgroundColor = COLOR_SECTION_BG,
           .layout = {
               .sizing = {CLAY_SIZING_PERCENT(0.7), CLAY_SIZING_GROW(0)},
               .childGap = 8,
@@ -223,9 +224,9 @@ void render_topbar() {
     }
 
     CLAY({.id = CLAY_ID("Consumables"),
-          .backgroundColor = COLOR_CARD_BG_TRANSPARENT,
+          .backgroundColor = COLOR_SECTION_BG,
           .layout = {
-              .sizing = {CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .sizing = {CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_GROW(0)},
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
