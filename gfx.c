@@ -204,7 +204,7 @@ void render_topbar() {
             .childGap = 4,
         }}) {
     CLAY({.id = CLAY_ID("Jokers"),
-          .backgroundColor = COLOR_CARD_BG,
+          .backgroundColor = COLOR_CARD_BG_TRANSPARENT,
           .layout = {
               .sizing = {CLAY_SIZING_PERCENT(0.7), CLAY_SIZING_GROW(0)},
               .childGap = 8,
@@ -223,7 +223,7 @@ void render_topbar() {
     }
 
     CLAY({.id = CLAY_ID("Consumables"),
-          .backgroundColor = COLOR_CARD_BG,
+          .backgroundColor = COLOR_CARD_BG_TRANSPARENT,
           .layout = {
               .sizing = {CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_FIXED(CARD_HEIGHT)},
               .childGap = 8,
