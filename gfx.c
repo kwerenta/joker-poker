@@ -67,7 +67,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
   size_t items_width = item_count * CARD_WIDTH;
 
   for (uint8_t i = 0; i < item_count; i++) {
-    float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width;
+    float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width - 2 * SECTION_PADDING;
     CustomElementData *element = frame_arena_allocate(sizeof(CustomElementData));
     *element = create_spread_item_element(section, i);
 
@@ -78,6 +78,8 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
       x_offset = (float)(parent_width - items_width) / (item_count + 1) * (i + 1) + CARD_WIDTH * i;
     else
       x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
+
+    x_offset += SECTION_PADDING;
 
     float y_offset = 0;
     if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
@@ -172,7 +174,7 @@ void render_hand() {
         }}) {
     CLAY({.id = CLAY_ID_LOCAL("Bottom"),
           .layout = {
-              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT + 2 * SECTION_PADDING)},
               .childGap = 8,
               .layoutDirection = CLAY_LEFT_TO_RIGHT,
           }}) {
@@ -201,7 +203,7 @@ void render_hand() {
 void render_topbar() {
   CLAY({.id = CLAY_ID("Topbar"),
         .layout = {
-            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT + 2 * SECTION_PADDING)},
             .childGap = 4,
         }}) {
     CLAY({.id = CLAY_ID("Jokers"),

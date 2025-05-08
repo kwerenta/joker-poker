@@ -16,6 +16,7 @@
 
 #define SIDEBAR_WIDTH (100)
 #define SIDEBAR_GAP (4)
+#define SECTION_PADDING (4)
 
 #define COLOR_WHITE (Clay_Color){255, 255, 255, 255}
 #define COLOR_BLACK (Clay_Color){0, 0, 0, 255}
