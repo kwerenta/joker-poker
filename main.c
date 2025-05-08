@@ -35,6 +35,9 @@ void init() {
 
   state.cards_atlas = load_texture("res/cards.png");
   state.font = load_texture("res/font.png");
+  state.bg = init_texture(128, 128);
+
+  init_sine_tab();
 
   sceCtrlSetSamplingCycle(0);
   sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
@@ -56,6 +59,8 @@ void destroy() {
 
   stbi_image_free(state.font->data);
   free(state.font);
+
+  free(state.bg);
 
   log_message(LOG_INFO, "Application has been destroyed.");
 }
@@ -79,6 +84,8 @@ int main(int argc, char *argv[]) {
     state.frame_arena.offset = 0;
 
     start_frame(list);
+
+    render_background();
 
     Clay_BeginLayout();
 

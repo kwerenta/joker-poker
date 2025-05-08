@@ -99,6 +99,18 @@ Texture *load_texture(const char *filename) {
   return texture;
 }
 
+Texture *init_texture(uint32_t width, uint32_t height) {
+  Texture *texture = (Texture *)calloc(1, sizeof(Texture));
+
+  texture->width = width;
+  texture->height = height;
+  texture->data = guGetStaticVramTexture(width, height, GU_PSM_8888);
+
+  sceKernelDcacheWritebackInvalidateAll();
+
+  return texture;
+}
+
 uint8_t button_pressed(unsigned int button) {
   if ((state.controls.data.Buttons & button) && (state.controls.state & button) == 0) {
     return 1;

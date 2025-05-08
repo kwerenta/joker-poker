@@ -67,7 +67,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
   size_t items_width = item_count * CARD_WIDTH;
 
   for (uint8_t i = 0; i < item_count; i++) {
-    float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width;
+    float parent_width = Clay_GetElementData(CLAY_SID(parent_id)).boundingBox.width - 2 * SECTION_PADDING;
     CustomElementData *element = frame_arena_allocate(sizeof(CustomElementData));
     *element = create_spread_item_element(section, i);
 
@@ -78,6 +78,8 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
       x_offset = (float)(parent_width - items_width) / (item_count + 1) * (i + 1) + CARD_WIDTH * i;
     else
       x_offset = i * (float)(parent_width - CARD_WIDTH) / (item_count - 1);
+
+    x_offset += SECTION_PADDING;
 
     float y_offset = 0;
     if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
@@ -172,11 +174,12 @@ void render_hand() {
         }}) {
     CLAY({.id = CLAY_ID_LOCAL("Bottom"),
           .layout = {
-              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT + 2 * SECTION_PADDING)},
               .childGap = 8,
               .layoutDirection = CLAY_LEFT_TO_RIGHT,
           }}) {
       CLAY({.id = CLAY_ID("Hand"),
+            .backgroundColor = COLOR_SECTION_BG,
             .layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
             }}) {}
@@ -200,11 +203,11 @@ void render_hand() {
 void render_topbar() {
   CLAY({.id = CLAY_ID("Topbar"),
         .layout = {
-            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT + 2 * SECTION_PADDING)},
             .childGap = 4,
         }}) {
     CLAY({.id = CLAY_ID("Jokers"),
-          .backgroundColor = COLOR_CARD_BG,
+          .backgroundColor = COLOR_SECTION_BG,
           .layout = {
               .sizing = {CLAY_SIZING_PERCENT(0.7), CLAY_SIZING_GROW(0)},
               .childGap = 8,
@@ -223,9 +226,9 @@ void render_topbar() {
     }
 
     CLAY({.id = CLAY_ID("Consumables"),
-          .backgroundColor = COLOR_CARD_BG,
+          .backgroundColor = COLOR_SECTION_BG,
           .layout = {
-              .sizing = {CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+              .sizing = {CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_GROW(0)},
               .childGap = 8,
               .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
           }}) {
@@ -630,4 +633,34 @@ void render_overlay_poker_hands() {
       }
     }
   }
+}
+
+void render_background() {
+  float time = state.time;
+
+  for (uint8_t y = 0; y < BG_TEXTURE_HEIGHT; y++) {
+    for (uint8_t x = 0; x < BG_TEXTURE_WIDTH; x++) {
+      uint8_t u = (x * 256) / BG_TEXTURE_WIDTH;
+      uint8_t v = (y * 256) / BG_TEXTURE_HEIGHT;
+      float v1 = sine_tab[(u + (uint8_t)(time * 10)) & 255];
+      float v2 = sine_tab[(v + (uint8_t)(time * 8)) & 255];
+      float v3 = sine_tab[((u + v) / 2 + (uint8_t)(time * 15)) & 255];
+
+      float val = v1 + v2 + v3;
+      uint8_t r = (uint8_t)(25 + 20 * (sine_tab[(uint8_t)(val * 12) & 255]));
+      uint8_t g = (uint8_t)(55 + 30 * (sine_tab[(uint8_t)(val * 15) & 255]));
+      uint8_t b = (uint8_t)(100 + 60 * (1.0f + sine_tab[(uint8_t)(val * 18) & 255]));
+
+      // Background texture buffer is larger due to PSP's requirement for texture sizes to be powers of 2,
+      // hence texture buffer width is used instead of the actual texture width for pixel coordinates
+      state.bg->data[x + y * state.bg->width] = RGB(r, g, b);
+    }
+  }
+
+  draw_texture(state.bg, &(Rect){.x = 0, .y = 0, .w = BG_TEXTURE_WIDTH, .h = BG_TEXTURE_HEIGHT},
+               &(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, 0xFFFFFFFF, 0);
+}
+
+void init_sine_tab() {
+  for (uint8_t i = 0; i <= 255; ++i) sine_tab[i] = sinf(i * 2.0f * M_PI / 256.0f);
 }
