@@ -651,6 +651,8 @@ void render_background() {
       uint8_t g = (uint8_t)(55 + 30 * (sine_tab[(uint8_t)(val * 15) & 255]));
       uint8_t b = (uint8_t)(100 + 60 * (1.0f + sine_tab[(uint8_t)(val * 18) & 255]));
 
+      // Background texture buffer is larger due to PSP's requirement for texture sizes to be powers of 2,
+      // hence texture buffer width is used instead of the actual texture width for pixel coordinates
       state.bg->data[x + y * state.bg->width] = RGB(r, g, b);
     }
   }
