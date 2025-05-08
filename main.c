@@ -67,7 +67,6 @@ void destroy() {
   stbi_image_free(state.font->data);
   free(state.font);
 
-  free(state.bg->data);
   free(state.bg);
 
   log_message(LOG_INFO, "Application has been destroyed.");
