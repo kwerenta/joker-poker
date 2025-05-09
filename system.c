@@ -12,30 +12,7 @@
 #include "gfx.h"
 #include "state.h"
 
-void draw_rectangle(Rect *rect, uint32_t color) {
-  Vertex *vertices = (Vertex *)sceGuGetMemory(2 * sizeof(Vertex));
-
-  vertices[0].u = 0.0f;
-  vertices[0].v = 0.0f;
-  vertices[0].x = rect->x;
-  vertices[0].y = rect->y;
-  vertices[0].z = 0.0f;
-  vertices[0].color = color;
-
-  vertices[1].u = 0.0f;
-  vertices[1].v = 0.0f;
-  vertices[1].x = rect->x + rect->w;
-  vertices[1].y = rect->y + rect->h;
-  vertices[1].z = 0.0f;
-  vertices[1].color = color;
-
-  sceGuEnable(GU_BLEND);
-  sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-
-  sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
-
-  sceGuDisable(GU_BLEND);
-}
+void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0}, rect, color, 0); }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
   const uint8_t vertices_count = angle == 0 ? 2 : 4;
@@ -80,20 +57,22 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
     vertices[1].z = 0.0f;
   }
 
-  sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
-  sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
-  sceGuTexFilter(GU_NEAREST, GU_NEAREST);
-  sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+  if (texture != NULL) {
+    sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
+    sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
+    sceGuTexFilter(GU_NEAREST, GU_NEAREST);
+    sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+    sceGuEnable(GU_TEXTURE_2D);
+  }
 
-  sceGuEnable(GU_TEXTURE_2D);
   sceGuEnable(GU_BLEND);
-
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+
   sceGuDrawArray(angle == 0 ? GU_SPRITES : GU_TRIANGLE_FAN,
                  GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, vertices_count, 0, vertices);
 
   sceGuDisable(GU_BLEND);
-  sceGuDisable(GU_TEXTURE_2D);
+  if (texture != NULL) sceGuDisable(GU_TEXTURE_2D);
 }
 
 Texture *load_texture(const char *filename) {
