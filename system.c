@@ -22,7 +22,7 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
     flush_render_batch();
 
   render_batch.texture = texture;
-  render_batch.is_angled = angle == 0 ? 0 : 1;
+  render_batch.is_angled = (angle != 0);
 
   if (angle != 0) {
     float cx = dst->x + dst->w / 2.0f;
@@ -47,22 +47,19 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
                        .u = u[j],
                        .v = v[j],
                        .color = color};
-      render_batch.vertices[render_batch.count] = vertex;
-      render_batch.count++;
+      render_batch.vertices[render_batch.count++] = vertex;
     }
     return;
   }
 
   Vertex vertex = {.u = src->x, .v = src->y, .color = color, .x = dst->x, .y = dst->y, .z = 0.0f};
-  render_batch.vertices[render_batch.count] = vertex;
-  render_batch.count++;
+  render_batch.vertices[render_batch.count++] = vertex;
 
   vertex.u += src->w;
   vertex.v += src->h;
   vertex.x += dst->w;
   vertex.y += dst->h;
-  render_batch.vertices[render_batch.count] = vertex;
-  render_batch.count++;
+  render_batch.vertices[render_batch.count++] = vertex;
 }
 
 void flush_render_batch() {

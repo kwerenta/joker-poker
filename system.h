@@ -33,7 +33,7 @@ typedef struct {
 
 typedef struct {
   uint8_t is_angled;
-  __attribute__((aligned(16))) Vertex *vertices;
+  Vertex *vertices;
   uint16_t count;
   Texture *texture;
 } RenderBatch;
