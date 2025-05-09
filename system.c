@@ -16,10 +16,12 @@
 void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0}, rect, color, 0); }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
-  if (render_batch.texture != texture || render_batch.angle != angle) flush_render_batch();
+  if (render_batch.texture != texture || (render_batch.is_angled == 0 && angle != 0) ||
+      (render_batch.is_angled == 1 && angle == 0))
+    flush_render_batch();
 
   render_batch.texture = texture;
-  render_batch.angle = angle;
+  render_batch.is_angled = angle == 0 ? 0 : 1;
 
   if (angle != 0) {
     float cx = dst->x + dst->w / 2.0f;
@@ -74,7 +76,7 @@ void flush_render_batch() {
   sceGuEnable(GU_BLEND);
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
-  sceGuDrawArray(render_batch.angle == 0 ? GU_SPRITES : GU_TRIANGLES,
+  sceGuDrawArray(render_batch.is_angled == 0 ? GU_SPRITES : GU_TRIANGLES,
                  GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
                  cvector_size(render_batch.vertices), 0, render_batch.vertices);
 

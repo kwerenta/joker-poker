@@ -30,7 +30,7 @@ typedef struct {
 } Texture;
 
 typedef struct {
-  float angle;
+  uint8_t is_angled;
   cvector(Vertex) vertices;
   Texture *texture;
 } RenderBatch;
