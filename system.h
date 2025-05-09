@@ -18,8 +18,8 @@ typedef struct {
 } Vector2;
 
 typedef struct {
-  uint16_t u, v;
-  int16_t x, y, z;
+  uint32_t color;
+  float x, y, z;
 } Vertex;
 
 typedef struct {
