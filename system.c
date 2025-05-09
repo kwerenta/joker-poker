@@ -17,15 +17,18 @@ void draw_rectangle(Rect *rect, uint32_t color) {
 
   vertices[0].x = rect->x;
   vertices[0].y = rect->y;
+  vertices[0].z = 0.0f;
+  vertices[0].color = color;
 
   vertices[1].x = rect->x + rect->w;
   vertices[1].y = rect->y + rect->h;
+  vertices[1].z = 0.0f;
+  vertices[1].color = color;
 
   sceGuEnable(GU_BLEND);
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
-  sceGuColor(color);
-  sceGuDrawArray(GU_SPRITES, GU_TEXTURE_16BIT | GU_VERTEX_16BIT | GU_TRANSFORM_2D, 2, 0, vertices);
+  sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 
   sceGuDisable(GU_BLEND);
 }
