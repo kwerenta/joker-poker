@@ -8,16 +8,17 @@
 #include <stb_image.h>
 #include <stdlib.h>
 
-#include "cvector.h"
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
 
-void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0}, rect, color, 0); }
+static RenderBatch render_batch = {.count = 0};
+
+void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0, 0, 0, 0}, rect, color, 0); }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
-  if (render_batch.texture != texture || (render_batch.is_angled == 0 && angle != 0) ||
-      (render_batch.is_angled == 1 && angle == 0))
+  if (render_batch.texture != texture || render_batch.is_angled != (angle != 0) ||
+      render_batch.count >= RENDER_BATCH_SIZE - 6)
     flush_render_batch();
 
   render_batch.texture = texture;
@@ -46,23 +47,26 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
                        .u = u[j],
                        .v = v[j],
                        .color = color};
-      cvector_push_back(render_batch.vertices, vertex);
+      render_batch.vertices[render_batch.count] = vertex;
+      render_batch.count++;
     }
     return;
   }
 
   Vertex vertex = {.u = src->x, .v = src->y, .color = color, .x = dst->x, .y = dst->y, .z = 0.0f};
-  cvector_push_back(render_batch.vertices, vertex);
+  render_batch.vertices[render_batch.count] = vertex;
+  render_batch.count++;
 
   vertex.u += src->w;
   vertex.v += src->h;
   vertex.x += dst->w;
   vertex.y += dst->h;
-  cvector_push_back(render_batch.vertices, vertex);
+  render_batch.vertices[render_batch.count] = vertex;
+  render_batch.count++;
 }
 
 void flush_render_batch() {
-  if (cvector_size(render_batch.vertices) == 0) return;
+  if (render_batch.count == 0) return;
   Texture *texture = render_batch.texture;
 
   if (texture != NULL) {
@@ -77,13 +81,13 @@ void flush_render_batch() {
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
   sceGuDrawArray(render_batch.is_angled == 0 ? GU_SPRITES : GU_TRIANGLES,
-                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
-                 cvector_size(render_batch.vertices), 0, render_batch.vertices);
+                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, render_batch.count, 0,
+                 render_batch.vertices);
 
   sceGuDisable(GU_BLEND);
   if (texture != NULL) sceGuDisable(GU_TEXTURE_2D);
 
-  cvector_clear(render_batch.vertices);
+  render_batch.count = 0;
 }
 
 Texture *load_texture(const char *filename) {
@@ -334,12 +338,14 @@ void init_gu(void **fbp0, void **fbp1, char list[]) {
 void end_gu() {
   sceGuDisplay(GU_FALSE);
   sceGuTerm();
-
-  cvector_free(render_batch.vertices);
 }
 
 void start_frame(char list[]) {
   sceGuStart(GU_DIRECT, list);
+
+  render_batch.vertices = (Vertex *)sceGuGetMemory(RENDER_BATCH_SIZE * sizeof(Vertex));
+  render_batch.count = 0;
+
   sceGuClearColor(0xFF000000);
   sceGuClear(GU_COLOR_BUFFER_BIT);
 }

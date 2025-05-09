@@ -7,6 +7,8 @@
 #define BUFFER_WIDTH (512)
 #define BUFFER_HEIGHT SCREEN_HEIGHT
 
+#define RENDER_BATCH_SIZE (512)
+
 #define RGB(r, g, b) RGBA(r, g, b, 255)
 #define RGBA(r, g, b, a) ((a << 24) | (b << 16) | (g << 8) | r)
 
@@ -31,11 +33,10 @@ typedef struct {
 
 typedef struct {
   uint8_t is_angled;
-  cvector(Vertex) vertices;
+  __attribute__((aligned(16))) Vertex *vertices;
+  uint16_t count;
   Texture *texture;
 } RenderBatch;
-
-static RenderBatch render_batch;
 
 Texture *load_texture(const char *filename);
 Texture *init_texture(uint32_t width, uint32_t height);

@@ -131,6 +131,14 @@ int main(int argc, char *argv[]) {
         break;
     }
 
+    CLAY({.floating = {
+              .attachTo = CLAY_ATTACH_TO_ROOT,
+              .attachPoints = {.parent = CLAY_ATTACH_POINT_RIGHT_TOP, .element = CLAY_ATTACH_POINT_RIGHT_TOP}}}) {
+      Clay_String fps_counter;
+      append_clay_string(&fps_counter, "%.2f FPS", 1 / state.delta);
+      CLAY_TEXT(fps_counter, WHITE_TEXT_CONFIG);
+    }
+
     Clay_RenderCommandArray render_commands = Clay_EndLayout();
     execute_render_commands(render_commands);
 
