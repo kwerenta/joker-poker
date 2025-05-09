@@ -134,6 +134,8 @@ int main(int argc, char *argv[]) {
     Clay_RenderCommandArray render_commands = Clay_EndLayout();
     execute_render_commands(render_commands);
 
+    flush_render_batch();
+
     end_frame();
   }
 

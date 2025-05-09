@@ -8,6 +8,7 @@
 #include <stb_image.h>
 #include <stdlib.h>
 
+#include "cvector.h"
 #include "game.h"
 #include "gfx.h"
 #include "state.h"
@@ -15,8 +16,10 @@
 void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0}, rect, color, 0); }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
-  const uint8_t vertices_count = angle == 0 ? 2 : 4;
-  Vertex *vertices = (Vertex *)sceGuGetMemory(vertices_count * sizeof(Vertex));
+  if (render_batch.texture != texture || render_batch.angle != angle) flush_render_batch();
+
+  render_batch.texture = texture;
+  render_batch.angle = angle;
 
   if (angle != 0) {
     float cx = dst->x + dst->w / 2.0f;
@@ -33,29 +36,32 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
     float u[4] = {src->x, src->x + src->w, src->x + src->w, src->x};
     float v[4] = {src->y, src->y, src->y + src->h, src->y + src->h};
 
-    for (int i = 0; i < 4; ++i) {
-      vertices[i].x = cos_a * dx[i] - sin_a * dy[i] + cx;
-      vertices[i].y = sin_a * dx[i] + cos_a * dy[i] + cy;
-      vertices[i].z = 0.0f;
-      vertices[i].u = u[i];
-      vertices[i].v = v[i];
-      vertices[i].color = color;
+    for (int i = 0; i < 6; ++i) {
+      int j = i < 3 ? i : i == 3 ? 0 : i - 2;
+      Vertex vertex = {.x = cos_a * dx[j] - sin_a * dy[j] + cx,
+                       .y = sin_a * dx[j] + cos_a * dy[j] + cy,
+                       .z = 0.0f,
+                       .u = u[j],
+                       .v = v[j],
+                       .color = color};
+      cvector_push_back(render_batch.vertices, vertex);
     }
-  } else {
-    vertices[0].u = src->x;
-    vertices[0].v = src->y;
-    vertices[0].color = color;
-    vertices[0].x = dst->x;
-    vertices[0].y = dst->y;
-    vertices[0].z = 0.0f;
-
-    vertices[1].u = src->x + src->w;
-    vertices[1].v = src->y + src->h;
-    vertices[1].color = color;
-    vertices[1].x = dst->x + dst->w;
-    vertices[1].y = dst->y + dst->h;
-    vertices[1].z = 0.0f;
+    return;
   }
+
+  Vertex vertex = {.u = src->x, .v = src->y, .color = color, .x = dst->x, .y = dst->y, .z = 0.0f};
+  cvector_push_back(render_batch.vertices, vertex);
+
+  vertex.u += src->w;
+  vertex.v += src->h;
+  vertex.x += dst->w;
+  vertex.y += dst->h;
+  cvector_push_back(render_batch.vertices, vertex);
+}
+
+void flush_render_batch() {
+  if (cvector_size(render_batch.vertices) == 0) return;
+  Texture *texture = render_batch.texture;
 
   if (texture != NULL) {
     sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
@@ -68,11 +74,14 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
   sceGuEnable(GU_BLEND);
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
-  sceGuDrawArray(angle == 0 ? GU_SPRITES : GU_TRIANGLE_FAN,
-                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, vertices_count, 0, vertices);
+  sceGuDrawArray(render_batch.angle == 0 ? GU_SPRITES : GU_TRIANGLES,
+                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
+                 cvector_size(render_batch.vertices), 0, render_batch.vertices);
 
   sceGuDisable(GU_BLEND);
   if (texture != NULL) sceGuDisable(GU_TEXTURE_2D);
+
+  cvector_clear(render_batch.vertices);
 }
 
 Texture *load_texture(const char *filename) {
@@ -323,6 +332,8 @@ void init_gu(void **fbp0, void **fbp1, char list[]) {
 void end_gu() {
   sceGuDisplay(GU_FALSE);
   sceGuTerm();
+
+  cvector_free(render_batch.vertices);
 }
 
 void start_frame(char list[]) {

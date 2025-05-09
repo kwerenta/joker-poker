@@ -1,6 +1,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include <cvector.h>
 #include <stdint.h>
 
 #define BUFFER_WIDTH (512)
@@ -28,8 +29,18 @@ typedef struct {
   uint32_t *data;
 } Texture;
 
+typedef struct {
+  float angle;
+  cvector(Vertex) vertices;
+  Texture *texture;
+} RenderBatch;
+
+static RenderBatch render_batch;
+
 Texture *load_texture(const char *filename);
 Texture *init_texture(uint32_t width, uint32_t height);
+
+void flush_render_batch();
 
 void draw_rectangle(Rect *rect, uint32_t color);
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle);
