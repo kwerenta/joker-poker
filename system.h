@@ -18,15 +18,10 @@ typedef struct {
 } Vector2;
 
 typedef struct {
-  uint32_t color;
-  float x, y, z;
-} Vertex;
-
-typedef struct {
   float u, v;
   uint32_t color;
   float x, y, z;
-} TextureVertex;
+} Vertex;
 
 typedef struct {
   int width, height;

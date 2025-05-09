@@ -15,11 +15,15 @@
 void draw_rectangle(Rect *rect, uint32_t color) {
   Vertex *vertices = (Vertex *)sceGuGetMemory(2 * sizeof(Vertex));
 
+  vertices[0].u = 0.0f;
+  vertices[0].v = 0.0f;
   vertices[0].x = rect->x;
   vertices[0].y = rect->y;
   vertices[0].z = 0.0f;
   vertices[0].color = color;
 
+  vertices[1].u = 0.0f;
+  vertices[1].v = 0.0f;
   vertices[1].x = rect->x + rect->w;
   vertices[1].y = rect->y + rect->h;
   vertices[1].z = 0.0f;
@@ -28,14 +32,14 @@ void draw_rectangle(Rect *rect, uint32_t color) {
   sceGuEnable(GU_BLEND);
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
-  sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
+  sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 
   sceGuDisable(GU_BLEND);
 }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
   const uint8_t vertices_count = angle == 0 ? 2 : 4;
-  TextureVertex *vertices = (TextureVertex *)sceGuGetMemory(vertices_count * sizeof(TextureVertex));
+  Vertex *vertices = (Vertex *)sceGuGetMemory(vertices_count * sizeof(Vertex));
 
   if (angle != 0) {
     float cx = dst->x + dst->w / 2.0f;
