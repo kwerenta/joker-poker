@@ -662,5 +662,5 @@ void render_background() {
 }
 
 void init_sine_tab() {
-  for (uint8_t i = 0; i <= 255; ++i) sine_tab[i] = sinf(i * 2.0f * M_PI / 256.0f);
+  for (uint16_t i = 0; i < 256; ++i) sine_tab[i] = sinf(i * 2.0f * M_PI / 256.0f);
 }
