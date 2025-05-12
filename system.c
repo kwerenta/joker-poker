@@ -311,17 +311,17 @@ void handle_controls() {
   controls->state = controls->data.Buttons;
 }
 
-void init_gu(void **fbp0, void **fbp1, char list[]) {
+void init_gu(char list[]) {
+  void *fbp0 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
+  void *fbp1 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
+
   sceGuInit();
 
-  *fbp0 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
-  *fbp1 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
-
   sceGuStart(GU_DIRECT, list);
-  sceGuDrawBuffer(GU_PSM_8888, *fbp0, BUFFER_WIDTH);
-  sceGuDispBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, *fbp1, BUFFER_WIDTH);
+  sceGuDrawBuffer(GU_PSM_8888, fbp0, BUFFER_WIDTH);
+  sceGuDispBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, fbp1, BUFFER_WIDTH);
 
-  sceGuDepthBuffer(*fbp0, 0);
+  sceGuDepthBuffer(fbp0, 0);
   sceGuDisable(GU_DEPTH_TEST);
 
   sceGuOffset(2048 - (SCREEN_WIDTH / 2), 2048 - (SCREEN_HEIGHT / 2));

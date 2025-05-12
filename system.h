@@ -50,7 +50,7 @@ Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32
 void handle_controls();
 
 int setup_callbacks();
-void init_gu(void **fbp0, void **fbp1, char list[]);
+void init_gu(char list[]);
 void end_gu();
 
 void start_frame(char list[]);

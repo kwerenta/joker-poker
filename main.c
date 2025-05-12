@@ -16,10 +16,7 @@
 PSP_MODULE_INFO("Joker Poker", 0, 0, 10);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
 
-char list[0x20000] __attribute__((aligned(64)));
-
-void *fbp0;
-void *fbp1;
+static char __attribute__((aligned(16))) list[262144];
 
 State state;
 
@@ -30,7 +27,7 @@ void init() {
 
   setup_callbacks();
 
-  init_gu(&fbp0, &fbp1, list);
+  init_gu(list);
   renderer_init();
 
   state.cards_atlas = load_texture("res/cards.png");
