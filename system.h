@@ -1,7 +1,6 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <cvector.h>
 #include <stdint.h>
 
 #define BUFFER_WIDTH (512)

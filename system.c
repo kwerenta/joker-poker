@@ -39,8 +39,9 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
     float u[4] = {src->x, src->x + src->w, src->x + src->w, src->x};
     float v[4] = {src->y, src->y, src->y + src->h, src->y + src->h};
 
+    static const uint8_t idx[6] = {0, 1, 2, 0, 2, 3};
     for (int i = 0; i < 6; ++i) {
-      int j = i < 3 ? i : i == 3 ? 0 : i - 2;
+      int j = idx[i];
       Vertex vertex = {.x = cos_a * dx[j] - sin_a * dy[j] + cx,
                        .y = sin_a * dx[j] + cos_a * dy[j] + cy,
                        .z = 0.0f,
