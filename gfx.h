@@ -8,8 +8,8 @@
 #define SCREEN_WIDTH (480)
 #define SCREEN_HEIGHT (272)
 
-#define BG_TEXTURE_WIDTH (120)
-#define BG_TEXTURE_HEIGHT (68)
+#define BG_TEXTURE_WIDTH (60)
+#define BG_TEXTURE_HEIGHT (34)
 
 #define CARD_WIDTH (48)
 #define CARD_HEIGHT (64)
