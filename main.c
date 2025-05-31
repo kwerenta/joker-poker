@@ -65,6 +65,9 @@ void destroy() {
 int main(int argc, char *argv[]) {
   init();
   uint64_t last_time = sceKernelGetSystemTimeWide();
+#ifdef DEBUG_BUILD
+  float frame_time = 0.0f;
+#endif
 
   log_message(LOG_INFO, "Starting main loop...");
 
@@ -133,7 +136,7 @@ int main(int argc, char *argv[]) {
               .attachTo = CLAY_ATTACH_TO_ROOT,
               .attachPoints = {.parent = CLAY_ATTACH_POINT_RIGHT_TOP, .element = CLAY_ATTACH_POINT_RIGHT_TOP}}}) {
       Clay_String fps_counter;
-      append_clay_string(&fps_counter, "%.2f FPS", 1 / state.delta);
+      append_clay_string(&fps_counter, "%.2f FPS [%.2f ms]", 1 / state.delta, frame_time);
       CLAY_TEXT(fps_counter, WHITE_TEXT_CONFIG);
     }
 #endif
@@ -142,6 +145,10 @@ int main(int argc, char *argv[]) {
     execute_render_commands(render_commands);
 
     flush_render_batch();
+
+#ifdef DEBUG_BUILD
+    frame_time = (sceKernelGetSystemTimeWide() - curr_time) / 1000.0f;
+#endif
 
     end_frame();
   }
