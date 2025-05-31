@@ -16,10 +16,7 @@
 PSP_MODULE_INFO("Joker Poker", 0, 0, 10);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
 
-char list[0x20000] __attribute__((aligned(64)));
-
-void *fbp0;
-void *fbp1;
+static char __attribute__((aligned(16))) list[262144];
 
 State state;
 
@@ -30,12 +27,12 @@ void init() {
 
   setup_callbacks();
 
-  init_gu(&fbp0, &fbp1, list);
+  init_gu(list);
   renderer_init();
 
   state.cards_atlas = load_texture("res/cards.png");
   state.font = load_texture("res/font.png");
-  state.bg = init_texture(128, 128);
+  state.bg = init_texture(64, 64);
 
   init_sine_tab();
 
@@ -131,8 +128,20 @@ int main(int argc, char *argv[]) {
         break;
     }
 
+#ifdef DEBUG_BUILD
+    CLAY({.floating = {
+              .attachTo = CLAY_ATTACH_TO_ROOT,
+              .attachPoints = {.parent = CLAY_ATTACH_POINT_RIGHT_TOP, .element = CLAY_ATTACH_POINT_RIGHT_TOP}}}) {
+      Clay_String fps_counter;
+      append_clay_string(&fps_counter, "%.2f FPS", 1 / state.delta);
+      CLAY_TEXT(fps_counter, WHITE_TEXT_CONFIG);
+    }
+#endif
+
     Clay_RenderCommandArray render_commands = Clay_EndLayout();
     execute_render_commands(render_commands);
+
+    flush_render_batch();
 
     end_frame();
   }
