@@ -1,5 +1,6 @@
 #include "system.h"
 
+#include <malloc.h>
 #include <math.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
@@ -12,19 +13,22 @@
 #include "gfx.h"
 #include "state.h"
 
+static Vertex vertex_buffer[RENDER_BATCH_SIZE];
 static RenderBatch render_batch = {.count = 0};
 
 void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0, 0, 0, 0}, rect, color, 0); }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
-  if (render_batch.texture != texture || render_batch.is_angled != (angle != 0) ||
-      render_batch.count >= RENDER_BATCH_SIZE - 6)
+  uint8_t is_angled = (angle != 0);
+
+  if (render_batch.texture != texture || render_batch.is_angled != is_angled ||
+      render_batch.count + 6 > RENDER_BATCH_SIZE)
     flush_render_batch();
 
   render_batch.texture = texture;
-  render_batch.is_angled = (angle != 0);
+  render_batch.is_angled = is_angled;
 
-  if (angle != 0) {
+  if (is_angled) {
     float cx = dst->x + dst->w / 2.0f;
     float cy = dst->y + dst->h / 2.0f;
 
@@ -75,12 +79,16 @@ void flush_render_batch() {
     sceGuEnable(GU_TEXTURE_2D);
   }
 
+  // Copy from RAM buffer to GPU memory
+  Vertex *gpu_vertices = (Vertex *)sceGuGetMemory(render_batch.count * sizeof(Vertex));
+  memcpy(gpu_vertices, render_batch.vertices, render_batch.count * sizeof(Vertex));
+
   sceGuEnable(GU_BLEND);
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
 
   sceGuDrawArray(render_batch.is_angled == 0 ? GU_SPRITES : GU_TRIANGLES,
                  GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, render_batch.count, 0,
-                 render_batch.vertices);
+                 gpu_vertices);
 
   sceGuDisable(GU_BLEND);
   if (texture != NULL) sceGuDisable(GU_TEXTURE_2D);
@@ -329,6 +337,9 @@ void init_gu(char list[]) {
   sceGuEnable(GU_SCISSOR_TEST);
   sceGuScissor(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+  // render_batch.vertices = (Vertex *)(0x40000000 | (unsigned int)memalign(16, RENDER_BATCH_SIZE * sizeof(Vertex)));
+  render_batch.vertices = vertex_buffer;
+
   sceGuFinish();
   sceGuDisplay(GU_TRUE);
 }
@@ -341,7 +352,7 @@ void end_gu() {
 void start_frame(char list[]) {
   sceGuStart(GU_DIRECT, list);
 
-  render_batch.vertices = (Vertex *)sceGuGetMemory(RENDER_BATCH_SIZE * sizeof(Vertex));
+  // render_batch.vertices = (Vertex *)sceGuGetMemory(RENDER_BATCH_SIZE * sizeof(Vertex));
   render_batch.count = 0;
 
   sceGuClearColor(0xFF000000);
