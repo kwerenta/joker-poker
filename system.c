@@ -337,7 +337,6 @@ void init_gu(char list[]) {
   sceGuEnable(GU_SCISSOR_TEST);
   sceGuScissor(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-  // render_batch.vertices = (Vertex *)(0x40000000 | (unsigned int)memalign(16, RENDER_BATCH_SIZE * sizeof(Vertex)));
   render_batch.vertices = vertex_buffer;
 
   sceGuFinish();
@@ -351,15 +350,15 @@ void end_gu() {
 
 void start_frame(char list[]) {
   sceGuStart(GU_DIRECT, list);
-
-  // render_batch.vertices = (Vertex *)sceGuGetMemory(RENDER_BATCH_SIZE * sizeof(Vertex));
-  render_batch.count = 0;
-
   sceGuClearColor(0xFF000000);
   sceGuClear(GU_COLOR_BUFFER_BIT);
+
+  render_batch.count = 0;
 }
 
 void end_frame() {
+  flush_render_batch();
+
   sceGuFinish();
   sceGuSync(0, 0);
   sceDisplayWaitVblankStart();
