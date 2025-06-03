@@ -34,8 +34,6 @@
 
 #define WHITE_TEXT_CONFIG CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE})
 
-static float sine_tab[256];
-
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst);
 void render_card(Card *card, Rect *dst);
 void render_joker(Joker *joker, Rect *dst);
@@ -61,7 +59,5 @@ void render_overlay_poker_hands();
 
 void render_background();
 void init_background();
-
-void init_sine_tab();
 
 #endif

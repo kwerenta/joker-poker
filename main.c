@@ -32,9 +32,7 @@ void init() {
 
   state.cards_atlas = load_texture("res/cards.png");
   state.font = load_texture("res/font.png");
-  state.bg = init_texture(64, 64);
 
-  init_sine_tab();
   init_background();
 
   sceCtrlSetSamplingCycle(0);

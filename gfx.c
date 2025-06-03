@@ -714,7 +714,3 @@ void render_background() {
   draw_texture(state.bg, &(Rect){.x = x_offest, .y = y_offest, .w = BG_TEXTURE_WIDTH, .h = BG_TEXTURE_HEIGHT},
                &(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, RGB(255, 255, 255), 0);
 }
-
-void init_sine_tab() {
-  for (uint16_t i = 0; i < 256; ++i) sine_tab[i] = sinf(i * 2.0f * M_PI / 256.0f);
-}
