@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 #include <clay.h>
-#include <math.h>
 #include <stdio.h>
 
 #include "debug.h"
@@ -9,8 +8,7 @@
 #include "state.h"
 #include "system.h"
 
-#define CLAY_COLOR_TO_PSP(color) \
-  RGBA((uint8_t)roundf(color.r), (uint8_t)roundf(color.g), (uint8_t)roundf(color.b), (uint8_t)roundf(color.a))
+#define CLAY_COLOR_TO_PSP(color) RGBA((uint8_t)(color.r), (uint8_t)(color.g), (uint8_t)(color.b), (uint8_t)(color.a))
 
 void error_handler(Clay_ErrorData error) {
   log_message(LOG_ERROR, "Clay error: %s", error.errorText.chars);
