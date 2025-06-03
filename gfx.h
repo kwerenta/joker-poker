@@ -8,6 +8,8 @@
 #define SCREEN_WIDTH (480)
 #define SCREEN_HEIGHT (272)
 
+#define BG_NOISE_SIZE 256
+#define BG_PERIOD 256
 #define BG_TEXTURE_WIDTH (60)
 #define BG_TEXTURE_HEIGHT (34)
 
@@ -58,6 +60,7 @@ void render_overlay_menu();
 void render_overlay_poker_hands();
 
 void render_background();
+void init_background();
 
 void init_sine_tab();
 

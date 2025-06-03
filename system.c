@@ -74,7 +74,14 @@ void flush_render_batch() {
   if (texture != NULL) {
     sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
     sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
-    sceGuTexFilter(GU_NEAREST, GU_NEAREST);
+
+    if (texture == state.bg) {
+      sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+      sceGuTexWrap(GU_REPEAT, GU_REPEAT);
+    } else {
+      sceGuTexFilter(GU_NEAREST, GU_NEAREST);
+    }
+
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
     sceGuEnable(GU_TEXTURE_2D);
   }

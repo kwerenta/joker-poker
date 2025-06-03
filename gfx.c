@@ -635,30 +635,84 @@ void render_overlay_poker_hands() {
   }
 }
 
-void render_background() {
-  float time = state.time;
+static const int8_t grad2[8][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
+uint8_t PERLIN_PERM[BG_PERIOD];
 
-  for (uint8_t y = 0; y < BG_TEXTURE_HEIGHT; y++) {
-    for (uint8_t x = 0; x < BG_TEXTURE_WIDTH; x++) {
-      uint8_t u = (x * 256) / BG_TEXTURE_WIDTH;
-      uint8_t v = (y * 256) / BG_TEXTURE_HEIGHT;
-      float v1 = sine_tab[(u + (uint8_t)(time * 10)) & 255];
-      float v2 = sine_tab[(v + (uint8_t)(time * 8)) & 255];
-      float v3 = sine_tab[((u + v) / 2 + (uint8_t)(time * 15)) & 255];
+float fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+float lerp(float a, float b, float t) { return a + t * (b - a); }
+float grad_dot(int hash, float dx, float dy) {
+  int8_t *g = (int8_t *)grad2[hash & 7];
+  return g[0] * dx + g[1] * dy;
+}
 
-      float val = v1 + v2 + v3;
-      uint8_t r = (uint8_t)(25 + 20 * (sine_tab[(uint8_t)(val * 12) & 255]));
-      uint8_t g = (uint8_t)(55 + 30 * (sine_tab[(uint8_t)(val * 15) & 255]));
-      uint8_t b = (uint8_t)(100 + 60 * (1.0f + sine_tab[(uint8_t)(val * 18) & 255]));
+// Tileable Perlin noise
+float perlin(float x, float y) {
+  int xi = (int)floorf(x) % BG_PERIOD;
+  int yi = (int)floorf(y) % BG_PERIOD;
+  int xi1 = (xi + 1) % BG_PERIOD;
+  int yi1 = (yi + 1) % BG_PERIOD;
 
-      // Background texture buffer is larger due to PSP's requirement for texture sizes to be powers of 2,
-      // hence texture buffer width is used instead of the actual texture width for pixel coordinates
-      state.bg->data[x + y * state.bg->width] = RGB(r, g, b);
-    }
+  float tx = x - floorf(x);
+  float ty = y - floorf(y);
+
+  float u = fade(tx);
+  float v = fade(ty);
+
+  int aa = PERLIN_PERM[(PERLIN_PERM[xi] + yi) % BG_PERIOD];
+  int ab = PERLIN_PERM[(PERLIN_PERM[xi] + yi1) % BG_PERIOD];
+  int ba = PERLIN_PERM[(PERLIN_PERM[xi1] + yi) % BG_PERIOD];
+  int bb = PERLIN_PERM[(PERLIN_PERM[xi1] + yi1) % BG_PERIOD];
+
+  float a = grad_dot(aa, tx, ty);
+  float b = grad_dot(ba, tx - 1, ty);
+  float c = grad_dot(ab, tx, ty - 1);
+  float d = grad_dot(bb, tx - 1, ty - 1);
+
+  float x1 = lerp(a, b, u);
+  float x2 = lerp(c, d, u);
+  return lerp(x1, x2, v);
+}
+
+void init_background() {
+  state.bg = init_texture(BG_NOISE_SIZE, BG_NOISE_SIZE);
+
+  for (int i = 0; i < BG_PERIOD; i++) PERLIN_PERM[i] = i;
+  for (int i = BG_PERIOD - 1; i > 0; i--) {
+    int j = rand() % (i + 1);
+    uint8_t temp = PERLIN_PERM[i];
+    PERLIN_PERM[i] = PERLIN_PERM[j];
+    PERLIN_PERM[j] = temp;
   }
 
-  draw_texture(state.bg, &(Rect){.x = 0, .y = 0, .w = BG_TEXTURE_WIDTH, .h = BG_TEXTURE_HEIGHT},
-               &(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, 0xFFFFFFFF, 0);
+  float scale = 16.0f;
+
+  for (int y = 0; y < BG_NOISE_SIZE; y++) {
+    for (int x = 0; x < BG_NOISE_SIZE; x++) {
+      float fx = (float)x / BG_NOISE_SIZE * BG_PERIOD / scale;
+      float fy = (float)y / BG_NOISE_SIZE * BG_PERIOD / scale;
+
+      float n = perlin(fx, fy);
+      n = (n + 1.0f) * 0.5f;
+      if (n < 0.0f) n = 0.0f;
+      if (n > 1.0f) n = 1.0f;
+
+      float subtle = 0.3f + n * 0.4f;
+
+      uint8_t r = (uint8_t)(subtle * 52);
+      uint8_t g = (uint8_t)(subtle * 130);
+      uint8_t b = (uint8_t)(subtle * 255);
+
+      state.bg->data[y * BG_NOISE_SIZE + x] = RGB(r, g, b);
+    }
+  }
+}
+
+void render_background() {
+  float x_offest = state.time * SCREEN_WIDTH * 0.0078125f;
+  float y_offest = state.time * SCREEN_HEIGHT * 0.0078125f;
+
+  draw_texture(state.bg, &(Rect){.x = x_offest, .y = y_offest, .w = BG_TEXTURE_WIDTH, .h = BG_TEXTURE_HEIGHT},
+               &(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, RGB(255, 255, 255), 0);
 }
 
 void init_sine_tab() {

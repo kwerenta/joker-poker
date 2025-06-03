@@ -35,6 +35,7 @@ void init() {
   state.bg = init_texture(64, 64);
 
   init_sine_tab();
+  init_background();
 
   sceCtrlSetSamplingCycle(0);
   sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
