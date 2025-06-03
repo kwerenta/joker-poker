@@ -645,7 +645,6 @@ float grad_dot(int hash, float dx, float dy) {
   return g[0] * dx + g[1] * dy;
 }
 
-// Tileable Perlin noise
 float perlin(float x, float y) {
   int xi = (int)floorf(x) % BG_PERIOD;
   int yi = (int)floorf(y) % BG_PERIOD;
