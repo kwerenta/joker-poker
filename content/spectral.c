@@ -1,5 +1,8 @@
 #include "spectral.h"
 
+#include "../state.h"
+#include "cvector.h"
+
 const char *get_spectral_card_name(Spectral spectral) {
   switch (spectral) {
     case SPECTRAL_FAMILIAR:
@@ -84,5 +87,35 @@ const char *get_spectral_card_description(Spectral spectral) {
   }
 };
 
-uint8_t get_spectral_max_selected(Spectral spectral) { return 0; }
-uint8_t use_spectral_card(Spectral spectral) { return 0; }
+uint8_t get_spectral_max_selected(Spectral spectral) {
+  switch (spectral) {
+    case SPECTRAL_TALISMAN:
+    case SPECTRAL_AURA:
+    case SPECTRAL_DEJA_VU:
+    case SPECTRAL_TRANCE:
+    case SPECTRAL_MEDIUM:
+    case SPECTRAL_CRYPTID:
+      return 1;
+
+    default:
+      return 0;
+  }
+}
+
+uint8_t use_spectral_card(Spectral spectral) {
+  Card *selected_cards[2] = {0};
+  uint8_t selected_count = 0;
+
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->selected == 0) continue;
+
+    selected_cards[selected_count] = card;
+    selected_count++;
+    if (selected_count > 2) return 0;
+  }
+
+  uint8_t max_selected_count = get_spectral_max_selected(spectral);
+  if (selected_count != max_selected_count) return 0;
+
+  return 1;
+}
