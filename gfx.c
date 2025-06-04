@@ -437,7 +437,8 @@ void render_booster_pack_content() {
             .childGap = 8,
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
         }}) {
-    if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA) {
+    if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA ||
+        state.game.booster_pack.item.type == BOOSTER_PACK_SPECTRAL) {
       CLAY({.id = CLAY_ID("BoosterPackHand"),
             .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
       render_spread_items(NAVIGATION_HAND, CLAY_STRING("BoosterPackHand"));
