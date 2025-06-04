@@ -1,5 +1,6 @@
 #include "system.h"
 
+#include <malloc.h>
 #include <math.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
@@ -12,29 +13,22 @@
 #include "gfx.h"
 #include "state.h"
 
-void draw_rectangle(Rect *rect, uint32_t color) {
-  Vertex *vertices = (Vertex *)sceGuGetMemory(2 * sizeof(Vertex));
+static Vertex vertex_buffer[RENDER_BATCH_SIZE];
+static RenderBatch render_batch = {.count = 0};
 
-  vertices[0].x = rect->x;
-  vertices[0].y = rect->y;
-
-  vertices[1].x = rect->x + rect->w;
-  vertices[1].y = rect->y + rect->h;
-
-  sceGuEnable(GU_BLEND);
-  sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-
-  sceGuColor(color);
-  sceGuDrawArray(GU_SPRITES, GU_TEXTURE_16BIT | GU_VERTEX_16BIT | GU_TRANSFORM_2D, 2, 0, vertices);
-
-  sceGuDisable(GU_BLEND);
-}
+void draw_rectangle(Rect *rect, uint32_t color) { draw_texture(NULL, &(Rect){0, 0, 0, 0}, rect, color, 0); }
 
 void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float angle) {
-  const uint8_t vertices_count = angle == 0 ? 2 : 4;
-  TextureVertex *vertices = (TextureVertex *)sceGuGetMemory(vertices_count * sizeof(TextureVertex));
+  uint8_t is_angled = (angle != 0);
 
-  if (angle != 0) {
+  if (render_batch.texture != texture || render_batch.is_angled != is_angled ||
+      render_batch.count + 6 > RENDER_BATCH_SIZE)
+    flush_render_batch();
+
+  render_batch.texture = texture;
+  render_batch.is_angled = is_angled;
+
+  if (is_angled) {
     float cx = dst->x + dst->w / 2.0f;
     float cy = dst->y + dst->h / 2.0f;
 
@@ -49,44 +43,64 @@ void draw_texture(Texture *texture, Rect *src, Rect *dst, uint32_t color, float 
     float u[4] = {src->x, src->x + src->w, src->x + src->w, src->x};
     float v[4] = {src->y, src->y, src->y + src->h, src->y + src->h};
 
-    for (int i = 0; i < 4; ++i) {
-      vertices[i].x = cos_a * dx[i] - sin_a * dy[i] + cx;
-      vertices[i].y = sin_a * dx[i] + cos_a * dy[i] + cy;
-      vertices[i].z = 0.0f;
-      vertices[i].u = u[i];
-      vertices[i].v = v[i];
-      vertices[i].color = color;
+    static const uint8_t idx[6] = {0, 1, 2, 0, 2, 3};
+    for (int i = 0; i < 6; ++i) {
+      int j = idx[i];
+      Vertex vertex = {.x = cos_a * dx[j] - sin_a * dy[j] + cx,
+                       .y = sin_a * dx[j] + cos_a * dy[j] + cy,
+                       .z = 0.0f,
+                       .u = u[j],
+                       .v = v[j],
+                       .color = color};
+      render_batch.vertices[render_batch.count++] = vertex;
     }
-  } else {
-    vertices[0].u = src->x;
-    vertices[0].v = src->y;
-    vertices[0].color = color;
-    vertices[0].x = dst->x;
-    vertices[0].y = dst->y;
-    vertices[0].z = 0.0f;
-
-    vertices[1].u = src->x + src->w;
-    vertices[1].v = src->y + src->h;
-    vertices[1].color = color;
-    vertices[1].x = dst->x + dst->w;
-    vertices[1].y = dst->y + dst->h;
-    vertices[1].z = 0.0f;
+    return;
   }
 
-  sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
-  sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
-  sceGuTexFilter(GU_NEAREST, GU_NEAREST);
-  sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+  Vertex vertex = {.u = src->x, .v = src->y, .color = color, .x = dst->x, .y = dst->y, .z = 0.0f};
+  render_batch.vertices[render_batch.count++] = vertex;
 
-  sceGuEnable(GU_TEXTURE_2D);
+  vertex.u += src->w;
+  vertex.v += src->h;
+  vertex.x += dst->w;
+  vertex.y += dst->h;
+  render_batch.vertices[render_batch.count++] = vertex;
+}
+
+void flush_render_batch() {
+  if (render_batch.count == 0) return;
+  Texture *texture = render_batch.texture;
+
+  if (texture != NULL) {
+    sceGuTexMode(GU_PSM_8888, 0, 0, GU_FALSE);
+    sceGuTexImage(0, texture->width, texture->height, texture->width, texture->data);
+
+    if (texture == state.bg) {
+      sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+      sceGuTexWrap(GU_REPEAT, GU_REPEAT);
+    } else {
+      sceGuTexFilter(GU_NEAREST, GU_NEAREST);
+    }
+
+    sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+    sceGuEnable(GU_TEXTURE_2D);
+  }
+
+  // Copy from RAM buffer to GPU memory
+  Vertex *gpu_vertices = (Vertex *)sceGuGetMemory(render_batch.count * sizeof(Vertex));
+  memcpy(gpu_vertices, render_batch.vertices, render_batch.count * sizeof(Vertex));
+
   sceGuEnable(GU_BLEND);
-
   sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-  sceGuDrawArray(angle == 0 ? GU_SPRITES : GU_TRIANGLE_FAN,
-                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, vertices_count, 0, vertices);
+
+  sceGuDrawArray(render_batch.is_angled == 0 ? GU_SPRITES : GU_TRIANGLES,
+                 GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, render_batch.count, 0,
+                 gpu_vertices);
 
   sceGuDisable(GU_BLEND);
-  sceGuDisable(GU_TEXTURE_2D);
+  if (texture != NULL) sceGuDisable(GU_TEXTURE_2D);
+
+  render_batch.count = 0;
 }
 
 Texture *load_texture(const char *filename) {
@@ -312,23 +326,25 @@ void handle_controls() {
   controls->state = controls->data.Buttons;
 }
 
-void init_gu(void **fbp0, void **fbp1, char list[]) {
+void init_gu(char list[]) {
+  void *fbp0 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
+  void *fbp1 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
+
   sceGuInit();
 
-  *fbp0 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
-  *fbp1 = guGetStaticVramBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, GU_PSM_8888);
-
   sceGuStart(GU_DIRECT, list);
-  sceGuDrawBuffer(GU_PSM_8888, *fbp0, BUFFER_WIDTH);
-  sceGuDispBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, *fbp1, BUFFER_WIDTH);
+  sceGuDrawBuffer(GU_PSM_8888, fbp0, BUFFER_WIDTH);
+  sceGuDispBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, fbp1, BUFFER_WIDTH);
 
-  sceGuDepthBuffer(*fbp0, 0);
+  sceGuDepthBuffer(fbp0, 0);
   sceGuDisable(GU_DEPTH_TEST);
 
   sceGuOffset(2048 - (SCREEN_WIDTH / 2), 2048 - (SCREEN_HEIGHT / 2));
   sceGuViewport(2048, 2048, SCREEN_WIDTH, SCREEN_HEIGHT);
   sceGuEnable(GU_SCISSOR_TEST);
   sceGuScissor(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+  render_batch.vertices = vertex_buffer;
 
   sceGuFinish();
   sceGuDisplay(GU_TRUE);
@@ -343,9 +359,13 @@ void start_frame(char list[]) {
   sceGuStart(GU_DIRECT, list);
   sceGuClearColor(0xFF000000);
   sceGuClear(GU_COLOR_BUFFER_BIT);
+
+  render_batch.count = 0;
 }
 
 void end_frame() {
+  flush_render_batch();
+
   sceGuFinish();
   sceGuSync(0, 0);
   sceDisplayWaitVblankStart();
