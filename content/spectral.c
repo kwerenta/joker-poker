@@ -102,6 +102,24 @@ uint8_t get_spectral_max_selected(Spectral spectral) {
   }
 }
 
+void destroy_random_card() {
+  uint8_t destroy_index = rand() % cvector_size(state.game.hand.cards);
+
+  for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
+    if (compare_cards(&state.game.full_deck[i], &state.game.hand.cards[destroy_index])) {
+      cvector_erase(state.game.full_deck, i);
+      break;
+    }
+  }
+
+  cvector_erase(state.game.hand.cards, destroy_index);
+}
+void add_card_to_deck(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
+  Card card = create_card(suit, rank, edition, enhancement);
+  cvector_push_back(state.game.hand.cards, card);
+  cvector_push_back(state.game.full_deck, card);
+}
+
 uint8_t use_spectral_card(Spectral spectral) {
   Card *selected_cards[2] = {0};
   uint8_t selected_count = 0;
@@ -116,6 +134,123 @@ uint8_t use_spectral_card(Spectral spectral) {
 
   uint8_t max_selected_count = get_spectral_max_selected(spectral);
   if (selected_count != max_selected_count) return 0;
+
+  switch (spectral) {
+    case SPECTRAL_FAMILIAR:
+      destroy_random_card();
+      for (uint8_t i = 0; i < 3; i++) add_card_to_deck(rand() % 4, rand() % 3 + 10, EDITION_BASE, rand() % 8 + 1);
+      break;
+
+    case SPECTRAL_GRIM:
+      destroy_random_card();
+      for (uint8_t i = 0; i < 2; i++) add_card_to_deck(rand() % 4, RANK_ACE, EDITION_BASE, rand() % 8 + 1);
+      break;
+
+    case SPECTRAL_INCANTATION:
+      destroy_random_card();
+      for (uint8_t i = 0; i < 4; i++) add_card_to_deck(rand() % 4, rand() % 9 + 1, EDITION_BASE, rand() % 8 + 1);
+      break;
+
+    case SPECTRAL_TALISMAN:
+      // TODO Add this when seals will be added
+      break;
+
+    case SPECTRAL_AURA:
+      selected_cards[0]->edition = rand() % 3 + 1;
+      break;
+
+    case SPECTRAL_WRAITH:
+      // TODO Add this when some rare jokers will be added
+      break;
+
+    case SPECTRAL_SIGIL: {
+      Suit new_suit = rand() % 4;
+
+      for (uint8_t i = 0; i < selected_count; i++) {
+        cvector_for_each(state.game.full_deck, Card, card) {
+          if (compare_cards(selected_cards[i], card)) {
+            card->suit = new_suit;
+            selected_cards[i]->suit = new_suit;
+            break;
+          }
+        }
+      }
+      break;
+    }
+
+    case SPECTRAL_OUIJA: {
+      Rank new_rank = rand() % 13;
+      // TODO Decrease global hand size instead of this one when it will be added
+      state.game.hand.size--;
+
+      for (uint8_t i = 0; i < selected_count; i++) {
+        cvector_for_each(state.game.full_deck, Card, card) {
+          if (compare_cards(selected_cards[i], card)) {
+            card->rank = new_rank;
+            selected_cards[i]->rank = new_rank;
+            break;
+          }
+        }
+      }
+      break;
+    }
+
+    case SPECTRAL_ECTOPLASM:
+      // TODO Add when negative jokers will be implemented
+      break;
+
+    case SPECTRAL_IMMOLATE:
+      state.game.money += 20;
+      for (uint8_t i = 0; i < 5; i++) destroy_random_card();
+      break;
+
+    case SPECTRAL_ANKH: {
+      uint8_t joker_to_copy = rand() % cvector_size(state.game.jokers.cards);
+      Joker joker = state.game.jokers.cards[joker_to_copy];
+      // TODO Don't remove eternal jokers when they will be added
+      cvector_clear(state.game.jokers.cards);
+      for (uint8_t i = 0; i < 2; i++) cvector_push_back(state.game.jokers.cards, joker);
+      break;
+    }
+
+    case SPECTRAL_DEJA_VU:
+      // TODO Add this when seals will be added
+      break;
+
+    case SPECTRAL_HEX: {
+      uint8_t joker_to_upgrade = rand() % cvector_size(state.game.jokers.cards);
+      Joker joker = state.game.jokers.cards[joker_to_upgrade];
+      // TODO Don't remove eternal jokers when they will be added
+      cvector_clear(state.game.jokers.cards);
+
+      joker.edition = EDITION_POLYCHROME;
+      cvector_push_back(state.game.jokers.cards, joker);
+      break;
+    }
+
+    case SPECTRAL_TRANCE:
+      // TODO Add this when seals will be added
+      break;
+
+    case SPECTRAL_MEDIUM:
+      // TODO Add this when seals will be added
+      break;
+
+    case SPECTRAL_CRYPTID: {
+      uint8_t card_to_copy = rand() % cvector_size(state.game.hand.cards);
+      Card *card = &state.game.hand.cards[card_to_copy];
+      for (uint8_t i = 0; i < 2; i++) add_card_to_deck(card->suit, card->rank, card->edition, card->enhancement);
+      break;
+    }
+
+    case SPECTRAL_SOUL:
+      // TODO Add this when legendary jokers will be added
+      break;
+
+    case SPECTRAL_BLACK_HOLE:
+      for (uint8_t i = 0; i < 12; i++) state.game.poker_hands[i].level++;
+      break;
+  }
 
   if (max_selected_count != 0) deselect_all_cards();
   return 1;
