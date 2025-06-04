@@ -117,5 +117,6 @@ uint8_t use_spectral_card(Spectral spectral) {
   uint8_t max_selected_count = get_spectral_max_selected(spectral);
   if (selected_count != max_selected_count) return 0;
 
+  if (max_selected_count != 0) deselect_all_cards();
   return 1;
 }
