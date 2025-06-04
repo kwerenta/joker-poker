@@ -9,6 +9,10 @@
 
 CustomElementData create_spread_item_element(NavigationSection section, uint8_t i) {
   switch (section) {
+    case NAVIGATION_NONE:
+    case NAVIGATION_OVERLAY_MENU:
+      return (CustomElementData){0};
+
     case NAVIGATION_HAND:
       return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = state.game.hand.cards[i]};
 
@@ -106,6 +110,10 @@ void get_shop_item_tooltip_content(Clay_String *name, Clay_String *description, 
 
 void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, NavigationSection section) {
   switch (section) {
+    case NAVIGATION_NONE:
+    case NAVIGATION_OVERLAY_MENU:
+      return;
+
     case NAVIGATION_HAND: {
       ShopItem item = {.type = SHOP_ITEM_CARD, .card = state.game.hand.cards[state.navigation.hovered]};
       get_shop_item_tooltip_content(name, description, &item);
