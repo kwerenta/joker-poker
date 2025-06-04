@@ -3,6 +3,7 @@
 #include <cvector.h>
 #include <stdint.h>
 
+#include "content/spectral.h"
 #include "content/tarot.h"
 #include "debug.h"
 #include "state.h"
@@ -584,6 +585,10 @@ uint8_t use_consumable(Consumable *consumable_to_use) {
     case CONSUMABLE_TAROT:
       was_used = use_tarot_card(consumable.tarot);
       break;
+
+    case CONSUMABLE_SPECTRAL:
+      was_used = use_spectral_card(consumable.spectral);
+      break;
   }
 
   if (was_used == 0 && consumable_to_use == NULL) {
@@ -625,6 +630,13 @@ uint8_t add_item_to_player(ShopItem *item) {
       Consumable tarot = {.type = CONSUMABLE_TAROT, .tarot = item->tarot};
       cvector_push_back(state.game.consumables.items, tarot);
       break;
+
+    case SHOP_ITEM_SPECTRAL:
+      if (cvector_size(state.game.consumables.items) >= state.game.consumables.size) return 0;
+
+      Consumable spectral = {.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral};
+      cvector_push_back(state.game.consumables.items, spectral);
+      break;
   }
 
   return 1;
@@ -637,6 +649,8 @@ uint8_t get_shop_item_price(ShopItem *item) {
     case SHOP_ITEM_PLANET:
     case SHOP_ITEM_TAROT:
       return 3;
+    case SHOP_ITEM_SPECTRAL:
+      return 4;
     case SHOP_ITEM_JOKER:
       return item->joker.base_price;
   }
@@ -697,6 +711,9 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
       case BOOSTER_PACK_ARCANA:
         content.tarot = rand() % 22;
         break;
+      case BOOSTER_PACK_SPECTRAL:
+        content.spectral = rand() % 18;
+        break;
     }
 
     cvector_push_back(state.game.booster_pack.content, content);
@@ -727,6 +744,9 @@ void select_booster_pack_item() {
       break;
     case BOOSTER_PACK_ARCANA:
       was_used = use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
+      break;
+    case BOOSTER_PACK_SPECTRAL:
+      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = content->spectral});
       break;
   }
 
@@ -768,7 +788,7 @@ void restock_shop() {
   }
 
   for (uint8_t i = 0; i < 2; i++) {
-    BoosterPackItem booster_pack = {.type = rand() % 4, .size = rand() % 3};
+    BoosterPackItem booster_pack = {.type = rand() % 5, .size = rand() % 3};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 }

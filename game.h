@@ -4,6 +4,7 @@
 #include <cvector.h>
 #include <stdint.h>
 
+#include "content/spectral.h"
 #include "content/tarot.h"
 
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
@@ -118,7 +119,7 @@ typedef struct {
   cvector_vector_type(Card) cards;
 } Hand;
 
-typedef enum { CONSUMABLE_PLANET, CONSUMABLE_TAROT } ConsumableType;
+typedef enum { CONSUMABLE_PLANET, CONSUMABLE_TAROT, CONSUMABLE_SPECTRAL } ConsumableType;
 
 typedef struct {
   ConsumableType type;
@@ -126,6 +127,7 @@ typedef struct {
   union {
     Planet planet;
     Tarot tarot;
+    Spectral spectral;
   };
 } Consumable;
 
@@ -152,20 +154,17 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_TAROT } ShopItemType;
+typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_TAROT, SHOP_ITEM_SPECTRAL } ShopItemType;
 
 typedef enum {
   BOOSTER_PACK_BUFFON,
   BOOSTER_PACK_STANDARD,
   BOOSTER_PACK_CELESTIAL,
-  BOOSTER_PACK_ARCANA
+  BOOSTER_PACK_ARCANA,
+  BOOSTER_PACK_SPECTRAL
 } BoosterPackType;
 
-typedef enum {
-  BOOSTER_PACK_NORMAL,
-  BOOSTER_PACK_JUMBO,
-  BOOSTER_PACK_MEGA,
-} BoosterPackSize;
+typedef enum { BOOSTER_PACK_NORMAL, BOOSTER_PACK_JUMBO, BOOSTER_PACK_MEGA } BoosterPackSize;
 
 typedef struct {
   BoosterPackType type;
@@ -177,6 +176,7 @@ typedef union {
   Joker joker;
   Planet planet;
   Tarot tarot;
+  Spectral spectral;
 } BoosterPackContent;
 
 typedef struct {
@@ -192,6 +192,7 @@ typedef struct {
     Card card;
     Planet planet;
     Tarot tarot;
+    Spectral spectral;
   };
 } ShopItem;
 

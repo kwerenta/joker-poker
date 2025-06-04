@@ -133,6 +133,8 @@ char *get_booster_pack_type_name(BoosterPackType type) {
       return "Celestial";
     case BOOSTER_PACK_ARCANA:
       return "Arcana";
+    case BOOSTER_PACK_SPECTRAL:
+      return "Spectral";
   }
 }
 
@@ -146,6 +148,8 @@ char *get_booster_pack_description_suffix(BoosterPackType type) {
       return "Planet cards to be used immediately";
     case BOOSTER_PACK_ARCANA:
       return "Tarot cards to be used immediately";
+    case BOOSTER_PACK_SPECTRAL:
+      return "Spectral cards to be used immediately";
   }
 }
 
