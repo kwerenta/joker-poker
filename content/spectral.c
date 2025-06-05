@@ -12,33 +12,33 @@ const char *get_spectral_card_name(Spectral spectral) {
     case SPECTRAL_INCANTATION:
       return "Incantation";
     case SPECTRAL_TALISMAN:
-      return "Talisman";
+      return "Talisman NOT IMPLEMENTED";
     case SPECTRAL_AURA:
       return "Aura";
     case SPECTRAL_WRAITH:
-      return "Wraith";
+      return "Wraith NOT IMPLEMENTED";
     case SPECTRAL_SIGIL:
       return "Sigil";
     case SPECTRAL_OUIJA:
       return "Ouija";
     case SPECTRAL_ECTOPLASM:
-      return "Ectoplasm";
+      return "Ectoplasm NOT IMPLEMENTED";
     case SPECTRAL_IMMOLATE:
       return "Immolate";
     case SPECTRAL_ANKH:
       return "Ankh";
     case SPECTRAL_DEJA_VU:
-      return "Deja Vu";
+      return "Deja Vu NOT IMPLEMENTED";
     case SPECTRAL_HEX:
       return "Hex";
     case SPECTRAL_TRANCE:
-      return "Trance";
+      return "Trance NOT IMPLEMENTED";
     case SPECTRAL_MEDIUM:
-      return "Medium";
+      return "Medium NOT IMPLEMENTED";
     case SPECTRAL_CRYPTID:
       return "Cryptid";
     case SPECTRAL_SOUL:
-      return "The Soul";
+      return "The Soul NOT IMPLEMENTED";
     case SPECTRAL_BLACK_HOLE:
       return "Black Hole";
   }
@@ -64,7 +64,7 @@ const char *get_spectral_card_description(Spectral spectral) {
       return "Converts all cards in hand to a single random rank, but -1 Hand Size.";
     case SPECTRAL_ECTOPLASM:
       return "Add Negative to a random Joker, but -1 Hand Size, plus another -1 hand size for each time Ectoplasm has "
-             "been used this run.";
+             "been used this run";
     case SPECTRAL_IMMOLATE:
       return "Destroys 5 random cards in hand, but gain $20.";
     case SPECTRAL_ANKH:
@@ -187,7 +187,6 @@ uint8_t use_spectral_card(Spectral spectral) {
     case SPECTRAL_OUIJA: {
       if (state.game.hand.size == 1) return 0;
       Rank new_rank = rand() % 13;
-      // TODO Decrease global hand size instead of this one when it will be added
       state.game.hand.size--;
 
       cvector_for_each(state.game.hand.cards, Card, hand_card) {
