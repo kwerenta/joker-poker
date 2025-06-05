@@ -166,11 +166,11 @@ uint8_t use_spectral_card(Spectral spectral) {
     case SPECTRAL_SIGIL: {
       Suit new_suit = rand() % 4;
 
-      for (uint8_t i = 0; i < selected_count; i++) {
+      cvector_for_each(state.game.hand.cards, Card, hand_card) {
         cvector_for_each(state.game.full_deck, Card, card) {
-          if (compare_cards(selected_cards[i], card)) {
+          if (compare_cards(hand_card, card)) {
             card->suit = new_suit;
-            selected_cards[i]->suit = new_suit;
+            hand_card->suit = new_suit;
             break;
           }
         }
@@ -183,11 +183,11 @@ uint8_t use_spectral_card(Spectral spectral) {
       // TODO Decrease global hand size instead of this one when it will be added
       state.game.hand.size--;
 
-      for (uint8_t i = 0; i < selected_count; i++) {
+      cvector_for_each(state.game.hand.cards, Card, hand_card) {
         cvector_for_each(state.game.full_deck, Card, card) {
-          if (compare_cards(selected_cards[i], card)) {
+          if (compare_cards(hand_card, card)) {
             card->rank = new_rank;
-            selected_cards[i]->rank = new_rank;
+            hand_card->rank = new_rank;
             break;
           }
         }
