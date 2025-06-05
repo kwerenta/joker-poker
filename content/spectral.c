@@ -137,16 +137,19 @@ uint8_t use_spectral_card(Spectral spectral) {
 
   switch (spectral) {
     case SPECTRAL_FAMILIAR:
+      if (state.game.hand.size == 1) return 0;
       destroy_random_card();
       for (uint8_t i = 0; i < 3; i++) add_card_to_deck(rand() % 4, rand() % 3 + 10, EDITION_BASE, rand() % 8 + 1);
       break;
 
     case SPECTRAL_GRIM:
+      if (state.game.hand.size == 1) return 0;
       destroy_random_card();
       for (uint8_t i = 0; i < 2; i++) add_card_to_deck(rand() % 4, RANK_ACE, EDITION_BASE, rand() % 8 + 1);
       break;
 
     case SPECTRAL_INCANTATION:
+      if (state.game.hand.size == 1) return 0;
       destroy_random_card();
       for (uint8_t i = 0; i < 4; i++) add_card_to_deck(rand() % 4, rand() % 9 + 1, EDITION_BASE, rand() % 8 + 1);
       break;
@@ -164,6 +167,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_SIGIL: {
+      if (state.game.hand.size == 1) return 0;
       Suit new_suit = rand() % 4;
 
       cvector_for_each(state.game.hand.cards, Card, hand_card) {
@@ -179,6 +183,7 @@ uint8_t use_spectral_card(Spectral spectral) {
     }
 
     case SPECTRAL_OUIJA: {
+      if (state.game.hand.size == 1) return 0;
       Rank new_rank = rand() % 13;
       // TODO Decrease global hand size instead of this one when it will be added
       state.game.hand.size--;
@@ -200,6 +205,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_IMMOLATE:
+      if (state.game.hand.size == 1) return 0;
       state.game.money += 20;
       for (uint8_t i = 0; i < 5; i++) destroy_random_card();
       break;
