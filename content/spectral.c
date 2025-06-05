@@ -237,8 +237,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_CRYPTID: {
-      uint8_t card_to_copy = rand() % cvector_size(state.game.hand.cards);
-      Card *card = &state.game.hand.cards[card_to_copy];
+      Card *card = selected_cards[0];
       for (uint8_t i = 0; i < 2; i++) add_card_to_deck(card->suit, card->rank, card->edition, card->enhancement);
       break;
     }
