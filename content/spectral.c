@@ -103,6 +103,8 @@ uint8_t get_spectral_max_selected(Spectral spectral) {
 }
 
 void destroy_random_card() {
+  if (cvector_size(state.game.hand.cards) == 0) return;
+
   uint8_t destroy_index = rand() % cvector_size(state.game.hand.cards);
 
   for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
