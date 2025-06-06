@@ -143,6 +143,8 @@ int main(int argc, char *argv[]) {
     Clay_RenderCommandArray render_commands = Clay_EndLayout();
     execute_render_commands(render_commands);
 
+    render_overlay_poker_hands();
+
 #ifdef DEBUG_BUILD
     frame_time = (sceKernelGetSystemTimeWide() - curr_time) / 1000.0f;
 #endif
