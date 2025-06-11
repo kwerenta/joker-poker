@@ -253,9 +253,36 @@ int main(int argc, char *argv[]) {
       ui_elements[name] =
           (UIElement){.type = UI_ELEMENT_TYPE_TEXT, .text = {.content = "Poker hand", .color = RGB(255, 255, 255)}};
       lay_append(&ctx, level, name);
-      lay_set_margins_ltrb(&ctx, name, 2, 2, 0, 2);
+      lay_set_margins_ltrb(&ctx, name, 2, 2, 2, 2);
       lay_set_behave(&ctx, name, LAY_VFILL | LAY_HFILL);
-      lay_set_contain(&ctx, name, LAY_MIDDLE);
+
+      lay_id chips = lay_item(&ctx);
+      ui_elements[chips] = (UIElement){.type = UI_ELEMENT_TYPE_RECTANGLE, .rectangle = {.color = RGB(15, 188, 249)}};
+      lay_append(&ctx, name, chips);
+      lay_set_margins_ltrb(&ctx, chips, 2, 2, 2, 2);
+      lay_set_size_xy(&ctx, chips, CHAR_WIDTH * 4, 0);
+      lay_set_behave(&ctx, chips, LAY_VFILL | LAY_RIGHT);
+
+      lay_id x = lay_item(&ctx);
+      ui_elements[x] = (UIElement){.type = UI_ELEMENT_TYPE_TEXT, .text = {.content = "x", .color = RGB(255, 255, 255)}};
+      lay_append(&ctx, chips, x);
+      lay_set_size_xy(&ctx, x, CHAR_WIDTH, 0);
+      lay_set_behave(&ctx, x, LAY_TOP | LAY_RIGHT);
+
+      lay_id mult = lay_item(&ctx);
+      ui_elements[mult] = (UIElement){.type = UI_ELEMENT_TYPE_RECTANGLE, .rectangle = {.color = RGB(255, 63, 52)}};
+      lay_append(&ctx, x, mult);
+      lay_set_margins_ltrb(&ctx, mult, 2, 2, 2, 2);
+      lay_set_size_xy(&ctx, mult, CHAR_WIDTH * 4, 0);
+      lay_set_behave(&ctx, mult, LAY_VFILL | LAY_RIGHT);
+
+      lay_id count = lay_item(&ctx);
+      ui_elements[count] =
+          (UIElement){.type = UI_ELEMENT_TYPE_TEXT, .text = {.content = "# 1", .color = RGB(255, 255, 255)}};
+      lay_append(&ctx, mult, count);
+      lay_set_margins_ltrb(&ctx, count, 2, 2, 2, 2);
+      lay_set_size_xy(&ctx, count, CHAR_WIDTH * 4, 0);
+      lay_set_behave(&ctx, count, LAY_VFILL | LAY_TOP | LAY_RIGHT);
 
       if (i == 11) {
         lay_set_margins_ltrb(&ctx, items[i], 4, 4, 4, 4);
