@@ -527,45 +527,46 @@ void render_overlay_menu() {
 }
 
 void render_overlay_poker_hands() {
-  draw_rectangle(&(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, RGBA(0, 0, 0, 150));
-  draw_rectangle(&(Rect){.x = 8, .y = 8, .w = SCREEN_WIDTH - 16, .h = SCREEN_HEIGHT - 16}, RGBA(30, 39, 46, 200));
+  // draw_rectangle(&(Rect){.x = 0, .y = 0, .w = SCREEN_WIDTH, .h = SCREEN_HEIGHT}, RGBA(0, 0, 0, 150));
+  // draw_rectangle(&(Rect){.x = 8, .y = 8, .w = SCREEN_WIDTH - 16, .h = SCREEN_HEIGHT - 16}, RGBA(30, 39, 46, 200));
 
-  for (uint8_t i = 0; i < 12; i++) {
-    Rect line = {.x = 12, .y = 12 + i * (CHAR_HEIGHT + 4 + 4), .w = SCREEN_WIDTH - 24, .h = CHAR_HEIGHT + 4};
-    draw_rectangle(&line, RGBA(255, 255, 255, 30));
-    draw_rectangle(&(Rect){.x = 12, .y = line.y, .w = CHAR_WIDTH * 7, .h = line.h}, 0xFFFFFFFF);
+  // for (uint8_t i = 0; i < 12; i++) {
+  //   Rect line = {.x = 12, .y = 12 + i * (CHAR_HEIGHT + 4 + 4), .w = SCREEN_WIDTH - 24, .h = CHAR_HEIGHT + 4};
+  //   draw_rectangle(&line, RGBA(255, 255, 255, 30));
+  //   draw_rectangle(&(Rect){.x = 12, .y = line.y, .w = CHAR_WIDTH * 7, .h = line.h}, 0xFFFFFFFF);
 
-    draw_rectangle(&(Rect){.x = 270, .y = line.y, .w = CHAR_WIDTH * 9 + 12, .h = line.h}, RGB(72, 84, 96));
-    draw_rectangle(&(Rect){.x = 270, .y = line.y, .w = CHAR_WIDTH * 4 + 4, .h = line.h}, RGB(15, 188, 249));
-    draw_rectangle(&(Rect){.x = 270 + CHAR_WIDTH * 5 + 8, .y = line.y, .w = CHAR_WIDTH * 4 + 4, .h = line.h},
-                   RGB(255, 63, 52));
+  //   draw_rectangle(&(Rect){.x = 270, .y = line.y, .w = CHAR_WIDTH * 9 + 12, .h = line.h}, RGB(72, 84, 96));
+  //   draw_rectangle(&(Rect){.x = 270, .y = line.y, .w = CHAR_WIDTH * 4 + 4, .h = line.h}, RGB(15, 188, 249));
+  //   draw_rectangle(&(Rect){.x = 270 + CHAR_WIDTH * 5 + 8, .y = line.y, .w = CHAR_WIDTH * 4 + 4, .h = line.h},
+  //                  RGB(255, 63, 52));
 
-    ScorePair score = get_poker_hand_total_score(1 << i);
-    Clay_String chips;
-    append_clay_string(&chips, "%d", score.chips);
-    draw_text_len(chips.chars, chips.length, &(Vector2){.x = 270 + 2, .y = line.y + 2}, 0xFFFFFFFF);
+  //   ScorePair score = get_poker_hand_total_score(1 << i);
+  //   Clay_String chips;
+  //   append_clay_string(&chips, "%d", score.chips);
+  //   draw_text_len(chips.chars, chips.length, &(Vector2){.x = 270 + 2, .y = line.y + 2}, 0xFFFFFFFF);
 
-    draw_text("x", &(Vector2){.x = 270 + 6 + 4 * CHAR_WIDTH, .y = line.y + 2}, 0xFFFFFFFF);
+  //   draw_text("x", &(Vector2){.x = 270 + 6 + 4 * CHAR_WIDTH, .y = line.y + 2}, 0xFFFFFFFF);
 
-    Clay_String mult;
-    append_clay_string(&mult, "%.0lf", score.mult);
-    draw_text_len(chips.chars, chips.length, &(Vector2){.x = 270 + CHAR_WIDTH * 5 + 10, .y = line.y + 2}, 0xFFFFFFFF);
+  //   Clay_String mult;
+  //   append_clay_string(&mult, "%.0lf", score.mult);
+  //   draw_text_len(chips.chars, chips.length, &(Vector2){.x = 270 + CHAR_WIDTH * 5 + 10, .y = line.y + 2},
+  //   0xFFFFFFFF);
 
-    Clay_String played;
-    append_clay_string(&played, "%d", state.game.poker_hands[i].played);
-    draw_text_len(played.chars, played.length, &(Vector2){.x = line.w - 3 * CHAR_WIDTH - 2, .y = line.y + 2},
-                  0xFFFFFFFF);
-    draw_text("#", &(Vector2){.x = line.w - 4 * CHAR_WIDTH - 4, .y = line.y + 2}, RGB(255, 168, 1));
+  //   Clay_String played;
+  //   append_clay_string(&played, "%d", state.game.poker_hands[i].played);
+  //   draw_text_len(played.chars, played.length, &(Vector2){.x = line.w - 3 * CHAR_WIDTH - 2, .y = line.y + 2},
+  //                 0xFFFFFFFF);
+  //   draw_text("#", &(Vector2){.x = line.w - 4 * CHAR_WIDTH - 4, .y = line.y + 2}, RGB(255, 168, 1));
 
-    Clay_String level;
-    append_clay_string(&level, "lvl.%d", state.game.poker_hands[i].level + 1);
-    draw_text_len(level.chars, level.length, &(Vector2){.x = 14, .y = line.y + 2}, 0xFF000000);
+  //   Clay_String level;
+  //   append_clay_string(&level, "lvl.%d", state.game.poker_hands[i].level + 1);
+  //   draw_text_len(level.chars, level.length, &(Vector2){.x = 14, .y = line.y + 2}, 0xFF000000);
 
-    const char *name_chars = get_poker_hand_name(1 << i);
-    draw_text(name_chars, &(Vector2){.x = 14 + CHAR_WIDTH * 7, .y = line.y + 2}, 0xFFFFFFFF);
-  }
+  //   const char *name_chars = get_poker_hand_name(1 << i);
+  //   draw_text(name_chars, &(Vector2){.x = 14 + CHAR_WIDTH * 7, .y = line.y + 2}, 0xFFFFFFFF);
+  // }
 
-  return;
+  // return;
 
   CLAY({.id = CLAY_ID("Overlay"),
         .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
