@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#include "content/spectral.h"
 #include "content/tarot.h"
 #include "game.h"
 #include "renderer.h"
@@ -8,6 +9,10 @@
 
 CustomElementData create_spread_item_element(NavigationSection section, uint8_t i) {
   switch (section) {
+    case NAVIGATION_NONE:
+    case NAVIGATION_OVERLAY_MENU:
+      return (CustomElementData){0};
+
     case NAVIGATION_HAND:
       return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = state.game.hand.cards[i]};
 
@@ -30,6 +35,10 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
         case SHOP_ITEM_TAROT:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
                                      .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
+        case SHOP_ITEM_SPECTRAL:
+          return (CustomElementData){
+              .type = CUSTOM_ELEMENT_CONSUMABLE,
+              .consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral}};
       }
     }
 
@@ -52,6 +61,10 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
         case BOOSTER_PACK_ARCANA:
           return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
                                      .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
+        case BOOSTER_PACK_SPECTRAL:
+          return (CustomElementData){
+              .type = CUSTOM_ELEMENT_CONSUMABLE,
+              .consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral}};
       }
       break;
     }
@@ -85,11 +98,22 @@ void get_shop_item_tooltip_content(Clay_String *name, Clay_String *description, 
       *description = (Clay_String){.chars = get_tarot_card_description(item->tarot),
                                    .length = strlen(get_tarot_card_description(item->tarot))};
       break;
+
+    case SHOP_ITEM_SPECTRAL:
+      *name = (Clay_String){.chars = get_spectral_card_name(item->spectral),
+                            .length = strlen(get_spectral_card_name(item->spectral))};
+      *description = (Clay_String){.chars = get_spectral_card_description(item->spectral),
+                                   .length = strlen(get_spectral_card_description(item->spectral))};
+      break;
   }
 }
 
 void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, NavigationSection section) {
   switch (section) {
+    case NAVIGATION_NONE:
+    case NAVIGATION_OVERLAY_MENU:
+      return;
+
     case NAVIGATION_HAND: {
       ShopItem item = {.type = SHOP_ITEM_CARD, .card = state.game.hand.cards[state.navigation.hovered]};
       get_shop_item_tooltip_content(name, description, &item);
@@ -114,6 +138,9 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
           get_shop_item_tooltip_content(name, description,
                                         &(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = consumable->tarot});
           break;
+        case CONSUMABLE_SPECTRAL:
+          get_shop_item_tooltip_content(name, description,
+                                        &(ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = consumable->spectral});
       }
       break;
     }
@@ -148,6 +175,10 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
           break;
         case BOOSTER_PACK_ARCANA:
           get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = item->tarot});
+          break;
+        case BOOSTER_PACK_SPECTRAL:
+          get_shop_item_tooltip_content(name, description,
+                                        &(ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = item->spectral});
           break;
       }
       break;
