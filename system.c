@@ -272,6 +272,7 @@ void handle_controls() {
 
   if (handle_navigation_controls() == 1 || state.overlay != OVERLAY_NONE) {
     state.controls.state = controls->data.Buttons;
+    state.render_commands = generate_render_commands();
     return;
   }
 
@@ -324,6 +325,7 @@ void handle_controls() {
   }
 
   controls->state = controls->data.Buttons;
+  state.render_commands = generate_render_commands();
 }
 
 void init_gu(char list[]) {
