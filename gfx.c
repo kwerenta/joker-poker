@@ -530,19 +530,19 @@ void render_cash_out() {
       CLAY({.layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
         if (blind != 0) {
           Clay_String blind_money;
-          append_clay_string(&blind_money, "Blind: $%d", get_blind_money(state.game.blind));
+          append_clay_string(&blind_money, "Blind: $%d", blind);
           CLAY_TEXT(blind_money, WHITE_TEXT_CONFIG);
         }
 
         if (hands != 0) {
           Clay_String hands_money;
-          append_clay_string(&hands_money, "Hands: $%d", get_hands_money());
+          append_clay_string(&hands_money, "Hands: $%d", hands);
           CLAY_TEXT(hands_money, WHITE_TEXT_CONFIG);
         }
 
         if (interest != 0) {
           Clay_String interest_money;
-          append_clay_string(&interest_money, "Interest: $%d", get_interest_money());
+          append_clay_string(&interest_money, "Interest: $%d", interest);
           CLAY_TEXT(interest_money, WHITE_TEXT_CONFIG);
         }
       }
