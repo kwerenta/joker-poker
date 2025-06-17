@@ -79,7 +79,6 @@ int main(int argc, char *argv[]) {
 
     state.delta = (curr_time - last_time) / 1000000.0f;
     state.time += state.delta;
-
     last_time = curr_time;
 
     state.frame_arena.offset = 0;
@@ -93,7 +92,7 @@ int main(int argc, char *argv[]) {
 #ifdef DEBUG_BUILD
     Clay_String fps_counter;
     append_clay_string(&fps_counter, "%.2f FPS [%.2f ms]", 1 / state.delta, frame_time);
-    draw_text_len(fps_counter.chars, fps_counter.length, &(Vector2){354, 0}, 0xFFFFFFFF);
+    draw_text_len(fps_counter.chars, fps_counter.length, &(Vector2){360, 0}, 0xFFFFFFFF);
 
     frame_time = (sceKernelGetSystemTimeWide() - curr_time) / 1000.0f;
 #endif
