@@ -550,10 +550,7 @@ void render_cash_out() {
   }
 }
 
-void render_game_over() {
-  Vector2 pos = {10, 10};
-  draw_text("You've lost:(", &pos, 0xFFFFFFFF);
-}
+void render_game_over() { CLAY_TEXT(CLAY_STRING("You've lost:("), WHITE_TEXT_CONFIG); }
 
 const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"),
                                             CLAY_STRING("Restart")};
