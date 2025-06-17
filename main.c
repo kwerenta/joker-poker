@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
   log_message(LOG_INFO, "Starting main loop...");
 
-  state.render_commands = generate_render_commands();
+  update_render_commands();
 
   while (state.running) {
     handle_controls();

@@ -13,7 +13,7 @@
 #include "text.h"
 #include "utils.h"
 
-Clay_RenderCommandArray generate_render_commands() {
+void update_render_commands() {
   Clay_BeginLayout();
 
   CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
@@ -58,7 +58,7 @@ Clay_RenderCommandArray generate_render_commands() {
       break;
   }
 
-  return Clay_EndLayout();
+  state.render_commands = Clay_EndLayout();
 }
 
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {

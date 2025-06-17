@@ -257,7 +257,7 @@ void change_stage(Stage stage) {
       break;
   }
 
-  state.render_commands = generate_render_commands();
+  update_render_commands();
 }
 
 void change_overlay(Overlay overlay) {
@@ -267,14 +267,14 @@ void change_overlay(Overlay overlay) {
 
   if (overlay == OVERLAY_NONE) {
     state.navigation = state.prev_navigation;
-    state.render_commands = generate_render_commands();
+    update_render_commands();
     return;
   }
 
   state.navigation.cursor = (NavigationCursor){0, 0};
   state.navigation.hovered = 0;
 
-  state.render_commands = generate_render_commands();
+  update_render_commands();
 }
 
 void overlay_menu_button_click() {
