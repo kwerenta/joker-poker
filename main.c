@@ -70,6 +70,8 @@ int main(int argc, char *argv[]) {
 
   log_message(LOG_INFO, "Starting main loop...");
 
+  Clay_RenderCommandArray render_commands = generate_render_commands();
+
   while (state.running) {
     handle_controls();
 
@@ -86,64 +88,13 @@ int main(int argc, char *argv[]) {
 
     render_background();
 
-    Clay_BeginLayout();
-
-    CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
-      if (state.stage != STAGE_GAME_OVER) render_sidebar();
-
-      CLAY({.id = CLAY_ID("Content"),
-            .layout = {
-                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
-            }}) {
-        if (state.stage != STAGE_GAME_OVER) render_topbar();
-
-        switch (state.stage) {
-          case STAGE_GAME:
-            render_hand();
-            break;
-          case STAGE_CASH_OUT:
-            render_cash_out();
-            break;
-          case STAGE_SHOP:
-            render_shop();
-            break;
-          case STAGE_GAME_OVER:
-            render_game_over();
-            break;
-          case STAGE_BOOSTER_PACK:
-            render_booster_pack_content();
-            break;
-        }
-      }
-    }
-
-    switch (state.overlay) {
-      case OVERLAY_NONE:
-        break;
-      case OVERLAY_MENU:
-        render_overlay_menu();
-        break;
-      case OVERLAY_POKER_HANDS:
-        render_overlay_poker_hands();
-        break;
-    }
-
-#ifdef DEBUG_BUILD
-    CLAY({.floating = {
-              .attachTo = CLAY_ATTACH_TO_ROOT,
-              .attachPoints = {.parent = CLAY_ATTACH_POINT_RIGHT_TOP, .element = CLAY_ATTACH_POINT_RIGHT_TOP}}}) {
-      Clay_String fps_counter;
-      append_clay_string(&fps_counter, "%.2f FPS [%.2f ms]", 1 / state.delta, frame_time);
-      CLAY_TEXT(fps_counter, WHITE_TEXT_CONFIG);
-    }
-#endif
-
-    Clay_RenderCommandArray render_commands = Clay_EndLayout();
     execute_render_commands(render_commands);
 
 #ifdef DEBUG_BUILD
+    Clay_String fps_counter;
+    append_clay_string(&fps_counter, "%.2f FPS [%.2f ms]", 1 / state.delta, frame_time);
+    draw_text_len(fps_counter.chars, fps_counter.length, &(Vector2){354, 0}, 0xFFFFFFFF);
+
     frame_time = (sceKernelGetSystemTimeWide() - curr_time) / 1000.0f;
 #endif
 
