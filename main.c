@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
   log_message(LOG_INFO, "Starting main loop...");
 
-  Clay_RenderCommandArray render_commands = generate_render_commands();
+  state.render_commands = generate_render_commands();
 
   while (state.running) {
     handle_controls();
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 
     render_background();
 
-    execute_render_commands(render_commands);
+    execute_render_commands(state.render_commands);
 
 #ifdef DEBUG_BUILD
     Clay_String fps_counter;
