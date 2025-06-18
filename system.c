@@ -183,7 +183,7 @@ Vector2 draw_text_len(const char *text, uint32_t len, const Vector2 *pos, uint32
     }
 
     src.x = (xOffset % 13) * CHAR_WIDTH;
-    src.y = (floor(xOffset / 13.0) + yOffest) * CHAR_HEIGHT;
+    src.y = ((uint8_t)(xOffset / 13) + yOffest) * CHAR_HEIGHT;
 
     draw_texture(state.font, &src, &dst, color, 0);
     dst.x += CHAR_WIDTH;
@@ -272,6 +272,7 @@ void handle_controls() {
 
   if (handle_navigation_controls() == 1 || state.overlay != OVERLAY_NONE) {
     state.controls.state = controls->data.Buttons;
+    update_render_commands();
     return;
   }
 
@@ -324,6 +325,7 @@ void handle_controls() {
   }
 
   controls->state = controls->data.Buttons;
+  update_render_commands();
 }
 
 void init_gu(char list[]) {

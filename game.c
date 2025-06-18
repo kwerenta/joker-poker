@@ -162,7 +162,7 @@ void play_hand() {
 
     change_stage(STAGE_CASH_OUT);
   } else if (state.game.hands == 0) {
-    state.stage = STAGE_GAME_OVER;
+    change_stage(STAGE_GAME_OVER);
   } else {
     fill_hand();
   }
