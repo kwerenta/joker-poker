@@ -20,6 +20,7 @@ static inline Clay_Dimensions measure_text(Clay_StringSlice text, Clay_TextEleme
 }
 
 void renderer_init() {
+  Clay_SetMaxElementCount(1024);
   uint64_t total_memory = Clay_MinMemorySize();
   Clay_Arena arena = Clay_CreateArenaWithCapacityAndMemory(total_memory, malloc(total_memory));
   Clay_Initialize(arena, (Clay_Dimensions){SCREEN_WIDTH, SCREEN_HEIGHT}, (Clay_ErrorHandler){error_handler});

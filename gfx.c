@@ -13,6 +13,54 @@
 #include "text.h"
 #include "utils.h"
 
+void update_render_commands() {
+  Clay_BeginLayout();
+
+  CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
+    if (state.stage != STAGE_GAME_OVER) render_sidebar();
+
+    CLAY({.id = CLAY_ID("Content"),
+          .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+              .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
+          }}) {
+      if (state.stage != STAGE_GAME_OVER) render_topbar();
+
+      switch (state.stage) {
+        case STAGE_GAME:
+          render_hand();
+          break;
+        case STAGE_CASH_OUT:
+          render_cash_out();
+          break;
+        case STAGE_SHOP:
+          render_shop();
+          break;
+        case STAGE_GAME_OVER:
+          render_game_over();
+          break;
+        case STAGE_BOOSTER_PACK:
+          render_booster_pack_content();
+          break;
+      }
+    }
+  }
+
+  switch (state.overlay) {
+    case OVERLAY_NONE:
+      break;
+    case OVERLAY_MENU:
+      render_overlay_menu();
+      break;
+    case OVERLAY_POKER_HANDS:
+      render_overlay_poker_hands();
+      break;
+  }
+
+  state.render_commands = Clay_EndLayout();
+}
+
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
   float angle = 3.0f * sinf(state.time * 0.75f - dst->x / SCREEN_WIDTH * M_PI * 3);
   Rect src = {.x = sprite_index->x * CARD_WIDTH, .y = sprite_index->y * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
@@ -482,19 +530,19 @@ void render_cash_out() {
       CLAY({.layout = {.layoutDirection = CLAY_TOP_TO_BOTTOM}}) {
         if (blind != 0) {
           Clay_String blind_money;
-          append_clay_string(&blind_money, "Blind: $%d", get_blind_money(state.game.blind));
+          append_clay_string(&blind_money, "Blind: $%d", blind);
           CLAY_TEXT(blind_money, WHITE_TEXT_CONFIG);
         }
 
         if (hands != 0) {
           Clay_String hands_money;
-          append_clay_string(&hands_money, "Hands: $%d", get_hands_money());
+          append_clay_string(&hands_money, "Hands: $%d", hands);
           CLAY_TEXT(hands_money, WHITE_TEXT_CONFIG);
         }
 
         if (interest != 0) {
           Clay_String interest_money;
-          append_clay_string(&interest_money, "Interest: $%d", get_interest_money());
+          append_clay_string(&interest_money, "Interest: $%d", interest);
           CLAY_TEXT(interest_money, WHITE_TEXT_CONFIG);
         }
       }
@@ -502,10 +550,7 @@ void render_cash_out() {
   }
 }
 
-void render_game_over() {
-  Vector2 pos = {10, 10};
-  draw_text("You've lost:(", &pos, 0xFFFFFFFF);
-}
+void render_game_over() { CLAY_TEXT(CLAY_STRING("You've lost:("), WHITE_TEXT_CONFIG); }
 
 const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"),
                                             CLAY_STRING("Restart")};

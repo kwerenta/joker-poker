@@ -83,6 +83,7 @@ void overlay_menu_button_click();
 
 typedef struct {
   Arena frame_arena;
+  Clay_RenderCommandArray render_commands;
 
   Texture *cards_atlas;
   Texture *font;

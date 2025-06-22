@@ -8,6 +8,7 @@
 
 #include "debug.h"
 #include "game.h"
+#include "gfx.h"
 
 const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
 
@@ -255,6 +256,8 @@ void change_stage(Stage stage) {
     case STAGE_GAME_OVER:
       break;
   }
+
+  update_render_commands();
 }
 
 void change_overlay(Overlay overlay) {
@@ -264,11 +267,14 @@ void change_overlay(Overlay overlay) {
 
   if (overlay == OVERLAY_NONE) {
     state.navigation = state.prev_navigation;
+    update_render_commands();
     return;
   }
 
   state.navigation.cursor = (NavigationCursor){0, 0};
   state.navigation.hovered = 0;
+
+  update_render_commands();
 }
 
 void overlay_menu_button_click() {
