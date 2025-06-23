@@ -185,6 +185,8 @@ typedef struct {
   cvector_vector_type(BoosterPackContent) content;
 } BoosterPack;
 
+typedef enum { VOUCHER_OVERSTOCK = 1 << 0 } Voucher;
+
 typedef struct {
   ShopItemType type;
   union {
@@ -198,6 +200,7 @@ typedef struct {
 
 typedef struct {
   uint8_t size;
+  Voucher voucher;
   cvector_vector_type(ShopItem) items;
   cvector_vector_type(BoosterPackItem) booster_packs;
 } Shop;
@@ -211,6 +214,7 @@ typedef struct {
   Hand hand;
   SelectedHand selected_hand;
 
+  uint32_t vouchers;
   JokerHand jokers;
   Consumables consumables;
 

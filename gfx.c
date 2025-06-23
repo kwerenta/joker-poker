@@ -176,6 +176,8 @@ void render_consumable(Consumable *consumable, Rect *dst) {
   render_card_atlas_sprite(&index, dst);
 }
 
+void render_voucher(Voucher voucher, Rect *dst) { render_card_atlas_sprite(&(Vector2){9, 7}, dst); }
+
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
   render_card_atlas_sprite(&(Vector2){.x = 4, .y = 3}, dst);
 }
@@ -537,9 +539,25 @@ void render_shop() {
 
       CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {}
 
-      CLAY({.id = CLAY_ID("ShopBoosterPacks"),
-            .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
-      render_spread_items(NAVIGATION_SHOP_BOOSTER_PACKS, CLAY_STRING("ShopBoosterPacks"));
+      CLAY({.id = CLAY_ID("ShopBottom"),
+            .layout = {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            }}) {
+        CLAY({.id = CLAY_ID("ShopVoucher"),
+              .layout = {.sizing = CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {
+          CustomElementData *voucher = frame_arena_allocate(sizeof(CustomElementData));
+          *voucher = (CustomElementData){.type = CUSTOM_ELEMENT_VOUCHER, .voucher = state.game.shop.voucher};
+
+          CLAY({.custom = {.customData = voucher},
+                .layout = {
+                    .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                }}) {}
+        }
+
+        CLAY({.id = CLAY_ID("ShopBoosterPacks"),
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
+        render_spread_items(NAVIGATION_SHOP_BOOSTER_PACKS, CLAY_STRING("ShopBoosterPacks"));
+      }
     }
   }
 }
