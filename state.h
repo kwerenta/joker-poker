@@ -91,6 +91,7 @@ typedef struct {
   Texture *cards_atlas;
   Texture *font;
   Texture *bg;
+  Texture *logo;
 
   Controls controls;
 

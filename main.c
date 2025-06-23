@@ -32,6 +32,7 @@ void init() {
 
   state.cards_atlas = load_texture("res/cards.png");
   state.font = load_texture("res/font.png");
+  state.logo = load_texture("res/logo.png");
 
   init_background();
 
@@ -53,6 +54,9 @@ void destroy() {
 
   stbi_image_free(state.font->data);
   free(state.font);
+
+  stbi_image_free(state.logo->data);
+  free(state.logo);
 
   free(state.bg);
 

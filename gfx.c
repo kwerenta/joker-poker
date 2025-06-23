@@ -71,12 +71,21 @@ void render_main_menu() {
             .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
             .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            .padding = CLAY_PADDING_ALL(16),
         }}) {
-    CLAY_TEXT(CLAY_STRING("Joker Poker"), WHITE_TEXT_CONFIG);
+    CLAY({.layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+          }}) {
+      CLAY({.layout = {.sizing = {CLAY_SIZING_FIXED(256), CLAY_SIZING_FIXED(64)}},
+            .image = {.imageData = state.logo}}) {}
+    }
 
     CLAY({.id = CLAY_ID("MainMenuButtons"),
           .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
               .childGap = 4,
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
           }}) {
       for (uint8_t i = 0; i < sizeof(main_menu_buttons) / sizeof(main_menu_buttons[0]); i++) {
         CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
