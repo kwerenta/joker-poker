@@ -123,6 +123,7 @@ void render_credits() {
                             "sprites, removed backgrounds, added custom elements"),
                 WHITE_TEXT_CONFIG);
       CLAY_TEXT(CLAY_STRING("Pixel Bitmap Fonts by frostyfreeze is licensed under CC0"), WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Logo by Grzybson4 is licensed under CC-BY-4.0"), WHITE_TEXT_CONFIG);
     }
   }
 }
