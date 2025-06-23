@@ -629,15 +629,23 @@ void render_overlay_menu() {
             {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                 .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
-                .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                .childGap = 4,
             },
         .backgroundColor = {0, 0, 0, 150}}) {
-    for (uint8_t i = 0; i < sizeof(overlay_menu_buttons) / sizeof(overlay_menu_buttons[0]); i++) {
-      CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
-            .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
-            .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
-        CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+    CLAY({.layout = {
+              .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)},
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+              .childGap = 4,
+          }}) {
+      for (uint8_t i = 0; i < sizeof(overlay_menu_buttons) / sizeof(overlay_menu_buttons[0]); i++) {
+        CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
+              .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
+              .layout = {
+                  .childAlignment = {CLAY_ALIGN_X_CENTER},
+                  .padding = CLAY_PADDING_ALL(4),
+                  .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+              }}) {
+          CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+        }
       }
     }
   }
