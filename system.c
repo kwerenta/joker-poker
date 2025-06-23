@@ -281,6 +281,10 @@ void handle_controls() {
       if (button_pressed(PSP_CTRL_CROSS)) main_menu_button_click();
       break;
 
+    case STAGE_CREDITS:
+      if (button_pressed(PSP_CTRL_CIRCLE)) change_stage(STAGE_MAIN_MENU);
+      break;
+
     case STAGE_GAME:
       if (button_pressed(PSP_CTRL_CROSS)) {
         toggle_card_select(state.navigation.hovered);

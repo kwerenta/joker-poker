@@ -19,6 +19,8 @@ typedef struct {
 
 typedef enum {
   STAGE_MAIN_MENU,
+  STAGE_CREDITS,
+
   STAGE_GAME,
   STAGE_CASH_OUT,
   STAGE_SHOP,

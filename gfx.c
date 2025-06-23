@@ -17,7 +17,7 @@ void update_render_commands() {
   Clay_BeginLayout();
 
   CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
-    if (state.stage != STAGE_GAME_OVER && state.stage != STAGE_MAIN_MENU) render_sidebar();
+    if (state.stage != STAGE_GAME_OVER && state.stage >= STAGE_GAME) render_sidebar();
 
     CLAY({.id = CLAY_ID("Content"),
           .layout = {
@@ -25,12 +25,16 @@ void update_render_commands() {
               .layoutDirection = CLAY_TOP_TO_BOTTOM,
               .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
           }}) {
-      if (state.stage != STAGE_GAME_OVER && state.stage != STAGE_MAIN_MENU) render_topbar();
+      if (state.stage != STAGE_GAME_OVER && state.stage >= STAGE_GAME) render_topbar();
 
       switch (state.stage) {
         case STAGE_MAIN_MENU:
           render_main_menu();
           break;
+        case STAGE_CREDITS:
+          render_credits();
+          break;
+
         case STAGE_GAME:
           render_hand();
           break;
@@ -64,7 +68,7 @@ void update_render_commands() {
   state.render_commands = Clay_EndLayout();
 }
 
-const Clay_String main_menu_buttons[] = {CLAY_STRING("Play"), CLAY_STRING("Quit")};
+const Clay_String main_menu_buttons[] = {CLAY_STRING("Play"), CLAY_STRING("Credits"), CLAY_STRING("Quit")};
 
 void render_main_menu() {
   CLAY({.layout = {
@@ -94,6 +98,31 @@ void render_main_menu() {
           CLAY_TEXT(main_menu_buttons[i], WHITE_TEXT_CONFIG);
         }
       }
+    }
+  }
+}
+
+void render_credits() {
+  CLAY({.layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+        }}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)},
+                     .padding = CLAY_PADDING_ALL(16),
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 8},
+          .backgroundColor = COLOR_CARD_BG}) {
+      CLAY({.layout = {.padding = {.bottom = 8}}}) {
+        CLAY_TEXT(CLAY_STRING("Following software libraries and assets are utilized in the creation of this game:"),
+                  WHITE_TEXT_CONFIG);
+      }
+
+      CLAY_TEXT(CLAY_STRING("c-vector by Evan Teran is licensed under MIT"), WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Clay by Nic Barker is licensed under zlib"), WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Poker cards asset pack by IvoryRed is licensed under CC-BY-4.0 / Changed placement of "
+                            "sprites, removed backgrounds, added custom elements"),
+                WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Pixel Bitmap Fonts by frostyfreeze is licensed under CC0"), WHITE_TEXT_CONFIG);
     }
   }
 }
