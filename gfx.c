@@ -17,7 +17,7 @@ void update_render_commands() {
   Clay_BeginLayout();
 
   CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
-    if (state.stage != STAGE_GAME_OVER) render_sidebar();
+    if (state.stage != STAGE_GAME_OVER && state.stage != STAGE_MAIN_MENU) render_sidebar();
 
     CLAY({.id = CLAY_ID("Content"),
           .layout = {
@@ -25,9 +25,12 @@ void update_render_commands() {
               .layoutDirection = CLAY_TOP_TO_BOTTOM,
               .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
           }}) {
-      if (state.stage != STAGE_GAME_OVER) render_topbar();
+      if (state.stage != STAGE_GAME_OVER && state.stage != STAGE_MAIN_MENU) render_topbar();
 
       switch (state.stage) {
+        case STAGE_MAIN_MENU:
+          render_main_menu();
+          break;
         case STAGE_GAME:
           render_hand();
           break;
@@ -59,6 +62,31 @@ void update_render_commands() {
   }
 
   state.render_commands = Clay_EndLayout();
+}
+
+const Clay_String main_menu_buttons[] = {CLAY_STRING("Play"), CLAY_STRING("Quit")};
+
+void render_main_menu() {
+  CLAY({.layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
+        }}) {
+    CLAY_TEXT(CLAY_STRING("Joker Poker"), WHITE_TEXT_CONFIG);
+
+    CLAY({.id = CLAY_ID("MainMenuButtons"),
+          .layout = {
+              .childGap = 4,
+          }}) {
+      for (uint8_t i = 0; i < sizeof(main_menu_buttons) / sizeof(main_menu_buttons[0]); i++) {
+        CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
+              .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
+              .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
+          CLAY_TEXT(main_menu_buttons[i], WHITE_TEXT_CONFIG);
+        }
+      }
+    }
+  }
 }
 
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {

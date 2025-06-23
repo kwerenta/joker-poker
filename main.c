@@ -38,8 +38,6 @@ void init() {
   sceCtrlSetSamplingCycle(0);
   sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 
-  game_init();
-
   state.delta = 0;
   state.running = 1;
 

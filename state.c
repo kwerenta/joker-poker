@@ -13,6 +13,7 @@
 const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_CONSUMABLES}};
 
 static const NavigationLayout stage_nav_layouts[] = {
+    {.row_count = 1, .rows = {{1, {NAVIGATION_MAIN_MENU}}}},
     {.row_count = 2,
      .rows =
          {
@@ -153,6 +154,9 @@ uint8_t get_nav_section_size(NavigationSection section) {
     case NAVIGATION_NONE:
       max_value = 0;
       break;
+    case NAVIGATION_MAIN_MENU:
+      max_value = 2;
+      break;
     case NAVIGATION_HAND:
       max_value = cvector_size(state.game.hand.cards);
       break;
@@ -252,6 +256,7 @@ void change_stage(Stage stage) {
       break;
 
     case STAGE_GAME:
+    case STAGE_MAIN_MENU:
     case STAGE_CASH_OUT:
     case STAGE_GAME_OVER:
       break;
@@ -290,6 +295,21 @@ void overlay_menu_button_click() {
     case 2:
       game_destroy();
       game_init();
+      break;
+
+    default:
+      return;
+  }
+}
+
+void main_menu_button_click() {
+  switch (state.navigation.hovered) {
+    case 0:
+      game_init();
+      break;
+
+    case 1:
+      state.running = 0;
       break;
 
     default:

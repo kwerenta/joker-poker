@@ -18,6 +18,7 @@ typedef struct {
 } Controls;
 
 typedef enum {
+  STAGE_MAIN_MENU,
   STAGE_GAME,
   STAGE_CASH_OUT,
   STAGE_SHOP,
@@ -29,6 +30,7 @@ typedef enum { OVERLAY_NONE, OVERLAY_MENU, OVERLAY_POKER_HANDS } Overlay;
 
 typedef enum {
   NAVIGATION_NONE,
+  NAVIGATION_MAIN_MENU,
   NAVIGATION_HAND,
   NAVIGATION_SHOP_ITEMS,
   NAVIGATION_SHOP_BOOSTER_PACKS,
@@ -80,6 +82,7 @@ void change_stage(Stage stage);
 void change_overlay(Overlay overlay);
 
 void overlay_menu_button_click();
+void main_menu_button_click();
 
 typedef struct {
   Arena frame_arena;
