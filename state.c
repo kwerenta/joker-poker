@@ -177,7 +177,7 @@ uint8_t get_nav_section_size(NavigationSection section) {
       break;
 
     case NAVIGATION_OVERLAY_MENU:
-      max_value = 3;
+      max_value = 4;
       break;
   }
 
@@ -295,6 +295,11 @@ void overlay_menu_button_click() {
     case 2:
       game_destroy();
       game_init();
+      break;
+
+    case 3:
+      game_destroy();
+      change_stage(STAGE_MAIN_MENU);
       break;
 
     default:
