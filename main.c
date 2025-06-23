@@ -32,13 +32,12 @@ void init() {
 
   state.cards_atlas = load_texture("res/cards.png");
   state.font = load_texture("res/font.png");
+  state.logo = load_texture("res/logo.png");
 
   init_background();
 
   sceCtrlSetSamplingCycle(0);
   sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
-
-  game_init();
 
   state.delta = 0;
   state.running = 1;
@@ -55,6 +54,9 @@ void destroy() {
 
   stbi_image_free(state.font->data);
   free(state.font);
+
+  stbi_image_free(state.logo->data);
+  free(state.logo);
 
   free(state.bg);
 

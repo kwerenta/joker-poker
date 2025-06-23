@@ -17,7 +17,7 @@ void update_render_commands() {
   Clay_BeginLayout();
 
   CLAY({.id = CLAY_ID("Container"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {
-    if (state.stage != STAGE_GAME_OVER) render_sidebar();
+    if (state.stage != STAGE_GAME_OVER && state.stage >= STAGE_GAME) render_sidebar();
 
     CLAY({.id = CLAY_ID("Content"),
           .layout = {
@@ -25,9 +25,16 @@ void update_render_commands() {
               .layoutDirection = CLAY_TOP_TO_BOTTOM,
               .padding = {.top = 8, .left = 8, .right = 8, .bottom = 0},
           }}) {
-      if (state.stage != STAGE_GAME_OVER) render_topbar();
+      if (state.stage != STAGE_GAME_OVER && state.stage >= STAGE_GAME) render_topbar();
 
       switch (state.stage) {
+        case STAGE_MAIN_MENU:
+          render_main_menu();
+          break;
+        case STAGE_CREDITS:
+          render_credits();
+          break;
+
         case STAGE_GAME:
           render_hand();
           break;
@@ -59,6 +66,66 @@ void update_render_commands() {
   }
 
   state.render_commands = Clay_EndLayout();
+}
+
+const Clay_String main_menu_buttons[] = {CLAY_STRING("Play"), CLAY_STRING("Credits"), CLAY_STRING("Quit")};
+
+void render_main_menu() {
+  CLAY({.layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            .padding = CLAY_PADDING_ALL(16),
+        }}) {
+    CLAY({.layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+          }}) {
+      CLAY({.layout = {.sizing = {CLAY_SIZING_FIXED(256), CLAY_SIZING_FIXED(64)}},
+            .image = {.imageData = state.logo}}) {}
+    }
+
+    CLAY({.id = CLAY_ID("MainMenuButtons"),
+          .layout = {
+              .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+              .childGap = 4,
+              .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+          }}) {
+      for (uint8_t i = 0; i < sizeof(main_menu_buttons) / sizeof(main_menu_buttons[0]); i++) {
+        CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
+              .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
+              .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
+          CLAY_TEXT(main_menu_buttons[i], WHITE_TEXT_CONFIG);
+        }
+      }
+    }
+  }
+}
+
+void render_credits() {
+  CLAY({.layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+        }}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)},
+                     .padding = CLAY_PADDING_ALL(16),
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 8},
+          .backgroundColor = COLOR_CARD_BG}) {
+      CLAY({.layout = {.padding = {.bottom = 8}}}) {
+        CLAY_TEXT(CLAY_STRING("Following software libraries and assets are utilized in the creation of this game:"),
+                  WHITE_TEXT_CONFIG);
+      }
+
+      CLAY_TEXT(CLAY_STRING("c-vector by Evan Teran is licensed under MIT"), WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Clay by Nic Barker is licensed under zlib"), WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Poker cards asset pack by IvoryRed is licensed under CC-BY-4.0 / Changed placement of "
+                            "sprites, removed backgrounds, added custom elements"),
+                WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Pixel Bitmap Fonts by frostyfreeze is licensed under CC0"), WHITE_TEXT_CONFIG);
+      CLAY_TEXT(CLAY_STRING("Logo by Grzybson4 is licensed under CC-BY-4.0"), WHITE_TEXT_CONFIG);
+    }
+  }
 }
 
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
@@ -552,8 +619,8 @@ void render_cash_out() {
 
 void render_game_over() { CLAY_TEXT(CLAY_STRING("You've lost:("), WHITE_TEXT_CONFIG); }
 
-const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"),
-                                            CLAY_STRING("Restart")};
+const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"), CLAY_STRING("Restart"),
+                                            CLAY_STRING("Go to main menu")};
 
 void render_overlay_menu() {
   CLAY({.id = CLAY_ID("Overlay"),
@@ -562,15 +629,23 @@ void render_overlay_menu() {
             {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                 .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
-                .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                .childGap = 4,
             },
         .backgroundColor = {0, 0, 0, 150}}) {
-    for (uint8_t i = 0; i < sizeof(overlay_menu_buttons) / sizeof(overlay_menu_buttons[0]); i++) {
-      CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
-            .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
-            .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
-        CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+    CLAY({.layout = {
+              .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)},
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+              .childGap = 4,
+          }}) {
+      for (uint8_t i = 0; i < sizeof(overlay_menu_buttons) / sizeof(overlay_menu_buttons[0]); i++) {
+        CLAY({.id = CLAY_IDI_LOCAL("Button", i + 1),
+              .backgroundColor = state.navigation.hovered == i ? COLOR_CHIPS : COLOR_MULT,
+              .layout = {
+                  .childAlignment = {CLAY_ALIGN_X_CENTER},
+                  .padding = CLAY_PADDING_ALL(4),
+                  .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
+              }}) {
+          CLAY_TEXT(overlay_menu_buttons[i], WHITE_TEXT_CONFIG);
+        }
       }
     }
   }

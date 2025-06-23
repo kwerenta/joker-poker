@@ -237,7 +237,7 @@ uint8_t handle_navigation_controls() {
   } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
     move_nav_hovered(hovered + 1);
     return 1;
-  } else if (button_pressed(PSP_CTRL_START)) {
+  } else if (state.stage != STAGE_MAIN_MENU && button_pressed(PSP_CTRL_START)) {
     change_overlay(state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE);
     return 1;
   }
@@ -277,6 +277,14 @@ void handle_controls() {
   }
 
   switch (state.stage) {
+    case STAGE_MAIN_MENU:
+      if (button_pressed(PSP_CTRL_CROSS)) main_menu_button_click();
+      break;
+
+    case STAGE_CREDITS:
+      if (button_pressed(PSP_CTRL_CIRCLE)) change_stage(STAGE_MAIN_MENU);
+      break;
+
     case STAGE_GAME:
       if (button_pressed(PSP_CTRL_CROSS)) {
         toggle_card_select(state.navigation.hovered);

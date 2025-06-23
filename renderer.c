@@ -89,6 +89,19 @@ void execute_render_commands(Clay_RenderCommandArray render_commands) {
         break;
       }
 
+      case CLAY_RENDER_COMMAND_TYPE_IMAGE: {
+        Texture *texture = (Texture *)render_command->renderData.image.imageData;
+        draw_texture(texture, &(Rect){0, 0, texture->width, texture->height},
+                     &(Rect){
+                         bounding_box.x,
+                         bounding_box.y,
+                         bounding_box.width,
+                         bounding_box.height,
+                     },
+                     0xFFFFFFFF, 0);
+        break;
+      }
+
       case CLAY_RENDER_COMMAND_TYPE_CUSTOM: {
         CustomElementData *custom_element = render_command->renderData.custom.customData;
         if (!custom_element) continue;
