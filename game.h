@@ -185,7 +185,43 @@ typedef struct {
   cvector_vector_type(BoosterPackContent) content;
 } BoosterPack;
 
-typedef enum { VOUCHER_OVERSTOCK = 1 << 0 } Voucher;
+typedef enum {
+  // Base vouchers
+  VOUCHER_OVERSTOCK = 1 << 0,
+  VOUCHER_CLEARANCE_SALE = 1 << 1,
+  VOUCHER_HONE = 1 << 2,
+  VOUCHER_REROLL_SURPLUS = 1 << 3,
+  VOUCHER_CRYSTALL_BALL = 1 << 4,
+  VOUCHER_TELESCOPE = 1 << 5,
+  VOUCHER_GRABBER = 1 << 6,
+  VOUCHER_WASTEFUL = 1 << 7,
+  VOUCHER_TAROT_MERCHANT = 1 << 8,
+  VOUCHER_PLANET_MERCHANT = 1 << 9,
+  VOUCHER_SEED_MONEY = 1 << 10,
+  VOUCHER_BLANK = 1 << 11,
+  VOUCHER_MAGIC_TRICK = 1 << 12,
+  VOUCHER_HIEROGLYPH = 1 << 13,
+  VOUCHER_DIRECTORS_CUT = 1 << 14,
+  VOUCHER_PAINT_BRUSH = 1 << 15,
+
+  // Upgraded vouchers
+  VOUCHER_OVERSTOCK_PLUS = 1 << (0 + 16),
+  VOUCHER_LIQUIDATION = 1 << (1 + 16),
+  VOUCHER_GLOW_UP = 1 << (2 + 16),
+  VOUCHER_REROLL_GLUT = 1 << (3 + 16),
+  VOUCHER_OMEN_GLOBE = 1 << (4 + 16),
+  VOUCHER_OBSERVATORY = 1 << (5 + 16),
+  VOUCHER_NACHO_TONG = 1 << (6 + 16),
+  VOUCHER_RECYCLOMANCY = 1 << (7 + 16),
+  VOUCHER_TAROT_TYCOON = 1 << (8 + 16),
+  VOUCHER_PLANET_TYCOON = 1 << (9 + 16),
+  VOUCHER_MONEY_TREE = 1 << (10 + 16),
+  VOUCHER_ANTIMATTER = 1 << (11 + 16),
+  VOUCHER_ILLUSION = 1 << (12 + 16),
+  VOUCHER_PTEROGLYPH = 1 << (13 + 16),
+  VOUCHER_RETCON = 1 << (14 + 16),
+  VOUCHER_PALETTE = 1 << (15 + 16)
+} Voucher;
 
 typedef struct {
   ShopItemType type;

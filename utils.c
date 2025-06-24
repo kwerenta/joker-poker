@@ -156,8 +156,10 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
     }
 
     case NAVIGATION_SHOP_VOUCHER:
-      append_clay_string(name, "Voucher");
-      append_clay_string(description, "Does something");
+      *name = (Clay_String){.chars = get_voucher_name(state.game.shop.voucher),
+                            .length = strlen(get_voucher_name(state.game.shop.voucher))};
+      *description = (Clay_String){.chars = get_voucher_description(state.game.shop.voucher),
+                                   .length = strlen(get_voucher_description(state.game.shop.voucher))};
       break;
 
     case NAVIGATION_SHOP_BOOSTER_PACKS: {
