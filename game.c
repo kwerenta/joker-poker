@@ -656,6 +656,12 @@ uint8_t get_shop_item_price(ShopItem *item) {
   }
 }
 
+uint8_t get_voucher_price(Voucher voucher) {
+  if (voucher <= 1 << 16) return 10;
+  return 20;
+}
+void add_voucher_to_player(Voucher voucher) { state.game.vouchers |= voucher; }
+
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return 4 + booster_pack->size * 2; }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
@@ -665,9 +671,12 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
 
 void buy_shop_item() {
   uint8_t item_index = state.navigation.hovered;
-  uint8_t is_booster_pack = get_current_section() == NAVIGATION_SHOP_BOOSTER_PACKS;
+  NavigationSection section = get_current_section();
+  uint8_t is_booster_pack = section == NAVIGATION_SHOP_BOOSTER_PACKS;
+  uint8_t is_voucher = section == NAVIGATION_SHOP_VOUCHER;
 
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
+                  : is_voucher    ? get_voucher_price(state.game.shop.voucher)
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
 
   if (state.game.money < price) return;
@@ -675,6 +684,9 @@ void buy_shop_item() {
   if (is_booster_pack) {
     open_booster_pack(&state.game.shop.booster_packs[item_index]);
     cvector_erase(state.game.shop.booster_packs, item_index);
+  } else if (is_voucher) {
+    add_voucher_to_player(state.game.shop.voucher);
+    state.game.shop.voucher = 0;
   } else {
     if (add_item_to_player(&state.game.shop.items[item_index]) == 0) return;
     cvector_erase(state.game.shop.items, item_index);

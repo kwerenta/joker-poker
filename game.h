@@ -274,6 +274,8 @@ void get_cash_out();
 
 uint8_t use_consumable(Consumable *consumable);
 uint8_t get_shop_item_price(ShopItem *item);
+uint8_t get_voucher_price(Voucher voucher);
+void add_voucher_to_player(Voucher voucher);
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack);
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack);
 void buy_shop_item();
