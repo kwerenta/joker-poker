@@ -791,6 +791,8 @@ void restock_shop() {
     BoosterPackItem booster_pack = {.type = rand() % 5, .size = rand() % 3};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
+
+  state.game.shop.voucher = VOUCHER_OVERSTOCK;
 }
 
 void exit_shop() {

@@ -221,7 +221,9 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .layout = {
                 .sizing = {CLAY_SIZING_FIXED(scale * CARD_WIDTH), CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {
-        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS) continue;
+        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS &&
+            section != NAVIGATION_SHOP_VOUCHER)
+          continue;
 
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
@@ -252,15 +254,14 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
   Clay_String description;
   get_nav_item_tooltip_content(&name, &description, section);
 
-  float y_offset = 4;
-  Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM,
-                                             .element = CLAY_ATTACH_POINT_CENTER_TOP};
+  float y_offset = -4;
+  Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM};
 
-  if (section == NAVIGATION_HAND || section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
-      section == NAVIGATION_BOOSTER_PACK) {
+  if (section == NAVIGATION_JOKERS || section == NAVIGATION_CONSUMABLES) {
     y_offset *= -1;
-    attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
-    attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+    attach_points.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+    attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
   }
 
   CLAY({.id = CLAY_ID("Tooltip"),
@@ -544,15 +545,8 @@ void render_shop() {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
             }}) {
         CLAY({.id = CLAY_ID("ShopVoucher"),
-              .layout = {.sizing = CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {
-          CustomElementData *voucher = frame_arena_allocate(sizeof(CustomElementData));
-          *voucher = (CustomElementData){.type = CUSTOM_ELEMENT_VOUCHER, .voucher = state.game.shop.voucher};
-
-          CLAY({.custom = {.customData = voucher},
-                .layout = {
-                    .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                }}) {}
-        }
+              .layout = {.sizing = CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {}
+        render_spread_items(NAVIGATION_SHOP_VOUCHER, CLAY_STRING("ShopVoucher"));
 
         CLAY({.id = CLAY_ID("ShopBoosterPacks"),
               .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
