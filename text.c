@@ -160,3 +160,143 @@ Clay_String get_full_booster_pack_name(BoosterPackSize size, BoosterPackType typ
 
   return booster_pack_name;
 }
+
+char *get_voucher_name(Voucher voucher) {
+  switch (voucher) {
+    case VOUCHER_OVERSTOCK:
+      return "Overstock";
+    case VOUCHER_CLEARANCE_SALE:
+      return "Clearance Sale";
+    case VOUCHER_HONE:
+      return "Hone";
+    case VOUCHER_REROLL_SURPLUS:
+      return "Reroll Surplus";
+    case VOUCHER_CRYSTALL_BALL:
+      return "Crystall Ball";
+    case VOUCHER_TELESCOPE:
+      return "Telescope";
+    case VOUCHER_GRABBER:
+      return "Grabber";
+    case VOUCHER_WASTEFUL:
+      return "Wasteful";
+    case VOUCHER_TAROT_MERCHANT:
+      return "Tarot Merchant";
+    case VOUCHER_PLANET_MERCHANT:
+      return "Planet Merchant";
+    case VOUCHER_SEED_MONEY:
+      return "Seed Money";
+    case VOUCHER_BLANK:
+      return "Blank";
+    case VOUCHER_MAGIC_TRICK:
+      return "Magic Trick";
+    case VOUCHER_HIEROGLYPH:
+      return "Hieroglyph";
+    case VOUCHER_DIRECTORS_CUT:
+      return "Director's Cut";
+    case VOUCHER_PAINT_BRUSH:
+      return "Paint Brush";
+
+    case VOUCHER_OVERSTOCK_PLUS:
+      return "Overstock Plus";
+    case VOUCHER_LIQUIDATION:
+      return "Liquidation";
+    case VOUCHER_GLOW_UP:
+      return "Glow Up";
+    case VOUCHER_REROLL_GLUT:
+      return "Reroll Glut";
+    case VOUCHER_OMEN_GLOBE:
+      return "Omen Globe";
+    case VOUCHER_OBSERVATORY:
+      return "Observatory";
+    case VOUCHER_NACHO_TONG:
+      return "Nacho Tong";
+    case VOUCHER_RECYCLOMANCY:
+      return "Recyclomancy";
+    case VOUCHER_TAROT_TYCOON:
+      return "Tarot Tycoon";
+    case VOUCHER_PLANET_TYCOON:
+      return "Planet Tycoon";
+    case VOUCHER_MONEY_TREE:
+      return "Money Tree";
+    case VOUCHER_ANTIMATTER:
+      return "Antimatter";
+    case VOUCHER_ILLUSION:
+      return "Illusion";
+    case VOUCHER_PTEROGLYPH:
+      return "Pteroglyph";
+    case VOUCHER_RETCON:
+      return "Retcon";
+    case VOUCHER_PALETTE:
+      return "Palette";
+  }
+}
+
+char *get_voucher_description(Voucher voucher) {
+  switch (voucher) {
+    case VOUCHER_OVERSTOCK:
+      return "+1 card slot available in shop (to 3 slots)";
+    case VOUCHER_CLEARANCE_SALE:
+      return "All cards and packs in shop are 25% off";
+    case VOUCHER_HONE:
+      return "Foil, Holographic, and Polychrome cards appear 2x more often";
+    case VOUCHER_REROLL_SURPLUS:
+      return "Rerolls cost $2 less";
+    case VOUCHER_CRYSTALL_BALL:
+      return "+1 consumable slot";
+    case VOUCHER_TELESCOPE:
+      return "Celestial Packs always contain the Planet card for your most played poker hand";
+    case VOUCHER_GRABBER:
+      return "Permanently gain +1 hand per round";
+    case VOUCHER_WASTEFUL:
+      return "Permanently gain +1 discard each round";
+    case VOUCHER_TAROT_MERCHANT:
+      return "Tarot cards appear 2X more frequently in the shop";
+    case VOUCHER_PLANET_MERCHANT:
+      return "Planet cards appear 2X more frequently in the shop";
+    case VOUCHER_SEED_MONEY:
+      return "Raise the cap on interest earned in each round to $10";
+    case VOUCHER_BLANK:
+      return "Does nothing?";
+    case VOUCHER_MAGIC_TRICK:
+      return "Playing cards can be purchased from the shop";
+    case VOUCHER_HIEROGLYPH:
+      return "-1 Ante, -1 hand each round";
+    case VOUCHER_DIRECTORS_CUT:
+      return "Reroll Boss Blind 1 time per Ante, $10 per roll";
+    case VOUCHER_PAINT_BRUSH:
+      return "+1 Hand Size";
+
+    case VOUCHER_OVERSTOCK_PLUS:
+      return "+1 card slot available in shop (to 4 slots)";
+    case VOUCHER_LIQUIDATION:
+      return "All cards and packs in shop are 50% off";
+    case VOUCHER_GLOW_UP:
+      return "Foil, Holographic, and Polychrome cards appear 4x more often";
+    case VOUCHER_REROLL_GLUT:
+      return "Rerolls cost an additional $2 less";
+    case VOUCHER_OMEN_GLOBE:
+      return "Spectral cards may appear in any of the Arcana Packs";
+    case VOUCHER_OBSERVATORY:
+      return "Planet cards in your consumable area give X1.5 Mult for their specified poker hand";
+    case VOUCHER_NACHO_TONG:
+      return "Permanently gain an additional +1 hand per round";
+    case VOUCHER_RECYCLOMANCY:
+      return "Permanently gain an additional +1 discard each round";
+    case VOUCHER_TAROT_TYCOON:
+      return "Tarot cards appear 4X more frequently in the shop";
+    case VOUCHER_PLANET_TYCOON:
+      return "Planet cards appear 4X more frequently in the shop";
+    case VOUCHER_MONEY_TREE:
+      return "Raise the cap on interest earned in each round to $20";
+    case VOUCHER_ANTIMATTER:
+      return "+1 Joker slot";
+    case VOUCHER_ILLUSION:
+      return "Playing cards in shop may have an Enhancement, Edition, and/or a Seal";
+    case VOUCHER_PTEROGLYPH:
+      return "-1 Ante, -1 discard each round";
+    case VOUCHER_RETCON:
+      return "Reroll Boss Blind unlimited times, $10 per roll";
+    case VOUCHER_PALETTE:
+      return "+1 Hand Size again";
+  }
+}

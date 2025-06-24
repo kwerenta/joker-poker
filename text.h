@@ -17,4 +17,7 @@ char *get_booster_pack_type_name(BoosterPackType type);
 char *get_booster_pack_description_suffix(BoosterPackType type);
 Clay_String get_full_booster_pack_name(BoosterPackSize size, BoosterPackType type);
 
+char *get_voucher_name(Voucher voucher);
+char *get_voucher_description(Voucher voucher);
+
 #endif

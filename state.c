@@ -27,7 +27,7 @@ static const NavigationLayout stage_nav_layouts[] = {
          {
              jokers_consumables_row,
              {1, {NAVIGATION_SHOP_ITEMS}},
-             {1, {NAVIGATION_SHOP_BOOSTER_PACKS}},
+             {2, {NAVIGATION_SHOP_VOUCHER, NAVIGATION_SHOP_BOOSTER_PACKS}},
          }},
     {.row_count = 3,
      .rows =
@@ -163,6 +163,9 @@ uint8_t get_nav_section_size(NavigationSection section) {
       break;
     case NAVIGATION_SHOP_ITEMS:
       max_value = cvector_size(state.game.shop.items);
+      break;
+    case NAVIGATION_SHOP_VOUCHER:
+      max_value = state.game.shop.voucher != 0 ? 1 : 0;
       break;
     case NAVIGATION_BOOSTER_PACK:
       max_value = cvector_size(state.game.booster_pack.content);

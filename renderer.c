@@ -121,6 +121,10 @@ void execute_render_commands(Clay_RenderCommandArray render_commands) {
             render_consumable(&custom_element->consumable, &dst);
             break;
 
+          case CUSTOM_ELEMENT_VOUCHER:
+            render_voucher(custom_element->voucher, &dst);
+            break;
+
           case CUSTOM_ELEMENT_BOOSTER_PACK:
             render_booster_pack(&custom_element->booster_pack, &dst);
             break;

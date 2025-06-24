@@ -9,6 +9,7 @@ typedef enum {
   CUSTOM_ELEMENT_CARD,
   CUSTOM_ELEMENT_JOKER,
   CUSTOM_ELEMENT_CONSUMABLE,
+  CUSTOM_ELEMENT_VOUCHER,
   CUSTOM_ELEMENT_BOOSTER_PACK
 } CustomElementType;
 
@@ -18,6 +19,7 @@ typedef struct __attribute__((aligned(16))) {
     Card card;
     Joker joker;
     Consumable consumable;
+    Voucher voucher;
     BoosterPackItem booster_pack;
   };
 } CustomElementData;
