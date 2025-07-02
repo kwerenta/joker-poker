@@ -563,8 +563,14 @@ uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 
 uint8_t get_hands_money() { return state.game.hands.remaining; }
 
 uint8_t get_interest_money() {
-  // TODO Add max interest cap
-  return state.game.money / 5;
+  uint8_t interest = state.game.money / 5;
+  uint8_t interest_cap = state.game.vouchers & VOUCHER_MONEY_TREE   ? 20
+                         : state.game.vouchers & VOUCHER_SEED_MONEY ? 10
+                                                                    : 5;
+
+  if (interest > interest_cap) return interest_cap;
+
+  return interest;
 }
 
 // If consumable is NULL then hovered item from consumables section will be used
@@ -883,7 +889,7 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  state.game.shop.voucher = VOUCHER_TELESCOPE;
+  state.game.shop.voucher = VOUCHER_SEED_MONEY;
 }
 
 void exit_shop() {
