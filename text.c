@@ -168,9 +168,9 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_CLEARANCE_SALE:
       return "Clearance Sale";
     case VOUCHER_HONE:
-      return "Hone";
+      return "Hone NOT IMPLEMENTED";
     case VOUCHER_REROLL_SURPLUS:
-      return "Reroll Surplus";
+      return "Reroll Surplus NOT IMPLEMENTED";
     case VOUCHER_CRYSTALL_BALL:
       return "Crystall Ball";
     case VOUCHER_TELESCOPE:
@@ -180,19 +180,19 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_WASTEFUL:
       return "Wasteful";
     case VOUCHER_TAROT_MERCHANT:
-      return "Tarot Merchant";
+      return "Tarot Merchant NOT IMPLEMENTED";
     case VOUCHER_PLANET_MERCHANT:
-      return "Planet Merchant";
+      return "Planet Merchant NOT IMPLEMENTED";
     case VOUCHER_SEED_MONEY:
       return "Seed Money";
     case VOUCHER_BLANK:
       return "Blank";
     case VOUCHER_MAGIC_TRICK:
-      return "Magic Trick";
+      return "Magic Trick NOT IMPLEMENTED";
     case VOUCHER_HIEROGLYPH:
       return "Hieroglyph";
     case VOUCHER_DIRECTORS_CUT:
-      return "Director's Cut";
+      return "Director's Cut NOT IMPLEMENTED";
     case VOUCHER_PAINT_BRUSH:
       return "Paint Brush";
 
@@ -201,11 +201,11 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_LIQUIDATION:
       return "Liquidation";
     case VOUCHER_GLOW_UP:
-      return "Glow Up";
+      return "Glow Up NOT IMPLEMENTED";
     case VOUCHER_REROLL_GLUT:
-      return "Reroll Glut";
+      return "Reroll Glut NOT IMPLEMENTED";
     case VOUCHER_OMEN_GLOBE:
-      return "Omen Globe";
+      return "Omen Globe NOT IMPLEMENTED";
     case VOUCHER_OBSERVATORY:
       return "Observatory";
     case VOUCHER_NACHO_TONG:
@@ -213,19 +213,19 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_RECYCLOMANCY:
       return "Recyclomancy";
     case VOUCHER_TAROT_TYCOON:
-      return "Tarot Tycoon";
+      return "Tarot Tycoon NOT IMPLEMENTED";
     case VOUCHER_PLANET_TYCOON:
-      return "Planet Tycoon";
+      return "Planet Tycoon NOT IMPLEMENTED";
     case VOUCHER_MONEY_TREE:
       return "Money Tree";
     case VOUCHER_ANTIMATTER:
       return "Antimatter";
     case VOUCHER_ILLUSION:
-      return "Illusion";
+      return "Illusion NOT IMPLEMENTED";
     case VOUCHER_PTEROGLYPH:
       return "Pteroglyph";
     case VOUCHER_RETCON:
-      return "Retcon";
+      return "Retcon NOT IMPLEMENTED";
     case VOUCHER_PALETTE:
       return "Palette";
   }
