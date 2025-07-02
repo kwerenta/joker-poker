@@ -706,6 +706,10 @@ void add_voucher_to_player(Voucher voucher) {
     case VOUCHER_WASTEFUL:
       state.game.discards.total++;
       break;
+    case VOUCHER_HIEROGLYPH:
+      state.game.ante--;
+      state.game.hands.total--;
+      break;
     case VOUCHER_PAINT_BRUSH:
       state.game.hand.size++;
       break;
@@ -722,6 +726,10 @@ void add_voucher_to_player(Voucher voucher) {
       break;
     case VOUCHER_ANTIMATTER:
       state.game.jokers.size++;
+      break;
+    case VOUCHER_PTEROGLYPH:
+      state.game.ante--;
+      state.game.discards.total--;
       break;
     case VOUCHER_PALETTE:
       state.game.hand.size++;
