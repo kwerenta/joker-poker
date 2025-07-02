@@ -688,6 +688,9 @@ void add_voucher_to_player(Voucher voucher) {
       state.game.shop.size = 3;
       fill_shop_items();
       break;
+    case VOUCHER_CRYSTALL_BALL:
+      state.game.consumables.size++;
+      break;
     case VOUCHER_PAINT_BRUSH:
       state.game.hand.size++;
       break;
