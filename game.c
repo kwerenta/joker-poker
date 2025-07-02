@@ -155,6 +155,14 @@ void play_hand() {
     if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
   }
 
+  if (state.game.vouchers & VOUCHER_OBSERVATORY) {
+    cvector_for_each(state.game.consumables.items, Consumable, consumable) {
+      if (consumable->type == CONSUMABLE_PLANET && (1 << consumable->planet) == state.game.selected_hand.hand_union) {
+        state.game.selected_hand.score_pair.mult *= 1.5;
+      }
+    }
+  }
+
   state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
   double required_score = get_required_score(state.game.ante, state.game.blind);
