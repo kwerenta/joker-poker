@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include <cvector.h>
+#include <math.h>
 #include <stdint.h>
 
 #include "content/spectral.h"
@@ -642,18 +643,37 @@ uint8_t add_item_to_player(ShopItem *item) {
   return 1;
 }
 
+uint8_t apply_sale(uint8_t price) {
+  float sale = 0.0f;
+
+  if (state.game.vouchers & VOUCHER_LIQUIDATION)
+    sale = 0.5f;
+  else if (state.game.vouchers & VOUCHER_CLEARANCE_SALE)
+    sale = 0.25f;
+
+  return (uint8_t)ceilf((1 - sale) * price - 0.5f);
+}
+
 uint8_t get_shop_item_price(ShopItem *item) {
+  uint8_t price = 0;
+
   switch (item->type) {
     case SHOP_ITEM_CARD:
-      return 1;
+      price = 1;
+      break;
     case SHOP_ITEM_PLANET:
     case SHOP_ITEM_TAROT:
-      return 3;
+      price = 3;
+      break;
     case SHOP_ITEM_SPECTRAL:
-      return 4;
+      price = 4;
+      break;
     case SHOP_ITEM_JOKER:
-      return item->joker.base_price;
+      price = item->joker.base_price;
+      break;
   }
+
+  return apply_sale(price);
 }
 
 uint8_t get_voucher_price(Voucher voucher) {
@@ -688,7 +708,7 @@ void add_voucher_to_player(Voucher voucher) {
   }
 }
 
-uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return 4 + booster_pack->size * 2; }
+uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return apply_sale(4 + booster_pack->size * 2); }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
   if (booster_pack->type == BOOSTER_PACK_BUFFON) count--;
@@ -834,7 +854,7 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  state.game.shop.voucher = VOUCHER_OVERSTOCK;
+  state.game.shop.voucher = VOUCHER_CLEARANCE_SALE;
 }
 
 void exit_shop() {
