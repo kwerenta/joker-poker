@@ -905,7 +905,27 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  state.game.shop.voucher = VOUCHER_SEED_MONEY;
+  if (state.game.blind % 3 == 0) {
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < 32; i++) {
+      if (state.game.vouchers & (1 << i)) continue;
+
+      if (i < 16) {
+        count++;
+        continue;
+      }
+      if (state.game.vouchers & (1 << (i - 16))) count++;
+    }
+
+    uint8_t voucher_index = rand() % count;
+
+    for (uint8_t i = 0; i < 32; i++) {
+      if (state.game.vouchers & (1 << i)) continue;
+
+      if (voucher_index == 0) state.game.shop.voucher = 1 << i;
+      voucher_index--;
+    }
+  }
 }
 
 void exit_shop() {
