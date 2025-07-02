@@ -476,7 +476,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Hands"), WHITE_TEXT_CONFIG);
 
       Clay_String hands;
-      append_clay_string(&hands, "%d", state.game.hands);
+      append_clay_string(&hands, "%d", state.game.hands.remaining);
       CLAY_TEXT(hands, WHITE_TEXT_CONFIG);
     }
 
@@ -484,7 +484,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Discards"), WHITE_TEXT_CONFIG);
 
       Clay_String discards;
-      append_clay_string(&discards, "%d", state.game.discards);
+      append_clay_string(&discards, "%d", state.game.discards.remaining);
       CLAY_TEXT(discards, WHITE_TEXT_CONFIG);
     }
 

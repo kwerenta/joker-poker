@@ -244,6 +244,11 @@ typedef struct {
 typedef enum { SORTING_BY_SUIT, SORTING_BY_RANK } SortingMode;
 
 typedef struct {
+  uint8_t remaining;
+  uint8_t total;
+} UsageState;
+
+typedef struct {
   cvector_vector_type(Card) full_deck;
   cvector_vector_type(Card) deck;
 
@@ -259,8 +264,8 @@ typedef struct {
   uint8_t round;
   uint8_t blind;
 
-  uint8_t hands;
-  uint8_t discards;
+  UsageState hands;
+  UsageState discards;
 
   PokerHandStats poker_hands[12];
 

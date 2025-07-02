@@ -32,8 +32,11 @@ void game_init() {
   state.game.blind = 0;
   state.game.round = 0;
 
-  state.game.hands = 4;
-  state.game.discards = 2;
+  state.game.hands.total = 4;
+  state.game.hands.remaining = 4;
+
+  state.game.discards.total = 2;
+  state.game.discards.remaining = 2;
 
   state.game.jokers.size = 5;
   state.game.consumables.size = 2;
@@ -86,7 +89,7 @@ void fill_hand() {
 }
 
 void play_hand() {
-  if (state.game.hands == 0 || state.game.selected_hand.count == 0) return;
+  if (state.game.hands.remaining == 0 || state.game.selected_hand.count == 0) return;
 
   update_scoring_hand();
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
@@ -146,7 +149,7 @@ void play_hand() {
   }
 
   remove_selected_cards();
-  state.game.hands--;
+  state.game.hands.remaining--;
 
   cvector_for_each(state.game.hand.cards, Card, card) {
     if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
@@ -162,7 +165,7 @@ void play_hand() {
     }
 
     change_stage(STAGE_CASH_OUT);
-  } else if (state.game.hands == 0) {
+  } else if (state.game.hands.remaining == 0) {
     change_stage(STAGE_GAME_OVER);
   } else {
     fill_hand();
@@ -175,8 +178,8 @@ void get_cash_out() {
   state.game.score = 0;
 
   // Reset hand and deck for new blind
-  state.game.hands = 4;
-  state.game.discards = 2;
+  state.game.hands.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.discards.total;
   cvector_clear(state.game.hand.cards);
   cvector_copy(state.game.full_deck, state.game.deck);
 
@@ -204,9 +207,9 @@ void update_scoring_edition(Edition edition) {
 }
 
 void discard_hand() {
-  if (state.game.selected_hand.count == 0 || state.game.discards == 0) return;
+  if (state.game.selected_hand.count == 0 || state.game.discards.remaining == 0) return;
 
-  state.game.discards--;
+  state.game.discards.remaining--;
   remove_selected_cards();
   fill_hand();
 }
@@ -557,7 +560,7 @@ double get_required_score(uint8_t ante, uint8_t blind) {
 }
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
-uint8_t get_hands_money() { return state.game.hands; }
+uint8_t get_hands_money() { return state.game.hands.remaining; }
 
 uint8_t get_interest_money() {
   // TODO Add max interest cap
@@ -691,6 +694,12 @@ void add_voucher_to_player(Voucher voucher) {
     case VOUCHER_CRYSTALL_BALL:
       state.game.consumables.size++;
       break;
+    case VOUCHER_GRABBER:
+      state.game.hands.total++;
+      break;
+    case VOUCHER_WASTEFUL:
+      state.game.discards.total++;
+      break;
     case VOUCHER_PAINT_BRUSH:
       state.game.hand.size++;
       break;
@@ -698,6 +707,12 @@ void add_voucher_to_player(Voucher voucher) {
     case VOUCHER_OVERSTOCK_PLUS:
       state.game.shop.size = 4;
       fill_shop_items();
+      break;
+    case VOUCHER_NACHO_TONG:
+      state.game.hands.total++;
+      break;
+    case VOUCHER_RECYCLOMANCY:
+      state.game.discards.total++;
       break;
     case VOUCHER_ANTIMATTER:
       state.game.jokers.size++;
