@@ -782,7 +782,18 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         content.joker = JOKERS[rand() % JOKER_COUNT];
         break;
       case BOOSTER_PACK_CELESTIAL:
-        content.planet = rand() % 12;
+        if (state.game.vouchers & VOUCHER_TELESCOPE && i == 0) {
+          uint16_t max_played = 0;
+
+          for (int8_t j = 11; j >= 0; j--) {
+            if (state.game.poker_hands[j].played >= max_played) {
+              max_played = state.game.poker_hands[j].played;
+              content.planet = j;
+            }
+          }
+        } else {
+          content.planet = rand() % 12;
+        }
         break;
       case BOOSTER_PACK_ARCANA:
         content.tarot = rand() % 22;
@@ -872,7 +883,7 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  state.game.shop.voucher = VOUCHER_CLEARANCE_SALE;
+  state.game.shop.voucher = VOUCHER_TELESCOPE;
 }
 
 void exit_shop() {
