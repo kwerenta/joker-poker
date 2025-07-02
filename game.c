@@ -660,7 +660,33 @@ uint8_t get_voucher_price(Voucher voucher) {
   if (voucher <= 1 << 16) return 10;
   return 20;
 }
-void add_voucher_to_player(Voucher voucher) { state.game.vouchers |= voucher; }
+void add_voucher_to_player(Voucher voucher) {
+  state.game.vouchers |= voucher;
+
+  switch (voucher) {
+    case VOUCHER_OVERSTOCK:
+      state.game.shop.size = 3;
+      fill_shop_items();
+      break;
+    case VOUCHER_PAINT_BRUSH:
+      state.game.hand.size++;
+      break;
+
+    case VOUCHER_OVERSTOCK_PLUS:
+      state.game.shop.size = 4;
+      fill_shop_items();
+      break;
+    case VOUCHER_ANTIMATTER:
+      state.game.jokers.size++;
+      break;
+    case VOUCHER_PALETTE:
+      state.game.hand.size++;
+      break;
+
+    default:
+      break;
+  }
+}
 
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return 4 + booster_pack->size * 2; }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
@@ -773,13 +799,10 @@ void select_booster_pack_item() {
 
 void skip_booster_pack() { close_booster_pack(); }
 
-void restock_shop() {
-  cvector_clear(state.game.shop.items);
-  cvector_clear(state.game.shop.booster_packs);
-
+void fill_shop_items() {
   ShopItem item = {0};
 
-  for (uint8_t i = 0; i < state.game.shop.size; i++) {
+  while (cvector_size(state.game.shop.items) < state.game.shop.size) {
     switch (rand() % 4) {
       case 0:
         item = (ShopItem){.type = SHOP_ITEM_CARD,
@@ -798,6 +821,13 @@ void restock_shop() {
 
     cvector_push_back(state.game.shop.items, item);
   }
+}
+
+void restock_shop() {
+  cvector_clear(state.game.shop.items);
+  cvector_clear(state.game.shop.booster_packs);
+
+  fill_shop_items();
 
   for (uint8_t i = 0; i < 2; i++) {
     BoosterPackItem booster_pack = {.type = rand() % 5, .size = rand() % 3};
