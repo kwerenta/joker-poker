@@ -10,6 +10,7 @@
 CustomElementData create_spread_item_element(NavigationSection section, uint8_t i) {
   switch (section) {
     case NAVIGATION_NONE:
+    case NAVIGATION_MAIN_MENU:
     case NAVIGATION_OVERLAY_MENU:
       return (CustomElementData){0};
 
@@ -42,9 +43,11 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
       }
     }
 
+    case NAVIGATION_SHOP_VOUCHER:
+      return (CustomElementData){.type = CUSTOM_ELEMENT_VOUCHER, .voucher = state.game.shop.voucher};
+
     case NAVIGATION_SHOP_BOOSTER_PACKS:
       return (CustomElementData){.type = CUSTOM_ELEMENT_BOOSTER_PACK, .booster_pack = state.game.shop.booster_packs[i]};
-      break;
 
     case NAVIGATION_BOOSTER_PACK: {
       BoosterPack *booster_pack = &state.game.booster_pack;
@@ -111,6 +114,7 @@ void get_shop_item_tooltip_content(Clay_String *name, Clay_String *description, 
 void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, NavigationSection section) {
   switch (section) {
     case NAVIGATION_NONE:
+    case NAVIGATION_MAIN_MENU:
     case NAVIGATION_OVERLAY_MENU:
       return;
 
@@ -150,6 +154,13 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
       get_shop_item_tooltip_content(name, description, item);
       break;
     }
+
+    case NAVIGATION_SHOP_VOUCHER:
+      *name = (Clay_String){.chars = get_voucher_name(state.game.shop.voucher),
+                            .length = strlen(get_voucher_name(state.game.shop.voucher))};
+      *description = (Clay_String){.chars = get_voucher_description(state.game.shop.voucher),
+                                   .length = strlen(get_voucher_description(state.game.shop.voucher))};
+      break;
 
     case NAVIGATION_SHOP_BOOSTER_PACKS: {
       BoosterPackItem *booster_pack = &state.game.shop.booster_packs[state.navigation.hovered];

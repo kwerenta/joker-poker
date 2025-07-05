@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include <cvector.h>
+#include <math.h>
 #include <stdint.h>
 
 #include "content/spectral.h"
@@ -31,8 +32,11 @@ void game_init() {
   state.game.blind = 0;
   state.game.round = 0;
 
-  state.game.hands = 4;
-  state.game.discards = 2;
+  state.game.hands.total = 4;
+  state.game.hands.remaining = 4;
+
+  state.game.discards.total = 2;
+  state.game.discards.remaining = 2;
 
   state.game.jokers.size = 5;
   state.game.consumables.size = 2;
@@ -85,7 +89,7 @@ void fill_hand() {
 }
 
 void play_hand() {
-  if (state.game.hands == 0 || state.game.selected_hand.count == 0) return;
+  if (state.game.hands.remaining == 0 || state.game.selected_hand.count == 0) return;
 
   update_scoring_hand();
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
@@ -145,10 +149,18 @@ void play_hand() {
   }
 
   remove_selected_cards();
-  state.game.hands--;
+  state.game.hands.remaining--;
 
   cvector_for_each(state.game.hand.cards, Card, card) {
     if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
+  }
+
+  if (state.game.vouchers & VOUCHER_OBSERVATORY) {
+    cvector_for_each(state.game.consumables.items, Consumable, consumable) {
+      if (consumable->type == CONSUMABLE_PLANET && (1 << consumable->planet) == state.game.selected_hand.hand_union) {
+        state.game.selected_hand.score_pair.mult *= 1.5;
+      }
+    }
   }
 
   state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
@@ -161,7 +173,7 @@ void play_hand() {
     }
 
     change_stage(STAGE_CASH_OUT);
-  } else if (state.game.hands == 0) {
+  } else if (state.game.hands.remaining == 0) {
     change_stage(STAGE_GAME_OVER);
   } else {
     fill_hand();
@@ -174,8 +186,8 @@ void get_cash_out() {
   state.game.score = 0;
 
   // Reset hand and deck for new blind
-  state.game.hands = 4;
-  state.game.discards = 2;
+  state.game.hands.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.discards.total;
   cvector_clear(state.game.hand.cards);
   cvector_copy(state.game.full_deck, state.game.deck);
 
@@ -203,9 +215,9 @@ void update_scoring_edition(Edition edition) {
 }
 
 void discard_hand() {
-  if (state.game.selected_hand.count == 0 || state.game.discards == 0) return;
+  if (state.game.selected_hand.count == 0 || state.game.discards.remaining == 0) return;
 
-  state.game.discards--;
+  state.game.discards.remaining--;
   remove_selected_cards();
   fill_hand();
 }
@@ -556,11 +568,17 @@ double get_required_score(uint8_t ante, uint8_t blind) {
 }
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
-uint8_t get_hands_money() { return state.game.hands; }
+uint8_t get_hands_money() { return state.game.hands.remaining; }
 
 uint8_t get_interest_money() {
-  // TODO Add max interest cap
-  return state.game.money / 5;
+  uint8_t interest = state.game.money / 5;
+  uint8_t interest_cap = state.game.vouchers & VOUCHER_MONEY_TREE   ? 20
+                         : state.game.vouchers & VOUCHER_SEED_MONEY ? 10
+                                                                    : 5;
+
+  if (interest > interest_cap) return interest_cap;
+
+  return interest;
 }
 
 // If consumable is NULL then hovered item from consumables section will be used
@@ -642,21 +660,95 @@ uint8_t add_item_to_player(ShopItem *item) {
   return 1;
 }
 
+uint8_t apply_sale(uint8_t price) {
+  float sale = 0.0f;
+
+  if (state.game.vouchers & VOUCHER_LIQUIDATION)
+    sale = 0.5f;
+  else if (state.game.vouchers & VOUCHER_CLEARANCE_SALE)
+    sale = 0.25f;
+
+  return (uint8_t)ceilf((1 - sale) * price - 0.5f);
+}
+
 uint8_t get_shop_item_price(ShopItem *item) {
+  uint8_t price = 0;
+
   switch (item->type) {
     case SHOP_ITEM_CARD:
-      return 1;
+      price = 1;
+      break;
     case SHOP_ITEM_PLANET:
     case SHOP_ITEM_TAROT:
-      return 3;
+      price = 3;
+      break;
     case SHOP_ITEM_SPECTRAL:
-      return 4;
+      price = 4;
+      break;
     case SHOP_ITEM_JOKER:
-      return item->joker.base_price;
+      price = item->joker.base_price;
+      break;
+  }
+
+  return apply_sale(price);
+}
+
+uint8_t get_voucher_price(Voucher voucher) {
+  if (voucher <= 1 << 16) return 10;
+  return 20;
+}
+void add_voucher_to_player(Voucher voucher) {
+  state.game.vouchers |= voucher;
+
+  switch (voucher) {
+    case VOUCHER_OVERSTOCK:
+      state.game.shop.size = 3;
+      fill_shop_items();
+      break;
+    case VOUCHER_CRYSTALL_BALL:
+      state.game.consumables.size++;
+      break;
+    case VOUCHER_GRABBER:
+      state.game.hands.total++;
+      break;
+    case VOUCHER_WASTEFUL:
+      state.game.discards.total++;
+      break;
+    case VOUCHER_HIEROGLYPH:
+      state.game.ante--;
+      state.game.hands.total--;
+      break;
+    case VOUCHER_PAINT_BRUSH:
+      state.game.hand.size++;
+      break;
+
+    case VOUCHER_OVERSTOCK_PLUS:
+      state.game.shop.size = 4;
+      fill_shop_items();
+      break;
+    case VOUCHER_NACHO_TONG:
+      state.game.hands.total++;
+      break;
+    case VOUCHER_RECYCLOMANCY:
+      state.game.discards.total++;
+      break;
+    case VOUCHER_ANTIMATTER:
+      state.game.jokers.size++;
+      break;
+    case VOUCHER_PTEROGLYPH:
+      state.game.ante--;
+      state.game.discards.total--;
+      break;
+    case VOUCHER_PALETTE:
+      state.game.hand.size++;
+      break;
+
+    default:
+      break;
   }
 }
 
-uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return 4 + booster_pack->size * 2; }
+uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return apply_sale(4 + booster_pack->size * 2); }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
   if (booster_pack->type == BOOSTER_PACK_BUFFON) count--;
@@ -665,9 +757,12 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
 
 void buy_shop_item() {
   uint8_t item_index = state.navigation.hovered;
-  uint8_t is_booster_pack = get_current_section() == NAVIGATION_SHOP_BOOSTER_PACKS;
+  NavigationSection section = get_current_section();
+  uint8_t is_booster_pack = section == NAVIGATION_SHOP_BOOSTER_PACKS;
+  uint8_t is_voucher = section == NAVIGATION_SHOP_VOUCHER;
 
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
+                  : is_voucher    ? get_voucher_price(state.game.shop.voucher)
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
 
   if (state.game.money < price) return;
@@ -675,6 +770,9 @@ void buy_shop_item() {
   if (is_booster_pack) {
     open_booster_pack(&state.game.shop.booster_packs[item_index]);
     cvector_erase(state.game.shop.booster_packs, item_index);
+  } else if (is_voucher) {
+    add_voucher_to_player(state.game.shop.voucher);
+    state.game.shop.voucher = 0;
   } else {
     if (add_item_to_player(&state.game.shop.items[item_index]) == 0) return;
     cvector_erase(state.game.shop.items, item_index);
@@ -706,7 +804,18 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         content.joker = JOKERS[rand() % JOKER_COUNT];
         break;
       case BOOSTER_PACK_CELESTIAL:
-        content.planet = rand() % 12;
+        if (state.game.vouchers & VOUCHER_TELESCOPE && i == 0) {
+          uint16_t max_played = 0;
+
+          for (int8_t j = 11; j >= 0; j--) {
+            if (state.game.poker_hands[j].played >= max_played) {
+              max_played = state.game.poker_hands[j].played;
+              content.planet = j;
+            }
+          }
+        } else {
+          content.planet = rand() % 12;
+        }
         break;
       case BOOSTER_PACK_ARCANA:
         content.tarot = rand() % 22;
@@ -761,13 +870,10 @@ void select_booster_pack_item() {
 
 void skip_booster_pack() { close_booster_pack(); }
 
-void restock_shop() {
-  cvector_clear(state.game.shop.items);
-  cvector_clear(state.game.shop.booster_packs);
-
+void fill_shop_items() {
   ShopItem item = {0};
 
-  for (uint8_t i = 0; i < state.game.shop.size; i++) {
+  while (cvector_size(state.game.shop.items) < state.game.shop.size) {
     switch (rand() % 4) {
       case 0:
         item = (ShopItem){.type = SHOP_ITEM_CARD,
@@ -786,10 +892,39 @@ void restock_shop() {
 
     cvector_push_back(state.game.shop.items, item);
   }
+}
+
+void restock_shop() {
+  cvector_clear(state.game.shop.items);
+  cvector_clear(state.game.shop.booster_packs);
+
+  fill_shop_items();
 
   for (uint8_t i = 0; i < 2; i++) {
     BoosterPackItem booster_pack = {.type = rand() % 5, .size = rand() % 3};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
+  }
+
+  if (state.game.blind % 3 == 0) {
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < 32; i++) {
+      if (state.game.vouchers & (1 << i)) continue;
+
+      if (i < 16) {
+        count++;
+        continue;
+      }
+      if (state.game.vouchers & (1 << (i - 16))) count++;
+    }
+
+    uint8_t voucher_index = rand() % count;
+
+    for (uint8_t i = 0; i < 32; i++) {
+      if (state.game.vouchers & (1 << i)) continue;
+
+      if (voucher_index == 0) state.game.shop.voucher = 1 << i;
+      voucher_index--;
+    }
   }
 }
 

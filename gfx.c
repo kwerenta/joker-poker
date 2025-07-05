@@ -176,6 +176,8 @@ void render_consumable(Consumable *consumable, Rect *dst) {
   render_card_atlas_sprite(&index, dst);
 }
 
+void render_voucher(Voucher voucher, Rect *dst) { render_card_atlas_sprite(&(Vector2){9, 7}, dst); }
+
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
   render_card_atlas_sprite(&(Vector2){.x = 4, .y = 3}, dst);
 }
@@ -219,7 +221,9 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .layout = {
                 .sizing = {CLAY_SIZING_FIXED(scale * CARD_WIDTH), CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {
-        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS) continue;
+        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS &&
+            section != NAVIGATION_SHOP_VOUCHER)
+          continue;
 
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
@@ -236,7 +240,8 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             append_clay_string(&price, "$%d",
                                section == NAVIGATION_SHOP_BOOSTER_PACKS
                                    ? get_booster_pack_price(&state.game.shop.booster_packs[i])
-                                   : get_shop_item_price(&state.game.shop.items[i]));
+                               : section == NAVIGATION_SHOP_VOUCHER ? get_voucher_price(state.game.shop.voucher)
+                                                                    : get_shop_item_price(&state.game.shop.items[i]));
             CLAY_TEXT(price, WHITE_TEXT_CONFIG);
           }
         }
@@ -250,15 +255,14 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
   Clay_String description;
   get_nav_item_tooltip_content(&name, &description, section);
 
-  float y_offset = 4;
-  Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM,
-                                             .element = CLAY_ATTACH_POINT_CENTER_TOP};
+  float y_offset = -4;
+  Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM};
 
-  if (section == NAVIGATION_HAND || section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
-      section == NAVIGATION_BOOSTER_PACK) {
+  if (section == NAVIGATION_JOKERS || section == NAVIGATION_CONSUMABLES) {
     y_offset *= -1;
-    attach_points.parent = CLAY_ATTACH_POINT_CENTER_TOP;
-    attach_points.element = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+    attach_points.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+    attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
   }
 
   CLAY({.id = CLAY_ID("Tooltip"),
@@ -472,7 +476,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Hands"), WHITE_TEXT_CONFIG);
 
       Clay_String hands;
-      append_clay_string(&hands, "%d", state.game.hands);
+      append_clay_string(&hands, "%d", state.game.hands.remaining);
       CLAY_TEXT(hands, WHITE_TEXT_CONFIG);
     }
 
@@ -480,7 +484,7 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Discards"), WHITE_TEXT_CONFIG);
 
       Clay_String discards;
-      append_clay_string(&discards, "%d", state.game.discards);
+      append_clay_string(&discards, "%d", state.game.discards.remaining);
       CLAY_TEXT(discards, WHITE_TEXT_CONFIG);
     }
 
@@ -537,9 +541,18 @@ void render_shop() {
 
       CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {}
 
-      CLAY({.id = CLAY_ID("ShopBoosterPacks"),
-            .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
-      render_spread_items(NAVIGATION_SHOP_BOOSTER_PACKS, CLAY_STRING("ShopBoosterPacks"));
+      CLAY({.id = CLAY_ID("ShopBottom"),
+            .layout = {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+            }}) {
+        CLAY({.id = CLAY_ID("ShopVoucher"),
+              .layout = {.sizing = CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {}
+        render_spread_items(NAVIGATION_SHOP_VOUCHER, CLAY_STRING("ShopVoucher"));
+
+        CLAY({.id = CLAY_ID("ShopBoosterPacks"),
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
+        render_spread_items(NAVIGATION_SHOP_BOOSTER_PACKS, CLAY_STRING("ShopBoosterPacks"));
+      }
     }
   }
 }
