@@ -20,11 +20,11 @@ jobs:
         run: |
           wget https://github.com/pspdev/pspdev/releases/latest/download/pspdev-ubuntu-latest-x86_64.tar.gz
           tar -xzf pspdev-ubuntu-latest-x86_64.tar.gz
-          echo "export PSPDEV=$GITHUB_WORKSPACE/pspdev" >> $GITHUB_ENV
-          echo "$PSPDEV/bin" >> $GITHUB_PATH
 
       - name: Build the game
         run: |
+          export PSPDEV=$GITHUB_WORKSPACE/pspdev
+          export PATH=$PSPDEV/bin:$PATH
           psp-cmake -DBUILD_PRX=1 -DENC_PRX=1 -B build
           cmake --build build
 
