@@ -792,8 +792,7 @@ void buy_shop_item() {
 
 void sell_shop_item() {
   uint8_t item_index = state.navigation.hovered;
-  NavigationSection section = get_current_section();
-  uint8_t is_consumable = section == NAVIGATION_CONSUMABLES;
+  uint8_t is_consumable = get_current_section() == NAVIGATION_CONSUMABLES;
 
   ShopItem item;
 
@@ -822,6 +821,7 @@ void sell_shop_item() {
   }
 
   state.game.money += get_shop_item_sell_price(&item);
+  set_nav_hovered(item_index);
 }
 
 void open_booster_pack(BoosterPackItem *booster_pack) {
