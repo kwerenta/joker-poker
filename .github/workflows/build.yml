@@ -36,8 +36,12 @@ jobs:
           cd dist
           zip -r joker-poker.zip joker-poker
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: JokerPoker
-          path: dist/joker-poker.zip
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/joker-poker.zip
+          asset_name: joker-poker.zip
+          asset_content_type: application/zip
