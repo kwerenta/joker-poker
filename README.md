@@ -68,6 +68,7 @@ There are currently no in-game control hints.
   - CROSS - select/buy/use currently hovered item
   - LTRIGGER/RTRIGGER - move hovered item to the left/right
   - START - open/close overlay menu
+  - TRIANGLE - sell currently hovered item
 - Game
   - SELECT - sort hand by rank/suit
   - SQUARE - play selected cards

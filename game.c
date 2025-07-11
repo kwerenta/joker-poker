@@ -755,6 +755,13 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   return count;
 }
 
+uint8_t get_shop_item_sell_price(ShopItem *item) {
+  int8_t sell_price = (uint8_t)floorf(get_shop_item_price(item) / 2.0);
+
+  if (sell_price < 1) return 1;
+  return sell_price;
+}
+
 void buy_shop_item() {
   uint8_t item_index = state.navigation.hovered;
   NavigationSection section = get_current_section();
@@ -781,6 +788,40 @@ void buy_shop_item() {
   state.game.money -= price;
 
   if (state.stage == STAGE_SHOP) set_nav_hovered(state.navigation.hovered);
+}
+
+void sell_shop_item() {
+  uint8_t item_index = state.navigation.hovered;
+  uint8_t is_consumable = get_current_section() == NAVIGATION_CONSUMABLES;
+
+  ShopItem item;
+
+  if (is_consumable) {
+    Consumable consumable = state.game.consumables.items[item_index];
+    switch (consumable.type) {
+      case CONSUMABLE_PLANET:
+        item.type = SHOP_ITEM_PLANET;
+        item.planet = consumable.planet;
+        break;
+      case CONSUMABLE_TAROT:
+        item.type = SHOP_ITEM_TAROT;
+        item.tarot = consumable.tarot;
+        break;
+      case CONSUMABLE_SPECTRAL:
+        item.type = SHOP_ITEM_SPECTRAL;
+        item.spectral = consumable.spectral;
+        break;
+    }
+
+    cvector_erase(state.game.consumables.items, item_index);
+  } else {
+    item.type = SHOP_ITEM_JOKER;
+    item.joker = state.game.jokers.cards[item_index];
+    cvector_erase(state.game.jokers.cards, item_index);
+  }
+
+  state.game.money += get_shop_item_sell_price(&item);
+  set_nav_hovered(item_index);
 }
 
 void open_booster_pack(BoosterPackItem *booster_pack) {
