@@ -251,6 +251,12 @@ uint8_t handle_navigation_controls() {
     }
   }
 
+  if (section == NAVIGATION_JOKERS) {
+    if (button_pressed(PSP_CTRL_TRIANGLE)) {
+      sell_shop_item();
+    }
+  }
+
   if (section == NAVIGATION_OVERLAY_MENU) {
     if (button_pressed(PSP_CTRL_CROSS)) {
       overlay_menu_button_click();
