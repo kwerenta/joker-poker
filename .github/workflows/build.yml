@@ -1,8 +1,9 @@
 name: Build Game
 
 on:
-  release:
-    types: [released]
+  push:
+    tags:
+      - "v*.*"
 
 jobs:
   build:
