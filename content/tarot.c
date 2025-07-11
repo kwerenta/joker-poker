@@ -34,7 +34,7 @@ const char *get_tarot_card_name(Tarot tarot) {
     case TAROT_DEATH:
       return "Death (XIII)";
     case TAROT_TEMPERANCE:
-      return "Temperance (XIV) NOT IMPLEMENTED";
+      return "Temperance (XIV)";
     case TAROT_DEVIL:
       return "The Devil (XV)";
     case TAROT_TOWER:
@@ -243,9 +243,20 @@ uint8_t use_tarot_card(Tarot tarot) {
         }
       }
       break;
-    case TAROT_TEMPERANCE:
-      // TODO Add this when selling items will be added
+    case TAROT_TEMPERANCE: {
+      uint8_t total = 0;
+      cvector_for_each(state.game.jokers.cards, Joker, joker) {
+        total += get_shop_item_sell_price(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = *joker});
+
+        if (total >= 50) {
+          total = 50;
+          break;
+        }
+      }
+
+      state.game.money += total;
       break;
+    }
     case TAROT_JUDGEMENT:
       if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) break;
       cvector_push_back(state.game.jokers.cards, JOKERS[rand() % JOKER_COUNT]);
