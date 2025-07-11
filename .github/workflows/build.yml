@@ -1,0 +1,47 @@
+name: Build Game
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential cmake pkgconf libreadline8 libusb-0.1 libgpgme11 libarchive-tools fakeroot zip
+
+      - name: Install pspdev toolchain
+        run: |
+          curl -L -O https://github.com/pspdev/pspdev/releases/latest/download/pspdev-ubuntu-latest-x86_64.tar.gz
+          tar -xzf pspdev-ubuntu-latest-x86_64.tar.gz
+          echo "PSPDEV=$GITHUB_WORKSPACE/pspdev" >> "$GITHUB_ENV"
+          echo "$PSPDEV/bin" >> "$GITHUB_PATH"
+
+      - name: Build the game
+        run: |
+          psp-cmake -DBUILD_PRX=1 -DENC_PRX=1 -B build
+          cmake --build build
+
+      - name: Prepare release zip
+        run: |
+          mkdir -p dist/joker-poker
+          cp build/EBOOT.PBP dist/joker-poker/EBOOT.PBP
+          cp -r res dist/joker-poker/
+          cd dist
+          zip -r joker-poker.zip joker-poker
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/joker-poker.zip
+          asset_name: joker-poker.zip
+          asset_content_type: application/zip

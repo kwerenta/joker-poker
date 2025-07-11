@@ -23,5 +23,5 @@ create_pbp_file(
     BACKGROUND_PATH NULL
     PREVIEW_PATH NULL
     TITLE Joker\ Poker
-    VERSION 0.10
+    VERSION 0.20
 )
