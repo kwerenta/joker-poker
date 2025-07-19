@@ -221,14 +221,49 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .layout = {
                 .sizing = {CLAY_SIZING_FIXED(scale * CARD_WIDTH), CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {
-        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS &&
-            section != NAVIGATION_SHOP_VOUCHER)
-          continue;
+        uint8_t is_shop = section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
+                          section == NAVIGATION_SHOP_VOUCHER;
+        if (is_hovered) {
+          Clay_String name;
+          Clay_String description;
+          get_nav_item_tooltip_content(&name, &description, section);
+
+          float y_offset = -4;
+          Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                                     .element = CLAY_ATTACH_POINT_CENTER_BOTTOM};
+
+          if (section == NAVIGATION_JOKERS || section == NAVIGATION_CONSUMABLES) {
+            y_offset *= -1;
+            attach_points.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM;
+            attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
+          }
+
+          CLAY({.id = CLAY_ID("Tooltip"),
+                .floating = {
+                    .attachTo = CLAY_ATTACH_TO_PARENT,
+                    .zIndex = is_shop ? 5 : 10,
+                    .offset = {.y = y_offset},
+                    .attachPoints = attach_points,
+                }}) {
+            CLAY({.backgroundColor = COLOR_CARD_BG,
+                  .layout = {
+                      .padding = CLAY_PADDING_ALL(4),
+                      .childGap = 2,
+                      .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
+                      .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                  }}) {
+              CLAY_TEXT(name, WHITE_TEXT_CONFIG);
+              CLAY_TEXT(description, WHITE_TEXT_CONFIG);
+            }
+          }
+        }
+
+        if (!is_shop) continue;
 
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
                            .offset = {.y = CHAR_HEIGHT},
-                           .zIndex = 4,
+                           .zIndex = 5,
                            .attachPoints = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM}}}) {
           CLAY({.backgroundColor = COLOR_CARD_BG,
@@ -246,42 +281,6 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
           }
         }
       }
-    }
-  }
-
-  if (get_current_section() != section) return;
-
-  Clay_String name;
-  Clay_String description;
-  get_nav_item_tooltip_content(&name, &description, section);
-
-  float y_offset = -4;
-  Clay_FloatingAttachPoints attach_points = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
-                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM};
-
-  if (section == NAVIGATION_JOKERS || section == NAVIGATION_CONSUMABLES) {
-    y_offset *= -1;
-    attach_points.parent = CLAY_ATTACH_POINT_CENTER_BOTTOM;
-    attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
-  }
-
-  CLAY({.id = CLAY_ID("Tooltip"),
-        .floating = {
-            .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
-            .parentId = CLAY_SIDI(parent_id, state.navigation.hovered + 1).id,
-            .zIndex = 3,
-            .offset = {.y = y_offset},
-            .attachPoints = attach_points,
-        }}) {
-    CLAY({.backgroundColor = COLOR_CARD_BG,
-          .layout = {
-              .padding = CLAY_PADDING_ALL(4),
-              .childGap = 2,
-              .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
-              .layoutDirection = CLAY_TOP_TO_BOTTOM,
-          }}) {
-      CLAY_TEXT(name, WHITE_TEXT_CONFIG);
-      CLAY_TEXT(description, WHITE_TEXT_CONFIG);
     }
   }
 }
