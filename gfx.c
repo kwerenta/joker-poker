@@ -221,6 +221,8 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             .layout = {
                 .sizing = {CLAY_SIZING_FIXED(scale * CARD_WIDTH), CLAY_SIZING_FIXED(scale * CARD_HEIGHT)},
             }}) {
+        uint8_t is_shop = section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
+                          section == NAVIGATION_SHOP_VOUCHER;
         if (is_hovered) {
           Clay_String name;
           Clay_String description;
@@ -239,7 +241,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
           CLAY({.id = CLAY_ID("Tooltip"),
                 .floating = {
                     .attachTo = CLAY_ATTACH_TO_PARENT,
-                    .zIndex = 5,
+                    .zIndex = is_shop ? 5 : 10,
                     .offset = {.y = y_offset},
                     .attachPoints = attach_points,
                 }}) {
@@ -256,9 +258,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
           }
         }
 
-        if (section != NAVIGATION_SHOP_ITEMS && section != NAVIGATION_SHOP_BOOSTER_PACKS &&
-            section != NAVIGATION_SHOP_VOUCHER)
-          continue;
+        if (!is_shop) continue;
 
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
