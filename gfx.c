@@ -238,8 +238,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
 
           CLAY({.id = CLAY_ID("Tooltip"),
                 .floating = {
-                    .attachTo = CLAY_ATTACH_TO_ELEMENT_WITH_ID,
-                    .parentId = CLAY_SIDI(parent_id, state.navigation.hovered + 1).id,
+                    .attachTo = CLAY_ATTACH_TO_PARENT,
                     .zIndex = 5,
                     .offset = {.y = y_offset},
                     .attachPoints = attach_points,
