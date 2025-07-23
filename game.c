@@ -178,6 +178,7 @@ void play_hand() {
     change_stage(STAGE_GAME_OVER);
   } else {
     fill_hand();
+    sort_hand();
   }
 }
 
@@ -221,6 +222,7 @@ void discard_hand() {
   state.game.discards.remaining--;
   remove_selected_cards();
   fill_hand();
+  sort_hand();
 }
 
 void remove_selected_cards() {
@@ -831,6 +833,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 
   shuffle_deck();
   fill_hand();
+  sort_hand();
 
   change_stage(STAGE_BOOSTER_PACK);
 
