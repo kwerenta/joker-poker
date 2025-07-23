@@ -980,6 +980,7 @@ void exit_shop() {
 
   shuffle_deck();
   fill_hand();
+  sort_hand();
 
   change_stage(STAGE_GAME);
 }
