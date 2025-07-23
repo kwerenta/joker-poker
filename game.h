@@ -241,7 +241,7 @@ typedef struct {
   cvector_vector_type(BoosterPackItem) booster_packs;
 } Shop;
 
-typedef enum { SORTING_BY_SUIT, SORTING_BY_RANK } SortingMode;
+typedef enum { SORTING_BY_RANK, SORTING_BY_SUIT } SortingMode;
 
 typedef struct {
   uint8_t remaining;
