@@ -146,6 +146,8 @@ void play_hand() {
         if (rand() % 15 == 0) state.game.money += 20;
         break;
     }
+
+    if (card->seal == SEAL_GOLD) state.game.money += 3;
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
