@@ -796,8 +796,11 @@ void buy_shop_item() {
 }
 
 void sell_shop_item() {
+  NavigationSection section = get_current_section();
   uint8_t item_index = state.navigation.hovered;
-  uint8_t is_consumable = get_current_section() == NAVIGATION_CONSUMABLES;
+  uint8_t is_consumable = section == NAVIGATION_CONSUMABLES;
+
+  if (get_nav_section_size(section) == 0) return;
 
   ShopItem item;
 
