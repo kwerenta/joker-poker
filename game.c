@@ -13,7 +13,7 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE));
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
 
   cvector_copy(state.game.full_deck, state.game.deck);
@@ -69,15 +69,20 @@ void game_destroy() {
 
 uint8_t compare_cards(Card *a, Card *b) {
   return a->chips == b->chips && a->enhancement == b->enhancement && a->edition == b->edition && a->rank == b->rank &&
-         a->suit == b->suit;
+         a->suit == b->suit && a->seal == b->seal;
 }
 
-Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
+Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement, Seal seal) {
   uint16_t chips = rank == RANK_ACE ? 11 : rank + 1;
   if (rank != RANK_ACE && chips > 10) chips = 10;
 
-  return (Card){
-      .suit = suit, .rank = rank, .chips = chips, .edition = edition, .enhancement = enhancement, .selected = 0};
+  return (Card){.suit = suit,
+                .rank = rank,
+                .chips = chips,
+                .edition = edition,
+                .enhancement = enhancement,
+                .seal = seal,
+                .selected = 0};
 }
 
 void draw_card() {
@@ -848,7 +853,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 
     switch (booster_pack->type) {
       case BOOSTER_PACK_STANDARD:
-        content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE);
+        content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE);
         break;
       case BOOSTER_PACK_BUFFON:
         content.joker = JOKERS[rand() % JOKER_COUNT];
@@ -927,7 +932,7 @@ void fill_shop_items() {
     switch (rand() % 4) {
       case 0:
         item = (ShopItem){.type = SHOP_ITEM_CARD,
-                          .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE)};
+                          .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE)};
         break;
       case 1:
         item = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};

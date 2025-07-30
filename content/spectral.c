@@ -116,8 +116,8 @@ void destroy_random_card() {
 
   cvector_erase(state.game.hand.cards, destroy_index);
 }
-void add_card_to_deck(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
-  Card card = create_card(suit, rank, edition, enhancement);
+void add_card_to_deck(Suit suit, Rank rank, Edition edition, Enhancement enhancement, Seal seal) {
+  Card card = create_card(suit, rank, edition, enhancement, seal);
   cvector_push_back(state.game.hand.cards, card);
   cvector_push_back(state.game.full_deck, card);
 }
@@ -141,19 +141,21 @@ uint8_t use_spectral_card(Spectral spectral) {
     case SPECTRAL_FAMILIAR:
       if (state.game.hand.size == 1) return 0;
       destroy_random_card();
-      for (uint8_t i = 0; i < 3; i++) add_card_to_deck(rand() % 4, rand() % 3 + 10, EDITION_BASE, rand() % 8 + 1);
+      for (uint8_t i = 0; i < 3; i++)
+        add_card_to_deck(rand() % 4, rand() % 3 + 10, EDITION_BASE, rand() % 8 + 1, SEAL_NONE);
       break;
 
     case SPECTRAL_GRIM:
       if (state.game.hand.size == 1) return 0;
       destroy_random_card();
-      for (uint8_t i = 0; i < 2; i++) add_card_to_deck(rand() % 4, RANK_ACE, EDITION_BASE, rand() % 8 + 1);
+      for (uint8_t i = 0; i < 2; i++) add_card_to_deck(rand() % 4, RANK_ACE, EDITION_BASE, rand() % 8 + 1, SEAL_NONE);
       break;
 
     case SPECTRAL_INCANTATION:
       if (state.game.hand.size == 1) return 0;
       destroy_random_card();
-      for (uint8_t i = 0; i < 4; i++) add_card_to_deck(rand() % 4, rand() % 9 + 1, EDITION_BASE, rand() % 8 + 1);
+      for (uint8_t i = 0; i < 4; i++)
+        add_card_to_deck(rand() % 4, rand() % 9 + 1, EDITION_BASE, rand() % 8 + 1, SEAL_NONE);
       break;
 
     case SPECTRAL_TALISMAN:
@@ -245,7 +247,8 @@ uint8_t use_spectral_card(Spectral spectral) {
 
     case SPECTRAL_CRYPTID: {
       Card *card = selected_cards[0];
-      for (uint8_t i = 0; i < 2; i++) add_card_to_deck(card->suit, card->rank, card->edition, card->enhancement);
+      for (uint8_t i = 0; i < 2; i++)
+        add_card_to_deck(card->suit, card->rank, card->edition, card->enhancement, card->seal);
       break;
     }
 
