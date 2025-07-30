@@ -248,21 +248,7 @@ void change_stage(Stage stage) {
 
   state.navigation.hovered = 0;
   state.navigation.cursor.col = 0;
-  state.navigation.cursor.row = stage_nav_layouts[stage].row_count > 1 ? 1 : 0;
-
-  switch (stage) {
-    case STAGE_BOOSTER_PACK:
-      state.navigation.cursor.row = 2;
-      break;
-
-    case STAGE_MAIN_MENU:
-    case STAGE_CREDITS:
-    case STAGE_GAME:
-    case STAGE_SHOP:
-    case STAGE_CASH_OUT:
-    case STAGE_GAME_OVER:
-      break;
-  }
+  state.navigation.cursor.row = stage == STAGE_BOOSTER_PACK ? 2 : stage_nav_layouts[stage].row_count > 1 ? 1 : 0;
 
   update_render_commands();
 }
