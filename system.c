@@ -303,7 +303,8 @@ void handle_controls() {
       } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
         discard_hand();
       } else if (button_pressed(PSP_CTRL_SELECT)) {
-        sort_hand(state.game.sorting_mode == SORTING_BY_SUIT ? SORTING_BY_RANK : SORTING_BY_SUIT);
+        state.game.sorting_mode = state.game.sorting_mode == SORTING_BY_SUIT ? SORTING_BY_RANK : SORTING_BY_SUIT;
+        sort_hand();
       }
 
       break;

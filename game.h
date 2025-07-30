@@ -241,7 +241,7 @@ typedef struct {
   cvector_vector_type(BoosterPackItem) booster_packs;
 } Shop;
 
-typedef enum { SORTING_BY_SUIT, SORTING_BY_RANK } SortingMode;
+typedef enum { SORTING_BY_RANK, SORTING_BY_SUIT } SortingMode;
 
 typedef struct {
   uint8_t remaining;
@@ -288,7 +288,7 @@ void draw_card();
 void play_hand();
 void discard_hand();
 void fill_hand();
-void sort_hand(SortingMode sorting_mode);
+void sort_hand();
 
 void toggle_card_select(uint8_t index);
 void deselect_all_cards();

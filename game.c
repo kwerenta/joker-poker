@@ -23,6 +23,7 @@ void game_init() {
   state.game.hand.size = 7;
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
   fill_hand();
+  sort_hand();
 
   state.game.money = 4;
 
@@ -177,6 +178,7 @@ void play_hand() {
     change_stage(STAGE_GAME_OVER);
   } else {
     fill_hand();
+    sort_hand();
   }
 }
 
@@ -220,6 +222,7 @@ void discard_hand() {
   state.game.discards.remaining--;
   remove_selected_cards();
   fill_hand();
+  sort_hand();
 }
 
 void remove_selected_cards() {
@@ -294,11 +297,10 @@ int compare_by_suit(const void *a, const void *b) {
   return by_suit;
 }
 
-void sort_hand(SortingMode sorting_mode) {
+void sort_hand() {
   int (*comparator)(const void *a, const void *b) = compare_by_rank;
-  if (sorting_mode == SORTING_BY_SUIT) comparator = compare_by_suit;
+  if (state.game.sorting_mode == SORTING_BY_SUIT) comparator = compare_by_suit;
 
-  state.game.sorting_mode = sorting_mode;
   qsort(state.game.hand.cards, cvector_size(state.game.hand.cards), sizeof(Card), comparator);
 }
 
@@ -831,6 +833,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 
   shuffle_deck();
   fill_hand();
+  sort_hand();
 
   change_stage(STAGE_BOOSTER_PACK);
 
@@ -980,6 +983,7 @@ void exit_shop() {
 
   shuffle_deck();
   fill_hand();
+  sort_hand();
 
   change_stage(STAGE_GAME);
 }
