@@ -141,6 +141,10 @@ void trigger_scoring_card(Card *card) {
   if (card->seal == SEAL_GOLD) state.game.money += 3;
 }
 
+void trigger_in_hand_card(Card *card) {
+  if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
+}
+
 void trigger_end_of_round_card(Card *card) {
   if (card->enhancement == ENHANCEMENT_GOLD) state.game.money += 3;
   if (card->seal == SEAL_BLUE)
@@ -171,7 +175,8 @@ void play_hand() {
   state.game.hands.remaining--;
 
   cvector_for_each(state.game.hand.cards, Card, card) {
-    if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
+    trigger_in_hand_card(card);
+    if (card->seal == SEAL_RED) trigger_in_hand_card(card);
   }
 
   if (state.game.vouchers & VOUCHER_OBSERVATORY) {
