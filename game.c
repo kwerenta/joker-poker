@@ -226,6 +226,11 @@ void update_scoring_edition(Edition edition) {
 void discard_hand() {
   if (state.game.selected_hand.count == 0 || state.game.discards.remaining == 0) return;
 
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->selected == 1 && card->seal == SEAL_PURPLE)
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22});
+  }
+
   state.game.discards.remaining--;
   remove_selected_cards();
   fill_hand();

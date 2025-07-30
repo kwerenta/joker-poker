@@ -317,6 +317,7 @@ uint8_t get_interest_money();
 void get_cash_out();
 
 uint8_t use_consumable(Consumable *consumable);
+uint8_t add_item_to_player(ShopItem *item);
 uint8_t get_shop_item_price(ShopItem *item);
 uint8_t get_voucher_price(Voucher voucher);
 void add_voucher_to_player(Voucher voucher);
