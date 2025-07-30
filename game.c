@@ -13,7 +13,7 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_RED));
   }
 
   cvector_copy(state.game.full_deck, state.game.deck);
@@ -94,6 +94,53 @@ void fill_hand() {
   while (cvector_size(state.game.hand.cards) < state.game.hand.size) draw_card();
 }
 
+void play_card(Card *card) {
+  if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
+
+  update_scoring_edition(card->edition);
+
+  switch (card->enhancement) {
+    case ENHANCEMENT_NONE:
+    case ENHANCEMENT_GOLD:
+    case ENHANCEMENT_WILD:
+    case ENHANCEMENT_STEEL:
+      break;
+
+    case ENHANCEMENT_BONUS:
+      state.game.selected_hand.score_pair.chips += 30;
+      break;
+
+    case ENHANCEMENT_MULT:
+      state.game.selected_hand.score_pair.mult += 4;
+      break;
+
+    case ENHANCEMENT_GLASS:
+      state.game.selected_hand.score_pair.mult *= 2;
+
+      if (rand() % 4 == 0) {
+        for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
+          Card *other = &state.game.full_deck[i];
+          if (compare_cards(card, other)) {
+            cvector_erase(state.game.full_deck, i);
+            break;
+          }
+        }
+      }
+      break;
+
+    case ENHANCEMENT_STONE:
+      state.game.selected_hand.score_pair.chips += 50;
+      break;
+
+    case ENHANCEMENT_LUCKY:
+      if (rand() % 5 == 0) state.game.selected_hand.score_pair.mult += 20;
+      if (rand() % 15 == 0) state.game.money += 20;
+      break;
+  }
+
+  if (card->seal == SEAL_GOLD) state.game.money += 3;
+}
+
 void play_hand() {
   if (state.game.hands.remaining == 0 || state.game.selected_hand.count == 0) return;
 
@@ -104,50 +151,9 @@ void play_hand() {
     Card *card = state.game.selected_hand.scoring_cards[i];
     if (card == NULL) continue;
 
-    if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
+    play_card(card);
 
-    update_scoring_edition(card->edition);
-
-    switch (card->enhancement) {
-      case ENHANCEMENT_NONE:
-      case ENHANCEMENT_GOLD:
-      case ENHANCEMENT_WILD:
-      case ENHANCEMENT_STEEL:
-        break;
-
-      case ENHANCEMENT_BONUS:
-        state.game.selected_hand.score_pair.chips += 30;
-        break;
-
-      case ENHANCEMENT_MULT:
-        state.game.selected_hand.score_pair.mult += 4;
-        break;
-
-      case ENHANCEMENT_GLASS:
-        state.game.selected_hand.score_pair.mult *= 2;
-
-        if (rand() % 4 == 0) {
-          for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
-            Card *other = &state.game.full_deck[i];
-            if (compare_cards(card, other)) {
-              cvector_erase(state.game.full_deck, i);
-              break;
-            }
-          }
-        }
-        break;
-
-      case ENHANCEMENT_STONE:
-        state.game.selected_hand.score_pair.chips += 50;
-        break;
-
-      case ENHANCEMENT_LUCKY:
-        if (rand() % 5 == 0) state.game.selected_hand.score_pair.mult += 20;
-        if (rand() % 15 == 0) state.game.money += 20;
-        break;
-    }
-
-    if (card->seal == SEAL_GOLD) state.game.money += 3;
+    if (card->seal == SEAL_RED) play_card(card);
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
