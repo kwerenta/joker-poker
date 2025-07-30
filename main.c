@@ -13,7 +13,7 @@
 #include "state.h"
 #include "system.h"
 
-PSP_MODULE_INFO("Joker Poker", 0, 0, 20);
+PSP_MODULE_INFO("Joker Poker", 0, 0, 21);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
 
 static char __attribute__((aligned(16))) list[262144];
