@@ -248,12 +248,14 @@ uint8_t handle_navigation_controls() {
       return 1;
     } else if (button_pressed(PSP_CTRL_TRIANGLE)) {
       sell_shop_item();
+      return 1;
     }
   }
 
   if (section == NAVIGATION_JOKERS) {
     if (button_pressed(PSP_CTRL_TRIANGLE)) {
       sell_shop_item();
+      return 1;
     }
   }
 

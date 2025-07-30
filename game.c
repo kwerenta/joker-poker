@@ -770,6 +770,9 @@ void buy_shop_item() {
   uint8_t is_booster_pack = section == NAVIGATION_SHOP_BOOSTER_PACKS;
   uint8_t is_voucher = section == NAVIGATION_SHOP_VOUCHER;
 
+  // Prevent buying items if navigation cursor is outside buyable items section
+  if (!is_booster_pack && !is_voucher && section != NAVIGATION_SHOP_ITEMS) return;
+
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
                   : is_voucher    ? get_voucher_price(state.game.shop.voucher)
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
