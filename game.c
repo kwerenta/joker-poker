@@ -178,6 +178,9 @@ void play_hand() {
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
       if (card->enhancement == ENHANCEMENT_GOLD) state.game.money += 3;
+      if (card->seal == SEAL_BLUE)
+        add_item_to_player(
+            &(ShopItem){.type = SHOP_ITEM_PLANET, .planet = ffs(state.game.selected_hand.hand_union) - 1});
     }
 
     change_stage(STAGE_CASH_OUT);
