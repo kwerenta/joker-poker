@@ -12,7 +12,7 @@ const char *get_spectral_card_name(Spectral spectral) {
     case SPECTRAL_INCANTATION:
       return "Incantation";
     case SPECTRAL_TALISMAN:
-      return "Talisman NOT IMPLEMENTED";
+      return "Talisman";
     case SPECTRAL_AURA:
       return "Aura";
     case SPECTRAL_WRAITH:
@@ -28,13 +28,13 @@ const char *get_spectral_card_name(Spectral spectral) {
     case SPECTRAL_ANKH:
       return "Ankh";
     case SPECTRAL_DEJA_VU:
-      return "Deja Vu NOT IMPLEMENTED";
+      return "Deja Vu";
     case SPECTRAL_HEX:
       return "Hex";
     case SPECTRAL_TRANCE:
-      return "Trance NOT IMPLEMENTED";
+      return "Trance";
     case SPECTRAL_MEDIUM:
-      return "Medium NOT IMPLEMENTED";
+      return "Medium";
     case SPECTRAL_CRYPTID:
       return "Cryptid";
     case SPECTRAL_SOUL:
@@ -159,7 +159,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_TALISMAN:
-      // TODO Add this when seals will be added
+      selected_cards[0]->seal = SEAL_GOLD;
       break;
 
     case SPECTRAL_AURA:
@@ -223,7 +223,7 @@ uint8_t use_spectral_card(Spectral spectral) {
     }
 
     case SPECTRAL_DEJA_VU:
-      // TODO Add this when seals will be added
+      selected_cards[0]->seal = SEAL_RED;
       break;
 
     case SPECTRAL_HEX: {
@@ -238,11 +238,11 @@ uint8_t use_spectral_card(Spectral spectral) {
     }
 
     case SPECTRAL_TRANCE:
-      // TODO Add this when seals will be added
+      selected_cards[0]->seal = SEAL_BLUE;
       break;
 
     case SPECTRAL_MEDIUM:
-      // TODO Add this when seals will be added
+      selected_cards[0]->seal = SEAL_PURPLE;
       break;
 
     case SPECTRAL_CRYPTID: {
