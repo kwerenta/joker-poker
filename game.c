@@ -94,7 +94,7 @@ void fill_hand() {
   while (cvector_size(state.game.hand.cards) < state.game.hand.size) draw_card();
 }
 
-void play_card(Card *card) {
+void trigger_scoring_card(Card *card) {
   if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
 
   update_scoring_edition(card->edition);
@@ -141,6 +141,12 @@ void play_card(Card *card) {
   if (card->seal == SEAL_GOLD) state.game.money += 3;
 }
 
+void trigger_end_of_round_card(Card *card) {
+  if (card->enhancement == ENHANCEMENT_GOLD) state.game.money += 3;
+  if (card->seal == SEAL_BLUE)
+    add_item_to_player(&(ShopItem){.type = SHOP_ITEM_PLANET, .planet = ffs(state.game.selected_hand.hand_union) - 1});
+}
+
 void play_hand() {
   if (state.game.hands.remaining == 0 || state.game.selected_hand.count == 0) return;
 
@@ -151,9 +157,8 @@ void play_hand() {
     Card *card = state.game.selected_hand.scoring_cards[i];
     if (card == NULL) continue;
 
-    play_card(card);
-
-    if (card->seal == SEAL_RED) play_card(card);
+    trigger_scoring_card(card);
+    if (card->seal == SEAL_RED) trigger_scoring_card(card);
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
@@ -183,10 +188,8 @@ void play_hand() {
 
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
-      if (card->enhancement == ENHANCEMENT_GOLD) state.game.money += 3;
-      if (card->seal == SEAL_BLUE)
-        add_item_to_player(
-            &(ShopItem){.type = SHOP_ITEM_PLANET, .planet = ffs(state.game.selected_hand.hand_union) - 1});
+      trigger_end_of_round_card(card);
+      if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
 
     change_stage(STAGE_CASH_OUT);
