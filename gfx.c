@@ -149,6 +149,9 @@ void render_card(Card *card, Rect *dst) {
 
   Vector2 edition = {.x = 5 + card->edition - 1, .y = 3};
   if (card->edition != EDITION_BASE) render_card_atlas_sprite(&edition, dst);
+
+  Vector2 seal = {.x = 5 + card->seal - 1, .y = 1};
+  if (card->seal != SEAL_NONE) render_card_atlas_sprite(&seal, dst);
 }
 
 void render_joker(Joker *joker, Rect *dst) {

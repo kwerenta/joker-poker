@@ -38,6 +38,8 @@ typedef enum {
   ENHANCEMENT_LUCKY
 } Enhancement;
 
+typedef enum { SEAL_NONE, SEAL_GOLD, SEAL_RED, SEAL_BLUE, SEAL_PURPLE } Seal;
+
 typedef enum {
   HAND_FLUSH_FIVE = 1 << 0,
   HAND_FLUSH_HOUSE = 1 << 1,
@@ -107,6 +109,7 @@ typedef struct {
 
   Edition edition;
   Enhancement enhancement;
+  Seal seal;
 
   uint16_t chips;
   uint8_t selected;
@@ -282,7 +285,7 @@ void game_init();
 void game_destroy();
 
 uint8_t compare_cards(Card *a, Card *b);
-Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement);
+Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement, Seal seal);
 void shuffle_deck();
 void draw_card();
 void play_hand();
@@ -314,6 +317,7 @@ uint8_t get_interest_money();
 void get_cash_out();
 
 uint8_t use_consumable(Consumable *consumable);
+uint8_t add_item_to_player(ShopItem *item);
 uint8_t get_shop_item_price(ShopItem *item);
 uint8_t get_voucher_price(Voucher voucher);
 void add_voucher_to_player(Voucher voucher);

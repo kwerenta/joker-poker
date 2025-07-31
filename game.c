@@ -13,7 +13,7 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE));
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
 
   cvector_copy(state.game.full_deck, state.game.deck);
@@ -69,15 +69,20 @@ void game_destroy() {
 
 uint8_t compare_cards(Card *a, Card *b) {
   return a->chips == b->chips && a->enhancement == b->enhancement && a->edition == b->edition && a->rank == b->rank &&
-         a->suit == b->suit;
+         a->suit == b->suit && a->seal == b->seal;
 }
 
-Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement) {
+Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement, Seal seal) {
   uint16_t chips = rank == RANK_ACE ? 11 : rank + 1;
   if (rank != RANK_ACE && chips > 10) chips = 10;
 
-  return (Card){
-      .suit = suit, .rank = rank, .chips = chips, .edition = edition, .enhancement = enhancement, .selected = 0};
+  return (Card){.suit = suit,
+                .rank = rank,
+                .chips = chips,
+                .edition = edition,
+                .enhancement = enhancement,
+                .seal = seal,
+                .selected = 0};
 }
 
 void draw_card() {
@@ -87,6 +92,63 @@ void draw_card() {
 
 void fill_hand() {
   while (cvector_size(state.game.hand.cards) < state.game.hand.size) draw_card();
+}
+
+void trigger_scoring_card(Card *card) {
+  if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
+
+  update_scoring_edition(card->edition);
+
+  switch (card->enhancement) {
+    case ENHANCEMENT_NONE:
+    case ENHANCEMENT_GOLD:
+    case ENHANCEMENT_WILD:
+    case ENHANCEMENT_STEEL:
+      break;
+
+    case ENHANCEMENT_BONUS:
+      state.game.selected_hand.score_pair.chips += 30;
+      break;
+
+    case ENHANCEMENT_MULT:
+      state.game.selected_hand.score_pair.mult += 4;
+      break;
+
+    case ENHANCEMENT_GLASS:
+      state.game.selected_hand.score_pair.mult *= 2;
+
+      if (rand() % 4 == 0) {
+        for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
+          Card *other = &state.game.full_deck[i];
+          if (compare_cards(card, other)) {
+            cvector_erase(state.game.full_deck, i);
+            break;
+          }
+        }
+      }
+      break;
+
+    case ENHANCEMENT_STONE:
+      state.game.selected_hand.score_pair.chips += 50;
+      break;
+
+    case ENHANCEMENT_LUCKY:
+      if (rand() % 5 == 0) state.game.selected_hand.score_pair.mult += 20;
+      if (rand() % 15 == 0) state.game.money += 20;
+      break;
+  }
+
+  if (card->seal == SEAL_GOLD) state.game.money += 3;
+}
+
+void trigger_in_hand_card(Card *card) {
+  if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
+}
+
+void trigger_end_of_round_card(Card *card) {
+  if (card->enhancement == ENHANCEMENT_GOLD) state.game.money += 3;
+  if (card->seal == SEAL_BLUE)
+    add_item_to_player(&(ShopItem){.type = SHOP_ITEM_PLANET, .planet = ffs(state.game.selected_hand.hand_union) - 1});
 }
 
 void play_hand() {
@@ -99,48 +161,8 @@ void play_hand() {
     Card *card = state.game.selected_hand.scoring_cards[i];
     if (card == NULL) continue;
 
-    if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
-
-    update_scoring_edition(card->edition);
-
-    switch (card->enhancement) {
-      case ENHANCEMENT_NONE:
-      case ENHANCEMENT_GOLD:
-      case ENHANCEMENT_WILD:
-      case ENHANCEMENT_STEEL:
-        break;
-
-      case ENHANCEMENT_BONUS:
-        state.game.selected_hand.score_pair.chips += 30;
-        break;
-
-      case ENHANCEMENT_MULT:
-        state.game.selected_hand.score_pair.mult += 4;
-        break;
-
-      case ENHANCEMENT_GLASS:
-        state.game.selected_hand.score_pair.mult *= 2;
-
-        if (rand() % 4 == 0) {
-          for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
-            Card *other = &state.game.full_deck[i];
-            if (compare_cards(card, other)) {
-              cvector_erase(state.game.full_deck, i);
-              break;
-            }
-          }
-        }
-        break;
-
-      case ENHANCEMENT_STONE:
-        state.game.selected_hand.score_pair.chips += 50;
-        break;
-
-      case ENHANCEMENT_LUCKY:
-        if (rand() % 5 == 0) state.game.selected_hand.score_pair.mult += 20;
-        if (rand() % 15 == 0) state.game.money += 20;
-        break;
-    }
+    trigger_scoring_card(card);
+    if (card->seal == SEAL_RED) trigger_scoring_card(card);
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
@@ -153,7 +175,8 @@ void play_hand() {
   state.game.hands.remaining--;
 
   cvector_for_each(state.game.hand.cards, Card, card) {
-    if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
+    trigger_in_hand_card(card);
+    if (card->seal == SEAL_RED) trigger_in_hand_card(card);
   }
 
   if (state.game.vouchers & VOUCHER_OBSERVATORY) {
@@ -170,7 +193,8 @@ void play_hand() {
 
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
-      if (card->enhancement == ENHANCEMENT_GOLD) state.game.money += 3;
+      trigger_end_of_round_card(card);
+      if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
 
     change_stage(STAGE_CASH_OUT);
@@ -218,6 +242,11 @@ void update_scoring_edition(Edition edition) {
 
 void discard_hand() {
   if (state.game.selected_hand.count == 0 || state.game.discards.remaining == 0) return;
+
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->selected == 1 && card->seal == SEAL_PURPLE)
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22});
+  }
 
   state.game.discards.remaining--;
   remove_selected_cards();
@@ -848,7 +877,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 
     switch (booster_pack->type) {
       case BOOSTER_PACK_STANDARD:
-        content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE);
+        content.card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE);
         break;
       case BOOSTER_PACK_BUFFON:
         content.joker = JOKERS[rand() % JOKER_COUNT];
@@ -927,7 +956,7 @@ void fill_shop_items() {
     switch (rand() % 4) {
       case 0:
         item = (ShopItem){.type = SHOP_ITEM_CARD,
-                          .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE)};
+                          .card = create_card(rand() % 4, rand() % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE)};
         break;
       case 1:
         item = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};
