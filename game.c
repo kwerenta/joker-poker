@@ -13,7 +13,7 @@ void game_init() {
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_RED));
+    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
 
   cvector_copy(state.game.full_deck, state.game.deck);
