@@ -1,3 +1,5 @@
+<img width="256" height="64" alt="Logo JOKER POKER PSP" align="right" src="https://github.com/user-attachments/assets/c1834f0c-3d2f-4a7d-98fa-e89788333080" />
+
 # Joker Poker
 
 Joker Poker is homebrew card game for PSP inspired by [Balatro](https://www.playbalatro.com).
@@ -7,6 +9,10 @@ Once these are solid, content will be expanded to include most of the jokers, bo
 
 > [!NOTE]
 > This project was written in plain C for the sake of writting it in C.
+
+<p align="center">
+   <img width="1072" height="684" alt="Screenshot of the game running on an emulator" src="https://github.com/user-attachments/assets/106bdeb9-f2c1-4512-923a-648d739b4a75" />
+</p>
 
 ## Installation
 
