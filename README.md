@@ -11,7 +11,7 @@ Once these are solid, content will be expanded to include most of the jokers, bo
 > This project was written in plain C for the sake of writting it in C.
 
 <p align="center">
-   <img width="1072" height="684" alt="footage" src="https://github.com/user-attachments/assets/106bdeb9-f2c1-4512-923a-648d739b4a75" />
+   <img width="1072" height="684" alt="Screenshot of the game running on an emulator" src="https://github.com/user-attachments/assets/106bdeb9-f2c1-4512-923a-648d739b4a75" />
 </p>
 
 ## Installation
