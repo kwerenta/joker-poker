@@ -7,6 +7,24 @@
 #include "content/spectral.h"
 #include "content/tarot.h"
 
+typedef enum {
+  DECK_RED,
+  DECK_BLUE,
+  DECK_YELLOW,
+  DECK_GREEN,
+  DECK_BLACK,
+  DECK_MAGIC,
+  DECK_NEBULA,
+  DECK_GHOST,
+  DECK_ABANDONED,
+  DECK_CHECKERED,
+  DECK_ZODIAC,
+  DECK_PAINTED,
+  DECK_ANAGLYPH,
+  DECK_PLASMA,
+  DECK_ERRATIC,
+} Deck;
+
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
@@ -252,6 +270,7 @@ typedef struct {
 } UsageState;
 
 typedef struct {
+  Deck deck_type;
   cvector_vector_type(Card) full_deck;
   cvector_vector_type(Card) deck;
 

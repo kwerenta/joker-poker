@@ -20,4 +20,7 @@ Clay_String get_full_booster_pack_name(BoosterPackSize size, BoosterPackType typ
 char *get_voucher_name(Voucher voucher);
 char *get_voucher_description(Voucher voucher);
 
+char *get_deck_name(Deck deck);
+char *get_deck_description(Deck deck);
+
 #endif
