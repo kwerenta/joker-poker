@@ -31,6 +31,9 @@ void update_render_commands() {
         case STAGE_MAIN_MENU:
           render_main_menu();
           break;
+        case STAGE_SELECT_DECK:
+          render_select_deck();
+          break;
         case STAGE_CREDITS:
           render_credits();
           break;
@@ -101,6 +104,8 @@ void render_main_menu() {
     }
   }
 }
+
+void render_select_deck() { CLAY_TEXT(CLAY_STRING("SELECT"), WHITE_TEXT_CONFIG); }
 
 void render_credits() {
   CLAY({.layout = {

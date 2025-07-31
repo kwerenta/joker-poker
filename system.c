@@ -291,6 +291,13 @@ void handle_controls() {
       if (button_pressed(PSP_CTRL_CROSS)) main_menu_button_click();
       break;
 
+    case STAGE_SELECT_DECK:
+      if (button_pressed(PSP_CTRL_CROSS))
+        game_init();
+      else if (button_pressed(PSP_CTRL_CIRCLE))
+        change_stage(STAGE_MAIN_MENU);
+      break;
+
     case STAGE_CREDITS:
       if (button_pressed(PSP_CTRL_CIRCLE)) change_stage(STAGE_MAIN_MENU);
       break;

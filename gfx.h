@@ -37,6 +37,7 @@
 void update_render_commands();
 
 void render_main_menu();
+void render_select_deck();
 void render_credits();
 
 void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst);
