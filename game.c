@@ -34,6 +34,61 @@ void game_init(Deck deck) {
 
   state.game.shop.size = 2;
 
+  switch (deck) {
+    case DECK_RED:
+      state.game.discards.total++;
+      break;
+    case DECK_BLUE:
+      state.game.hands.total++;
+      break;
+    case DECK_YELLOW:
+      state.game.money += 10;
+      break;
+    case DECK_GREEN:
+      // TODO Implement passive ability of this deck
+      break;
+    case DECK_BLACK:
+      state.game.jokers.size++;
+      state.game.hands.total--;
+      break;
+    case DECK_MAGIC:
+      add_voucher_to_player(VOUCHER_CRYSTALL_BALL);
+      ShopItem fool = {.type = SHOP_ITEM_TAROT, .tarot = TAROT_FOOL};
+      add_item_to_player(&fool);
+      add_item_to_player(&fool);
+      break;
+    case DECK_NEBULA:
+      add_voucher_to_player(VOUCHER_TELESCOPE);
+      state.game.consumables.size--;
+      break;
+    case DECK_GHOST:
+      // TODO Add spectral cards to the shop when it will have proper shop item weights
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_HEX});
+      break;
+    case DECK_ABANDONED:
+    case DECK_CHECKERED:
+      // TODO Add proper cards according to deck's description
+      break;
+    case DECK_ZODIAC:
+      add_voucher_to_player(VOUCHER_TAROT_MERCHANT);
+      add_voucher_to_player(VOUCHER_PLANET_MERCHANT);
+      add_voucher_to_player(VOUCHER_OVERSTOCK);
+      break;
+    case DECK_PAINTED:
+      state.game.hand.size += 2;
+      state.game.jokers.size--;
+      break;
+    case DECK_ANAGLYPH:
+      // TODO Implement when Tags will be added
+      break;
+    case DECK_PLASMA:
+      // TODO Implement passive ability of this deck
+      break;
+    case DECK_ERRATIC:
+      // TODO Add proper cards according to deck's description
+      break;
+  }
+
   state.game.hands.remaining = state.game.hands.total;
   state.game.discards.remaining = state.game.discards.total;
 
