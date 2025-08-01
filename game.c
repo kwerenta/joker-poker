@@ -11,7 +11,60 @@
 
 void game_init(Deck deck) {
   state.game.deck_type = deck;
+  generate_deck();
 
+  state.game.score = 0;
+  state.game.ante = 1;
+  state.game.blind = 0;
+  state.game.round = 0;
+
+  state.game.money = 4;
+
+  state.game.hand.size = 8;
+  state.game.hands.total = 4;
+  state.game.discards.total = 3;
+
+  state.game.jokers.size = 5;
+  state.game.consumables.size = 2;
+
+  state.game.shop.size = 2;
+
+  apply_deck_settings();
+
+  state.game.hands.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.discards.total;
+
+  change_stage(STAGE_GAME);
+
+  state.game.fool_last_used.was_used = 0;
+  memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
+
+  cvector_reserve(state.game.shop.booster_packs, 2);
+
+  cvector_copy(state.game.full_deck, state.game.deck);
+  cvector_reserve(state.game.hand.cards, state.game.hand.size);
+
+  shuffle_deck();
+  fill_hand();
+  sort_hand();
+
+  log_message(LOG_INFO, "Game has been initialized.");
+}
+
+void game_destroy() {
+  cvector_destroy(state.game.deck);
+  cvector_destroy(state.game.full_deck);
+  cvector_destroy(state.game.hand.cards);
+  cvector_destroy(state.game.jokers.cards);
+  cvector_destroy(state.game.consumables.items);
+  cvector_destroy(state.game.shop.items);
+  cvector_destroy(state.game.shop.booster_packs);
+  cvector_destroy(state.game.booster_pack.content);
+
+  log_message(LOG_INFO, "Game has been destroyed.");
+}
+
+void generate_deck() {
   cvector_reserve(state.game.full_deck, state.game.deck_type == DECK_ABANDONED ? 40 : 52);
   for (uint8_t i = 0; i < 52; i++) {
     Rank rank = i % 13;
@@ -30,24 +83,10 @@ void game_init(Deck deck) {
 
     cvector_push_back(state.game.full_deck, create_card(suit, rank, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
+}
 
-  state.game.score = 0;
-  state.game.ante = 1;
-  state.game.blind = 0;
-  state.game.round = 0;
-
-  state.game.money = 4;
-
-  state.game.hand.size = 8;
-  state.game.hands.total = 4;
-  state.game.discards.total = 3;
-
-  state.game.jokers.size = 5;
-  state.game.consumables.size = 2;
-
-  state.game.shop.size = 2;
-
-  switch (deck) {
+void apply_deck_settings() {
+  switch (state.game.deck_type) {
     case DECK_RED:
       state.game.discards.total++;
       break;
@@ -96,38 +135,6 @@ void game_init(Deck deck) {
     case DECK_ERRATIC:
       break;
   }
-
-  state.game.hands.remaining = state.game.hands.total;
-  state.game.discards.remaining = state.game.discards.total;
-
-  change_stage(STAGE_GAME);
-
-  state.game.fool_last_used.was_used = 0;
-  memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
-
-  cvector_reserve(state.game.shop.booster_packs, 2);
-
-  cvector_copy(state.game.full_deck, state.game.deck);
-  cvector_reserve(state.game.hand.cards, state.game.hand.size);
-
-  shuffle_deck();
-  fill_hand();
-  sort_hand();
-
-  log_message(LOG_INFO, "Game has been initialized.");
-}
-
-void game_destroy() {
-  cvector_destroy(state.game.deck);
-  cvector_destroy(state.game.full_deck);
-  cvector_destroy(state.game.hand.cards);
-  cvector_destroy(state.game.jokers.cards);
-  cvector_destroy(state.game.consumables.items);
-  cvector_destroy(state.game.shop.items);
-  cvector_destroy(state.game.shop.booster_packs);
-  cvector_destroy(state.game.booster_pack.content);
-
-  log_message(LOG_INFO, "Game has been destroyed.");
 }
 
 uint8_t compare_cards(Card *a, Card *b) {

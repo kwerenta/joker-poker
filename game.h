@@ -302,6 +302,8 @@ typedef struct {
 
 void game_init(Deck deck);
 void game_destroy();
+void generate_deck();
+void apply_deck_settings();
 
 uint8_t compare_cards(Card *a, Card *b);
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement, Seal seal);
