@@ -331,6 +331,7 @@ double get_required_score(uint8_t ante, uint8_t blind);
 
 uint8_t get_blind_money(uint8_t blind);
 uint8_t get_hands_money();
+uint8_t get_discards_money();
 uint8_t get_interest_money();
 
 void get_cash_out();

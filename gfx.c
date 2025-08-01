@@ -620,6 +620,7 @@ void render_cash_out() {
     CLAY(card_content_config()) {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
+      uint8_t discards = get_discards_money();
       uint8_t blind = get_blind_money(state.game.blind);
 
       CLAY({.layout = {
@@ -627,7 +628,7 @@ void render_cash_out() {
                 .childAlignment = {CLAY_ALIGN_X_CENTER},
             }}) {
         Clay_String cash_out_text;
-        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + blind);
+        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + discards + blind);
         CLAY_TEXT(cash_out_text, CLAY_TEXT_CONFIG({.textColor = COLOR_MONEY}));
       }
 
@@ -644,6 +645,12 @@ void render_cash_out() {
           Clay_String hands_money;
           append_clay_string(&hands_money, "Hands: $%d", hands);
           CLAY_TEXT(hands_money, WHITE_TEXT_CONFIG);
+        }
+
+        if (discards != 0) {
+          Clay_String discards_money;
+          append_clay_string(&discards_money, "Discards: $%d", discards);
+          CLAY_TEXT(discards_money, WHITE_TEXT_CONFIG);
         }
 
         if (interest != 0) {

@@ -45,7 +45,6 @@ void game_init(Deck deck) {
       state.game.money += 10;
       break;
     case DECK_GREEN:
-      // TODO Implement passive ability of this deck
       break;
     case DECK_BLACK:
       state.game.jokers.size++;
@@ -262,7 +261,8 @@ void play_hand() {
 }
 
 void get_cash_out() {
-  state.game.money += get_interest_money() + get_hands_money() + get_blind_money(state.game.blind);
+  state.game.money +=
+      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.blind);
 
   state.game.score = 0;
 
@@ -654,9 +654,12 @@ double get_required_score(uint8_t ante, uint8_t blind) {
 }
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
-uint8_t get_hands_money() { return state.game.hands.remaining; }
+uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
+uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
 
 uint8_t get_interest_money() {
+  if (state.game.deck_type == DECK_GREEN) return 0;
+
   uint8_t interest = state.game.money / 5;
   uint8_t interest_cap = state.game.vouchers & VOUCHER_MONEY_TREE   ? 20
                          : state.game.vouchers & VOUCHER_SEED_MONEY ? 10
