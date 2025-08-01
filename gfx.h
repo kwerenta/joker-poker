@@ -46,6 +46,7 @@ void render_joker(Joker *joker, Rect *dst);
 void render_consumable(Consumable *consumable, Rect *dst);
 void render_voucher(Voucher voucher, Rect *dst);
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst);
+void render_deck(Deck deck, Rect *dst);
 
 void render_spread_items(NavigationSection section, Clay_String parent_id);
 
