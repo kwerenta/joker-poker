@@ -293,7 +293,7 @@ void handle_controls() {
 
     case STAGE_SELECT_DECK:
       if (button_pressed(PSP_CTRL_CROSS))
-        game_init();
+        game_init(state.navigation.hovered);
       else if (button_pressed(PSP_CTRL_CIRCLE))
         change_stage(STAGE_MAIN_MENU);
       break;
@@ -343,8 +343,9 @@ void handle_controls() {
 
     case STAGE_GAME_OVER:
       if (button_pressed(PSP_CTRL_CROSS)) {
+        Deck current_deck = state.game.deck_type;
         game_destroy();
-        game_init();
+        game_init(current_deck);
       }
 
       break;

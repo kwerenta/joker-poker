@@ -300,7 +300,7 @@ typedef struct {
   SortingMode sorting_mode;
 } Game;
 
-void game_init();
+void game_init(Deck deck);
 void game_destroy();
 
 uint8_t compare_cards(Card *a, Card *b);

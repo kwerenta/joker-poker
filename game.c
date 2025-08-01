@@ -9,7 +9,9 @@
 #include "debug.h"
 #include "state.h"
 
-void game_init() {
+void game_init(Deck deck) {
+  state.game.deck_type = deck;
+
   // Generate standard deck of 52 cards
   cvector_reserve(state.game.full_deck, 52);
   for (uint8_t i = 0; i < 52; i++) {

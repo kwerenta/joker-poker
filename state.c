@@ -284,10 +284,12 @@ void overlay_menu_button_click() {
       change_overlay(OVERLAY_POKER_HANDS);
       break;
 
-    case 2:
+    case 2: {
+      Deck current_deck = state.game.deck_type;
       game_destroy();
-      game_init();
+      game_init(current_deck);
       break;
+    }
 
     case 3:
       game_destroy();
