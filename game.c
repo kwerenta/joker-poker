@@ -35,7 +35,7 @@ void game_init(Deck deck) {
   state.game.shop.size = 2;
 
   state.game.hands.remaining = state.game.hands.total;
-  state.game.discards.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.discards.total;
 
   change_stage(STAGE_GAME);
 
