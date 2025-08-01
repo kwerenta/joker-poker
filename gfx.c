@@ -109,7 +109,11 @@ void render_select_deck() {
   CLAY({.layout = {
             .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
             .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            .childGap = 8,
         }}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_FIXED(256), CLAY_SIZING_FIXED(64)}}, .image = {.imageData = state.logo}}) {}
+
     CLAY({.layout = {.sizing = {CLAY_SIZING_PERCENT(0.5), CLAY_SIZING_FIT(0)},
                      .padding = CLAY_PADDING_ALL(8),
                      .childGap = 8},
