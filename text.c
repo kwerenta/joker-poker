@@ -300,3 +300,73 @@ char *get_voucher_description(Voucher voucher) {
       return "+1 Hand Size again";
   }
 }
+
+char *get_deck_name(Deck deck) {
+  switch (deck) {
+    case DECK_RED:
+      return "Red Deck";
+    case DECK_BLUE:
+      return "Blue Deck";
+    case DECK_YELLOW:
+      return "Yellow Deck";
+    case DECK_GREEN:
+      return "Green Deck";
+    case DECK_BLACK:
+      return "Black Deck";
+    case DECK_MAGIC:
+      return "Magic Deck";
+    case DECK_NEBULA:
+      return "Nebula Deck";
+    case DECK_GHOST:
+      return "Ghost Deck PARTIALLY IMPLEMENTED";
+    case DECK_ABANDONED:
+      return "Abandoned Deck";
+    case DECK_CHECKERED:
+      return "Checkered Deck";
+    case DECK_ZODIAC:
+      return "Zodiac Deck";
+    case DECK_PAINTED:
+      return "Painted Deck";
+    case DECK_ANAGLYPH:
+      return "Anaglyph Deck NOT IMPLEMENTED";
+    case DECK_PLASMA:
+      return "Plasma Deck";
+    case DECK_ERRATIC:
+      return "Erratic Deck";
+  }
+}
+
+char *get_deck_description(Deck deck) {
+  switch (deck) {
+    case DECK_RED:
+      return "+1 discard every round";
+    case DECK_BLUE:
+      return "+1 hand every round";
+    case DECK_YELLOW:
+      return "Start with extra 10$";
+    case DECK_GREEN:
+      return "At end of each Round: $2 per remaining Hand, $1 per remaining Discard, Earn no Interest";
+    case DECK_BLACK:
+      return "+1 Joker slot, -1 hand every round";
+    case DECK_MAGIC:
+      return "Start run with the Crystal Ball voucher and 2 copies of The Fool";
+    case DECK_NEBULA:
+      return "Start run with the Telescope voucher and -1 consumable slot";
+    case DECK_GHOST:
+      return "Spectral cards may appear in the shop, start with a Hex card";
+    case DECK_ABANDONED:
+      return "Start run with no Face Cards in your deck";
+    case DECK_CHECKERED:
+      return "Start run with 26 Spades and 26 Hearts in deck";
+    case DECK_ZODIAC:
+      return "Start run with Tarot Merchant, Planet Merchant, and Overstock";
+    case DECK_PAINTED:
+      return "+2 hand size, -1 Joker slot";
+    case DECK_ANAGLYPH:
+      return "After defeating each Boss Blind, gain a Double Tag";
+    case DECK_PLASMA:
+      return "Balance Chips and Mult when calculating score for played hand, X2 base Blind size";
+    case DECK_ERRATIC:
+      return "All Ranks and Suits in deck are randomized";
+  }
+}

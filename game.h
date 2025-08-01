@@ -7,6 +7,24 @@
 #include "content/spectral.h"
 #include "content/tarot.h"
 
+typedef enum {
+  DECK_RED,
+  DECK_BLUE,
+  DECK_YELLOW,
+  DECK_GREEN,
+  DECK_BLACK,
+  DECK_MAGIC,
+  DECK_NEBULA,
+  DECK_GHOST,
+  DECK_ABANDONED,
+  DECK_CHECKERED,
+  DECK_ZODIAC,
+  DECK_PAINTED,
+  DECK_ANAGLYPH,
+  DECK_PLASMA,
+  DECK_ERRATIC,
+} Deck;
+
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
@@ -252,6 +270,7 @@ typedef struct {
 } UsageState;
 
 typedef struct {
+  Deck deck_type;
   cvector_vector_type(Card) full_deck;
   cvector_vector_type(Card) deck;
 
@@ -281,8 +300,10 @@ typedef struct {
   SortingMode sorting_mode;
 } Game;
 
-void game_init();
+void game_init(Deck deck);
 void game_destroy();
+void generate_deck();
+void apply_deck_settings();
 
 uint8_t compare_cards(Card *a, Card *b);
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enchacement, Seal seal);
@@ -312,6 +333,7 @@ double get_required_score(uint8_t ante, uint8_t blind);
 
 uint8_t get_blind_money(uint8_t blind);
 uint8_t get_hands_money();
+uint8_t get_discards_money();
 uint8_t get_interest_money();
 
 void get_cash_out();

@@ -31,6 +31,9 @@ void update_render_commands() {
         case STAGE_MAIN_MENU:
           render_main_menu();
           break;
+        case STAGE_SELECT_DECK:
+          render_select_deck();
+          break;
         case STAGE_CREDITS:
           render_credits();
           break;
@@ -97,6 +100,40 @@ void render_main_menu() {
               .layout = {.padding = CLAY_PADDING_ALL(4)}}) {
           CLAY_TEXT(main_menu_buttons[i], WHITE_TEXT_CONFIG);
         }
+      }
+    }
+  }
+}
+
+void render_select_deck() {
+  CLAY({.layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            .childGap = 8,
+        }}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_FIXED(256), CLAY_SIZING_FIXED(64)}}, .image = {.imageData = state.logo}}) {}
+
+    CLAY({.layout = {.sizing = {CLAY_SIZING_PERCENT(0.5), CLAY_SIZING_FIT(0)},
+                     .padding = CLAY_PADDING_ALL(8),
+                     .childGap = 8},
+          .backgroundColor = COLOR_CARD_BG}) {
+      CustomElementData *deck_icon = frame_arena_allocate(sizeof(CustomElementData));
+      *deck_icon = (CustomElementData){.type = CUSTOM_ELEMENT_DECK, .deck = state.navigation.hovered};
+      CLAY({.custom = deck_icon,
+            .layout = {.sizing = {CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
+
+      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                       .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                       .childGap = 4}}) {
+        Clay_String deck_name;
+        append_clay_string(&deck_name, "%s", get_deck_name(state.navigation.hovered));
+
+        Clay_String deck_description;
+        append_clay_string(&deck_description, "%s", get_deck_description(state.navigation.hovered));
+
+        CLAY_TEXT(deck_name, WHITE_TEXT_CONFIG);
+        CLAY_TEXT(deck_description, WHITE_TEXT_CONFIG);
       }
     }
   }
@@ -184,6 +221,8 @@ void render_voucher(Voucher voucher, Rect *dst) { render_card_atlas_sprite(&(Vec
 void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
   render_card_atlas_sprite(&(Vector2){.x = 4, .y = 3}, dst);
 }
+
+void render_deck(Deck deck, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 3, .y = 3}, dst); }
 
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
   size_t item_count = get_nav_section_size(section);
@@ -596,6 +635,7 @@ void render_cash_out() {
     CLAY(card_content_config()) {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
+      uint8_t discards = get_discards_money();
       uint8_t blind = get_blind_money(state.game.blind);
 
       CLAY({.layout = {
@@ -603,7 +643,7 @@ void render_cash_out() {
                 .childAlignment = {CLAY_ALIGN_X_CENTER},
             }}) {
         Clay_String cash_out_text;
-        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + blind);
+        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + discards + blind);
         CLAY_TEXT(cash_out_text, CLAY_TEXT_CONFIG({.textColor = COLOR_MONEY}));
       }
 
@@ -620,6 +660,12 @@ void render_cash_out() {
           Clay_String hands_money;
           append_clay_string(&hands_money, "Hands: $%d", hands);
           CLAY_TEXT(hands_money, WHITE_TEXT_CONFIG);
+        }
+
+        if (discards != 0) {
+          Clay_String discards_money;
+          append_clay_string(&discards_money, "Discards: $%d", discards);
+          CLAY_TEXT(discards_money, WHITE_TEXT_CONFIG);
         }
 
         if (interest != 0) {

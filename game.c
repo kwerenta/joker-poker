@@ -9,47 +9,44 @@
 #include "debug.h"
 #include "state.h"
 
-void game_init() {
-  // Generate standard deck of 52 cards
-  cvector_reserve(state.game.full_deck, 52);
-  for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
-  }
-
-  cvector_copy(state.game.full_deck, state.game.deck);
-
-  shuffle_deck();
-
-  state.game.hand.size = 7;
-  cvector_reserve(state.game.hand.cards, state.game.hand.size);
-  fill_hand();
-  sort_hand();
-
-  state.game.money = 4;
+void game_init(Deck deck) {
+  state.game.deck_type = deck;
+  generate_deck();
 
   state.game.score = 0;
-
   state.game.ante = 1;
   state.game.blind = 0;
   state.game.round = 0;
 
-  state.game.hands.total = 4;
-  state.game.hands.remaining = 4;
+  state.game.money = 4;
 
-  state.game.discards.total = 2;
-  state.game.discards.remaining = 2;
+  state.game.hand.size = 8;
+  state.game.hands.total = 4;
+  state.game.discards.total = 3;
 
   state.game.jokers.size = 5;
   state.game.consumables.size = 2;
 
   state.game.shop.size = 2;
-  cvector_reserve(state.game.shop.booster_packs, 2);
+
+  apply_deck_settings();
+
+  state.game.hands.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.discards.total;
 
   change_stage(STAGE_GAME);
 
   state.game.fool_last_used.was_used = 0;
-
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
+
+  cvector_reserve(state.game.shop.booster_packs, 2);
+
+  cvector_copy(state.game.full_deck, state.game.deck);
+  cvector_reserve(state.game.hand.cards, state.game.hand.size);
+
+  shuffle_deck();
+  fill_hand();
+  sort_hand();
 
   log_message(LOG_INFO, "Game has been initialized.");
 }
@@ -65,6 +62,79 @@ void game_destroy() {
   cvector_destroy(state.game.booster_pack.content);
 
   log_message(LOG_INFO, "Game has been destroyed.");
+}
+
+void generate_deck() {
+  cvector_reserve(state.game.full_deck, state.game.deck_type == DECK_ABANDONED ? 40 : 52);
+  for (uint8_t i = 0; i < 52; i++) {
+    Rank rank = i % 13;
+    Suit suit = i % 4;
+
+    if (state.game.deck_type == DECK_ABANDONED && (rank == RANK_JACK || rank == RANK_QUEEN || rank == RANK_KING))
+      continue;
+
+    // Convert possible suit values from 0 1 2 3 to 0 2 (hearts and spades)
+    if (state.game.deck_type == DECK_CHECKERED) suit = 2 * (suit % 2);
+
+    if (state.game.deck_type == DECK_ERRATIC) {
+      rank = rand() % 13;
+      suit = rand() % 4;
+    }
+
+    cvector_push_back(state.game.full_deck, create_card(suit, rank, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
+  }
+}
+
+void apply_deck_settings() {
+  switch (state.game.deck_type) {
+    case DECK_RED:
+      state.game.discards.total++;
+      break;
+    case DECK_BLUE:
+      state.game.hands.total++;
+      break;
+    case DECK_YELLOW:
+      state.game.money += 10;
+      break;
+    case DECK_GREEN:
+      break;
+    case DECK_BLACK:
+      state.game.jokers.size++;
+      state.game.hands.total--;
+      break;
+    case DECK_MAGIC:
+      add_voucher_to_player(VOUCHER_CRYSTALL_BALL);
+      ShopItem fool = {.type = SHOP_ITEM_TAROT, .tarot = TAROT_FOOL};
+      add_item_to_player(&fool);
+      add_item_to_player(&fool);
+      break;
+    case DECK_NEBULA:
+      add_voucher_to_player(VOUCHER_TELESCOPE);
+      state.game.consumables.size--;
+      break;
+    case DECK_GHOST:
+      // TODO Add spectral cards to the shop when it will have proper shop item weights
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_HEX});
+      break;
+    case DECK_ABANDONED:
+    case DECK_CHECKERED:
+      break;
+    case DECK_ZODIAC:
+      add_voucher_to_player(VOUCHER_TAROT_MERCHANT);
+      add_voucher_to_player(VOUCHER_PLANET_MERCHANT);
+      add_voucher_to_player(VOUCHER_OVERSTOCK);
+      break;
+    case DECK_PAINTED:
+      state.game.hand.size += 2;
+      state.game.jokers.size--;
+      break;
+    case DECK_ANAGLYPH:
+      // TODO Implement when Tags will be added
+      break;
+    case DECK_PLASMA:
+    case DECK_ERRATIC:
+      break;
+  }
 }
 
 uint8_t compare_cards(Card *a, Card *b) {
@@ -187,7 +257,11 @@ void play_hand() {
     }
   }
 
-  state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
+  if (state.game.deck_type == DECK_PLASMA)
+    state.game.score +=
+        pow(floor((state.game.selected_hand.score_pair.chips + state.game.selected_hand.score_pair.mult) / 2), 2);
+  else
+    state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
@@ -207,7 +281,8 @@ void play_hand() {
 }
 
 void get_cash_out() {
-  state.game.money += get_interest_money() + get_hands_money() + get_blind_money(state.game.blind);
+  state.game.money +=
+      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.blind);
 
   state.game.score = 0;
 
@@ -595,13 +670,19 @@ double get_ante_base_score(uint8_t ante) {
 }
 
 double get_required_score(uint8_t ante, uint8_t blind) {
-  return get_ante_base_score(ante) * (blind == 0 ? 1 : blind == 1 ? 1.5 : 2);
+  return (state.game.deck_type == DECK_PLASMA ? 2 : 1) * get_ante_base_score(ante) *
+         (blind == 0   ? 1
+          : blind == 1 ? 1.5
+                       : 2);
 }
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
-uint8_t get_hands_money() { return state.game.hands.remaining; }
+uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
+uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
 
 uint8_t get_interest_money() {
+  if (state.game.deck_type == DECK_GREEN) return 0;
+
   uint8_t interest = state.game.money / 5;
   uint8_t interest_cap = state.game.vouchers & VOUCHER_MONEY_TREE   ? 20
                          : state.game.vouchers & VOUCHER_SEED_MONEY ? 10
