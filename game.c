@@ -81,7 +81,6 @@ void game_init(Deck deck) {
       // TODO Implement when Tags will be added
       break;
     case DECK_PLASMA:
-      // TODO Implement passive ability of this deck
       break;
     case DECK_ERRATIC:
       // TODO Add proper cards according to deck's description
@@ -241,7 +240,11 @@ void play_hand() {
     }
   }
 
-  state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
+  if (state.game.deck_type == DECK_PLASMA)
+    state.game.score +=
+        pow(floor((state.game.selected_hand.score_pair.chips + state.game.selected_hand.score_pair.mult) / 2), 2);
+  else
+    state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
   double required_score = get_required_score(state.game.ante, state.game.blind);
 
@@ -650,7 +653,10 @@ double get_ante_base_score(uint8_t ante) {
 }
 
 double get_required_score(uint8_t ante, uint8_t blind) {
-  return get_ante_base_score(ante) * (blind == 0 ? 1 : blind == 1 ? 1.5 : 2);
+  return (state.game.deck_type == DECK_PLASMA ? 2 : 1) * get_ante_base_score(ante) *
+         (blind == 0   ? 1
+          : blind == 1 ? 1.5
+                       : 2);
 }
 
 uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
