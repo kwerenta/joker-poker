@@ -105,7 +105,26 @@ void render_main_menu() {
   }
 }
 
-void render_select_deck() { CLAY_TEXT(CLAY_STRING("SELECT"), WHITE_TEXT_CONFIG); }
+void render_select_deck() {
+  CLAY({.layout = {
+            .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+            .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+        }}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)},
+                     .padding = CLAY_PADDING_ALL(8),
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM},
+          .backgroundColor = COLOR_CARD_BG}) {
+      Clay_String deck_name;
+      append_clay_string(&deck_name, "%s", get_deck_name(state.navigation.hovered));
+
+      Clay_String deck_description;
+      append_clay_string(&deck_description, "%s", get_deck_description(state.navigation.hovered));
+
+      CLAY_TEXT(deck_name, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(deck_description, WHITE_TEXT_CONFIG);
+    }
+  }
+}
 
 void render_credits() {
   CLAY({.layout = {
