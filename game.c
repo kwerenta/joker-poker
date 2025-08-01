@@ -12,10 +12,18 @@
 void game_init(Deck deck) {
   state.game.deck_type = deck;
 
-  // Generate standard deck of 52 cards
-  cvector_reserve(state.game.full_deck, 52);
+  cvector_reserve(state.game.full_deck, state.game.deck_type == DECK_ABANDONED ? 40 : 52);
   for (uint8_t i = 0; i < 52; i++) {
-    cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
+    Rank rank = i % 13;
+    Suit suit = i % 4;
+
+    if (state.game.deck_type == DECK_ABANDONED && (rank == RANK_JACK || rank == RANK_QUEEN || rank == RANK_KING))
+      continue;
+
+    // Convert possible suit values from 0 1 2 3 to 0 2 (hearts and spades)
+    if (state.game.deck_type == DECK_CHECKERED) suit = 2 * (suit % 2);
+
+    cvector_push_back(state.game.full_deck, create_card(suit, rank, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
 
   state.game.score = 0;
@@ -66,7 +74,6 @@ void game_init(Deck deck) {
       break;
     case DECK_ABANDONED:
     case DECK_CHECKERED:
-      // TODO Add proper cards according to deck's description
       break;
     case DECK_ZODIAC:
       add_voucher_to_player(VOUCHER_TAROT_MERCHANT);
