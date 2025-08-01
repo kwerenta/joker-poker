@@ -318,7 +318,7 @@ char *get_deck_name(Deck deck) {
     case DECK_NEBULA:
       return "Nebula Deck";
     case DECK_GHOST:
-      return "Ghost Deck";
+      return "Ghost Deck PARTIALLY IMPLEMENTED";
     case DECK_ABANDONED:
       return "Abandoned Deck";
     case DECK_CHECKERED:
@@ -328,7 +328,7 @@ char *get_deck_name(Deck deck) {
     case DECK_PAINTED:
       return "Painted Deck";
     case DECK_ANAGLYPH:
-      return "Anaglyph Deck";
+      return "Anaglyph Deck NOT IMPLEMENTED";
     case DECK_PLASMA:
       return "Plasma Deck";
     case DECK_ERRATIC:
