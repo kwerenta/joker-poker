@@ -18,40 +18,38 @@ void game_init(Deck deck) {
     cvector_push_back(state.game.full_deck, create_card(i % 4, i % 13, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
 
-  cvector_copy(state.game.full_deck, state.game.deck);
-
-  shuffle_deck();
-
-  state.game.hand.size = 7;
-  cvector_reserve(state.game.hand.cards, state.game.hand.size);
-  fill_hand();
-  sort_hand();
-
-  state.game.money = 4;
-
   state.game.score = 0;
-
   state.game.ante = 1;
   state.game.blind = 0;
   state.game.round = 0;
 
-  state.game.hands.total = 4;
-  state.game.hands.remaining = 4;
+  state.game.money = 4;
 
-  state.game.discards.total = 2;
-  state.game.discards.remaining = 2;
+  state.game.hand.size = 8;
+  state.game.hands.total = 4;
+  state.game.discards.total = 3;
 
   state.game.jokers.size = 5;
   state.game.consumables.size = 2;
 
   state.game.shop.size = 2;
-  cvector_reserve(state.game.shop.booster_packs, 2);
+
+  state.game.hands.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.hands.total;
 
   change_stage(STAGE_GAME);
 
   state.game.fool_last_used.was_used = 0;
-
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
+
+  cvector_reserve(state.game.shop.booster_packs, 2);
+
+  cvector_copy(state.game.full_deck, state.game.deck);
+  cvector_reserve(state.game.hand.cards, state.game.hand.size);
+
+  shuffle_deck();
+  fill_hand();
+  sort_hand();
 
   log_message(LOG_INFO, "Game has been initialized.");
 }
