@@ -23,6 +23,11 @@ void game_init(Deck deck) {
     // Convert possible suit values from 0 1 2 3 to 0 2 (hearts and spades)
     if (state.game.deck_type == DECK_CHECKERED) suit = 2 * (suit % 2);
 
+    if (state.game.deck_type == DECK_ERRATIC) {
+      rank = rand() % 13;
+      suit = rand() % 4;
+    }
+
     cvector_push_back(state.game.full_deck, create_card(suit, rank, EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE));
   }
 
@@ -88,9 +93,7 @@ void game_init(Deck deck) {
       // TODO Implement when Tags will be added
       break;
     case DECK_PLASMA:
-      break;
     case DECK_ERRATIC:
-      // TODO Add proper cards according to deck's description
       break;
   }
 
