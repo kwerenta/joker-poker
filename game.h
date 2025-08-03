@@ -25,6 +25,17 @@ typedef enum {
   DECK_ERRATIC,
 } Deck;
 
+typedef enum {
+  STAKE_WHITE,
+  STAKE_RED,
+  STAKE_GREEN,
+  STAKE_BLACK,
+  STAKE_BLUE,
+  STAKE_PURPLE,
+  STAKE_ORANGE,
+  STAKE_GOLD,
+} Stake;
+
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
