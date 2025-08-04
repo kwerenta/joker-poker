@@ -33,6 +33,8 @@ void game_init(Deck deck, Stake stake) {
 
   apply_deck_settings();
 
+  if (stake == STAKE_BLUE) state.game.discards.total--;
+
   state.game.hands.remaining = state.game.hands.total;
   state.game.discards.remaining = state.game.discards.total;
 
