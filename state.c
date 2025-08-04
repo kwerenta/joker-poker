@@ -290,8 +290,9 @@ void overlay_menu_button_click() {
 
     case 2: {
       Deck current_deck = state.game.deck_type;
+      Stake current_stake = state.game.stake;
       game_destroy();
-      game_init(current_deck);
+      game_init(current_deck, current_stake);
       break;
     }
 

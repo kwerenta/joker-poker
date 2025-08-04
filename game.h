@@ -282,6 +282,8 @@ typedef struct {
 
 typedef struct {
   Deck deck_type;
+  Stake stake;
+
   cvector_vector_type(Card) full_deck;
   cvector_vector_type(Card) deck;
 
@@ -311,7 +313,7 @@ typedef struct {
   SortingMode sorting_mode;
 } Game;
 
-void game_init(Deck deck);
+void game_init(Deck deck, Stake stake);
 void game_destroy();
 void generate_deck();
 void apply_deck_settings();

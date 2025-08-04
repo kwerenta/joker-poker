@@ -9,8 +9,10 @@
 #include "debug.h"
 #include "state.h"
 
-void game_init(Deck deck) {
+void game_init(Deck deck, Stake stake) {
   state.game.deck_type = deck;
+  state.game.stake = stake;
+
   generate_deck();
 
   state.game.score = 0;
