@@ -9,8 +9,10 @@
 #include "debug.h"
 #include "state.h"
 
-void game_init(Deck deck) {
+void game_init(Deck deck, Stake stake) {
   state.game.deck_type = deck;
+  state.game.stake = stake;
+
   generate_deck();
 
   state.game.score = 0;
@@ -30,6 +32,8 @@ void game_init(Deck deck) {
   state.game.shop.size = 2;
 
   apply_deck_settings();
+
+  if (stake >= STAKE_BLUE) state.game.discards.total--;
 
   state.game.hands.remaining = state.game.hands.total;
   state.game.discards.remaining = state.game.discards.total;
@@ -645,6 +649,52 @@ ScorePair get_poker_hand_total_score(uint16_t hand_union) {
 }
 
 double get_ante_base_score(uint8_t ante) {
+  if (state.game.stake >= STAKE_PURPLE) {
+    switch (ante) {
+      case 0:
+        return 100;
+      case 1:
+        return 300;
+      case 2:
+        return 1000;
+      case 3:
+        return 3200;
+      case 4:
+        return 9000;
+      case 5:
+        return 25000;
+      case 6:
+        return 60000;
+      case 7:
+        return 110000;
+      case 8:
+        return 200000;
+    }
+  }
+
+  if (state.game.stake >= STAKE_GREEN) {
+    switch (ante) {
+      case 0:
+        return 100;
+      case 1:
+        return 300;
+      case 2:
+        return 900;
+      case 3:
+        return 2600;
+      case 4:
+        return 8000;
+      case 5:
+        return 20000;
+      case 6:
+        return 36000;
+      case 7:
+        return 60000;
+      case 8:
+        return 100000;
+    }
+  }
+
   switch (ante) {
     case 0:
       return 100;
@@ -676,7 +726,9 @@ double get_required_score(uint8_t ante, uint8_t blind) {
                        : 2);
 }
 
-uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
+uint8_t get_blind_money(uint8_t blind) {
+  return blind == 0 ? state.game.stake >= STAKE_RED ? 0 : 3 : blind == 1 ? 4 : 5;
+}
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
 

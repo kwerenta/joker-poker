@@ -28,7 +28,9 @@
 #define COLOR_MULT (Clay_Color){255, 63, 52, 255}
 #define COLOR_CHIPS (Clay_Color){15, 188, 249, 255}
 #define COLOR_MONEY (Clay_Color){255, 168, 1, 255}
-#define COLOR_CARD_BG (Clay_Color){30, 39, 46, 255}
+#define COLOR_CARD_BG_ALPHA(alpha) \
+  (Clay_Color) { 30, 39, 46, alpha }
+#define COLOR_CARD_BG COLOR_CARD_BG_ALPHA(255)
 #define COLOR_SECTION_BG (Clay_Color){0, 0, 0, 60}
 #define COLOR_CARD_LIGHT_BG (Clay_Color){72, 84, 96, 255}
 
@@ -63,6 +65,7 @@ void render_cash_out();
 void render_game_over();
 
 void render_overlay_menu();
+void render_overlay_select_stake();
 void render_overlay_poker_hands();
 
 void render_background();

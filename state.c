@@ -43,6 +43,7 @@ static const NavigationLayout stage_nav_layouts[] = {
 static const NavigationLayout overlay_nav_layouts[] = {
     {.row_count = 0},
     {.row_count = 1, .rows = {{1, {NAVIGATION_OVERLAY_MENU}}}},
+    {.row_count = 1, .rows = {{1, {NAVIGATION_SELECT_STAKE}}}},
     {.row_count = 0},
 };
 
@@ -150,46 +151,33 @@ NavigationSection get_current_section() {
 }
 
 uint8_t get_nav_section_size(NavigationSection section) {
-  uint8_t max_value = 0;
-
   switch (section) {
     case NAVIGATION_NONE:
-      max_value = 0;
-      break;
+      return 0;
     case NAVIGATION_MAIN_MENU:
-      max_value = 3;
-      break;
+      return 3;
     case NAVIGATION_SELECT_DECK:
-      max_value = 15;
-      break;
+      return 15;
+    case NAVIGATION_SELECT_STAKE:
+      return 8;
     case NAVIGATION_HAND:
-      max_value = cvector_size(state.game.hand.cards);
-      break;
+      return cvector_size(state.game.hand.cards);
     case NAVIGATION_SHOP_ITEMS:
-      max_value = cvector_size(state.game.shop.items);
-      break;
+      return cvector_size(state.game.shop.items);
     case NAVIGATION_SHOP_VOUCHER:
-      max_value = state.game.shop.voucher != 0 ? 1 : 0;
-      break;
+      return state.game.shop.voucher != 0 ? 1 : 0;
     case NAVIGATION_BOOSTER_PACK:
-      max_value = cvector_size(state.game.booster_pack.content);
-      break;
+      return cvector_size(state.game.booster_pack.content);
     case NAVIGATION_CONSUMABLES:
-      max_value = cvector_size(state.game.consumables.items);
-      break;
+      return cvector_size(state.game.consumables.items);
     case NAVIGATION_JOKERS:
-      max_value = cvector_size(state.game.jokers.cards);
-      break;
+      return cvector_size(state.game.jokers.cards);
     case NAVIGATION_SHOP_BOOSTER_PACKS:
-      max_value = cvector_size(state.game.shop.booster_packs);
-      break;
+      return cvector_size(state.game.shop.booster_packs);
 
     case NAVIGATION_OVERLAY_MENU:
-      max_value = 4;
-      break;
+      return 4;
   }
-
-  return max_value;
 }
 
 uint8_t is_nav_section_horizontal(NavigationSection section) {
@@ -286,8 +274,9 @@ void overlay_menu_button_click() {
 
     case 2: {
       Deck current_deck = state.game.deck_type;
+      Stake current_stake = state.game.stake;
       game_destroy();
-      game_init(current_deck);
+      game_init(current_deck, current_stake);
       break;
     }
 

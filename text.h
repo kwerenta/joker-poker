@@ -23,4 +23,7 @@ char *get_voucher_description(Voucher voucher);
 char *get_deck_name(Deck deck);
 char *get_deck_description(Deck deck);
 
+char *get_stake_name(Stake stake);
+char *get_stake_description(Stake stake);
+
 #endif

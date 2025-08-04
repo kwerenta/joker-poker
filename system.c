@@ -237,7 +237,7 @@ uint8_t handle_navigation_controls() {
   } else if (button_pressed(PSP_CTRL_RTRIGGER)) {
     move_nav_hovered(hovered + 1);
     return 1;
-  } else if (state.stage != STAGE_MAIN_MENU && button_pressed(PSP_CTRL_START)) {
+  } else if (state.stage != STAGE_MAIN_MENU && state.stage != STAGE_SELECT_DECK && button_pressed(PSP_CTRL_START)) {
     change_overlay(state.overlay == OVERLAY_NONE ? OVERLAY_MENU : OVERLAY_NONE);
     return 1;
   }
@@ -259,6 +259,16 @@ uint8_t handle_navigation_controls() {
     }
   }
 
+  if (section == NAVIGATION_SELECT_STAKE) {
+    if (button_pressed(PSP_CTRL_CROSS)) {
+      game_init(state.prev_navigation.hovered, state.navigation.hovered);
+      return 1;
+    } else if (button_pressed(PSP_CTRL_CIRCLE)) {
+      change_overlay(OVERLAY_NONE);
+      return 1;
+    }
+  }
+
   if (section == NAVIGATION_OVERLAY_MENU) {
     if (button_pressed(PSP_CTRL_CROSS)) {
       overlay_menu_button_click();
@@ -266,7 +276,7 @@ uint8_t handle_navigation_controls() {
     }
   }
 
-  if (state.overlay != OVERLAY_NONE && state.overlay != OVERLAY_MENU) {
+  if (state.overlay != OVERLAY_NONE && state.overlay != OVERLAY_MENU && state.overlay != OVERLAY_SELECT_STAKE) {
     if (button_pressed(PSP_CTRL_CIRCLE)) {
       change_overlay(OVERLAY_MENU);
       return 1;
@@ -293,7 +303,7 @@ void handle_controls() {
 
     case STAGE_SELECT_DECK:
       if (button_pressed(PSP_CTRL_CROSS))
-        game_init(state.navigation.hovered);
+        change_overlay(OVERLAY_SELECT_STAKE);
       else if (button_pressed(PSP_CTRL_CIRCLE))
         change_stage(STAGE_MAIN_MENU);
       break;
@@ -344,8 +354,9 @@ void handle_controls() {
     case STAGE_GAME_OVER:
       if (button_pressed(PSP_CTRL_CROSS)) {
         Deck current_deck = state.game.deck_type;
+        Stake current_stake = state.game.stake;
         game_destroy();
-        game_init(current_deck);
+        game_init(current_deck, current_stake);
       }
 
       break;
