@@ -259,6 +259,16 @@ uint8_t handle_navigation_controls() {
     }
   }
 
+  if (section == NAVIGATION_SELECT_STAKE) {
+    if (button_pressed(PSP_CTRL_CROSS)) {
+      game_init(state.prev_navigation.hovered);
+      return 1;
+    } else if (button_pressed(PSP_CTRL_CIRCLE)) {
+      change_overlay(OVERLAY_NONE);
+      return 1;
+    }
+  }
+
   if (section == NAVIGATION_OVERLAY_MENU) {
     if (button_pressed(PSP_CTRL_CROSS)) {
       overlay_menu_button_click();
