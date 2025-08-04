@@ -688,47 +688,20 @@ void render_cash_out() {
 
 void render_game_over() { CLAY_TEXT(CLAY_STRING("You've lost:("), WHITE_TEXT_CONFIG); }
 
-void render_overlay_select_stake() {
-  CLAY({.id = CLAY_ID("Overlay"),
-        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
-        .layout =
-            {
-                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
-            },
-        .backgroundColor = {0, 0, 0, 150}}) {
-    Clay_Color bg = COLOR_CARD_BG;
-    bg.a = 200;
-
-    CLAY({.layout = {.sizing = {CLAY_SIZING_PERCENT(0.5), CLAY_SIZING_FIXED(64)},
-                     .padding = CLAY_PADDING_ALL(8),
-                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                     .childGap = 4},
-          .backgroundColor = bg}) {
-      Clay_String stake_name;
-      append_clay_string(&stake_name, "%s", get_stake_name(state.navigation.hovered));
-
-      Clay_String stake_description;
-      append_clay_string(&stake_description, "%s", get_stake_description(state.navigation.hovered));
-
-      CLAY_TEXT(stake_name, WHITE_TEXT_CONFIG);
-      CLAY_TEXT(stake_description, WHITE_TEXT_CONFIG);
-    }
-  }
-}
+const Clay_ElementDeclaration overlay_bg_config =
+    (Clay_ElementDeclaration){.floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
+                              .layout =
+                                  {
+                                      .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                                  },
+                              .backgroundColor = {0, 0, 0, 150}};
 
 const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"), CLAY_STRING("Restart"),
                                             CLAY_STRING("Go to main menu")};
 
 void render_overlay_menu() {
-  CLAY({.id = CLAY_ID("Overlay"),
-        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
-        .layout =
-            {
-                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
-            },
-        .backgroundColor = {0, 0, 0, 150}}) {
+  CLAY(overlay_bg_config) {
     CLAY({.layout = {
               .sizing = {CLAY_SIZING_FIT(0), CLAY_SIZING_FIT(0)},
               .layoutDirection = CLAY_TOP_TO_BOTTOM,
@@ -749,18 +722,30 @@ void render_overlay_menu() {
   }
 }
 
+void render_overlay_select_stake() {
+  CLAY(overlay_bg_config) {
+    Clay_Color bg = COLOR_CARD_BG;
+    bg.a = 200;
+
+    CLAY({.layout = {.sizing = {CLAY_SIZING_PERCENT(0.5), CLAY_SIZING_FIXED(64)},
+                     .padding = CLAY_PADDING_ALL(8),
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 4},
+          .backgroundColor = bg}) {
+      Clay_String stake_name;
+      append_clay_string(&stake_name, "%s", get_stake_name(state.navigation.hovered));
+
+      Clay_String stake_description;
+      append_clay_string(&stake_description, "%s", get_stake_description(state.navigation.hovered));
+
+      CLAY_TEXT(stake_name, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(stake_description, WHITE_TEXT_CONFIG);
+    }
+  }
+}
+
 void render_overlay_poker_hands() {
-  CLAY({.id = CLAY_ID("Overlay"),
-        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
-        .layout =
-            {
-                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
-                .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                .childGap = 4,
-                .padding = CLAY_PADDING_ALL(8),
-            },
-        .backgroundColor = {0, 0, 0, 150}}) {
+  CLAY(overlay_bg_config) {
     Clay_Color bg = COLOR_CARD_BG;
     bg.a = 200;
 
