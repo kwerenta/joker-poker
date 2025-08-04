@@ -63,6 +63,9 @@ void update_render_commands() {
     case OVERLAY_MENU:
       render_overlay_menu();
       break;
+    case OVERLAY_SELECT_STAKE:
+      render_overlay_select_stake();
+      break;
     case OVERLAY_POKER_HANDS:
       render_overlay_poker_hands();
       break;
@@ -128,30 +131,17 @@ void render_select_deck() {
         CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
                          .layoutDirection = CLAY_TOP_TO_BOTTOM,
                          .childGap = 4}}) {
+          Deck deck = get_current_section() == NAVIGATION_SELECT_DECK ? state.navigation.hovered
+                                                                      : state.prev_navigation.hovered;
           Clay_String deck_name;
-          append_clay_string(&deck_name, "%s", get_deck_name(state.navigation.hovered));
+          append_clay_string(&deck_name, "%s", get_deck_name(deck));
 
           Clay_String deck_description;
-          append_clay_string(&deck_description, "%s", get_deck_description(state.navigation.hovered));
+          append_clay_string(&deck_description, "%s", get_deck_description(deck));
 
           CLAY_TEXT(deck_name, WHITE_TEXT_CONFIG);
           CLAY_TEXT(deck_description, WHITE_TEXT_CONFIG);
         }
-      }
-
-      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
-                       .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                       .childGap = 4},
-            .border = {.color = get_current_section() == NAVIGATION_SELECT_STAKE ? COLOR_WHITE : COLOR_MULT,
-                       .width = CLAY_BORDER_OUTSIDE(1)}}) {
-        Clay_String stake_name;
-        append_clay_string(&stake_name, "%s", get_stake_name(state.navigation.hovered));
-
-        Clay_String stake_description;
-        append_clay_string(&stake_description, "%s", get_stake_description(state.navigation.hovered));
-
-        CLAY_TEXT(stake_name, WHITE_TEXT_CONFIG);
-        CLAY_TEXT(stake_description, WHITE_TEXT_CONFIG);
       }
     }
   }
@@ -697,6 +687,35 @@ void render_cash_out() {
 }
 
 void render_game_over() { CLAY_TEXT(CLAY_STRING("You've lost:("), WHITE_TEXT_CONFIG); }
+
+void render_overlay_select_stake() {
+  CLAY({.id = CLAY_ID("Overlay"),
+        .floating = {.zIndex = 10, .attachTo = CLAY_ATTACH_TO_ROOT},
+        .layout =
+            {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+            },
+        .backgroundColor = {0, 0, 0, 150}}) {
+    Clay_Color bg = COLOR_CARD_BG;
+    bg.a = 200;
+
+    CLAY({.layout = {.sizing = {CLAY_SIZING_PERCENT(0.5), CLAY_SIZING_FIXED(64)},
+                     .padding = CLAY_PADDING_ALL(8),
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 4},
+          .backgroundColor = bg}) {
+      Clay_String stake_name;
+      append_clay_string(&stake_name, "%s", get_stake_name(state.navigation.hovered));
+
+      Clay_String stake_description;
+      append_clay_string(&stake_description, "%s", get_stake_description(state.navigation.hovered));
+
+      CLAY_TEXT(stake_name, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(stake_description, WHITE_TEXT_CONFIG);
+    }
+  }
+}
 
 const Clay_String overlay_menu_buttons[] = {CLAY_STRING("Continue"), CLAY_STRING("Poker hands"), CLAY_STRING("Restart"),
                                             CLAY_STRING("Go to main menu")};

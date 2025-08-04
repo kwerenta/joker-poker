@@ -14,12 +14,7 @@ const NavigationRow jokers_consumables_row = {2, {NAVIGATION_JOKERS, NAVIGATION_
 
 static const NavigationLayout stage_nav_layouts[] = {
     {.row_count = 1, .rows = {{1, {NAVIGATION_MAIN_MENU}}}},
-    {.row_count = 2,
-     .rows =
-         {
-             {1, {NAVIGATION_SELECT_DECK}},
-             {1, {NAVIGATION_SELECT_STAKE}},
-         }},
+    {.row_count = 1, .rows = {{1, {NAVIGATION_SELECT_DECK}}}},
     {.row_count = 0},
     {.row_count = 2,
      .rows =
@@ -48,6 +43,7 @@ static const NavigationLayout stage_nav_layouts[] = {
 static const NavigationLayout overlay_nav_layouts[] = {
     {.row_count = 0},
     {.row_count = 1, .rows = {{1, {NAVIGATION_OVERLAY_MENU}}}},
+    {.row_count = 1, .rows = {{1, {NAVIGATION_SELECT_STAKE}}}},
     {.row_count = 0},
 };
 
@@ -169,6 +165,7 @@ uint8_t get_nav_section_size(NavigationSection section) {
       break;
     case NAVIGATION_SELECT_STAKE:
       max_value = 8;
+      break;
     case NAVIGATION_HAND:
       max_value = cvector_size(state.game.hand.cards);
       break;

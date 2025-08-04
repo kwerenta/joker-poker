@@ -293,7 +293,8 @@ void handle_controls() {
 
     case STAGE_SELECT_DECK:
       if (button_pressed(PSP_CTRL_CROSS))
-        game_init(state.navigation.hovered);
+        // game_init(state.navigation.hovered);
+        change_overlay(OVERLAY_SELECT_STAKE);
       else if (button_pressed(PSP_CTRL_CIRCLE))
         change_stage(STAGE_MAIN_MENU);
       break;
