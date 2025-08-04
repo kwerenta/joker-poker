@@ -724,14 +724,11 @@ void render_overlay_menu() {
 
 void render_overlay_select_stake() {
   CLAY(overlay_bg_config) {
-    Clay_Color bg = COLOR_CARD_BG;
-    bg.a = 200;
-
     CLAY({.layout = {.sizing = {CLAY_SIZING_PERCENT(0.5), CLAY_SIZING_FIXED(64)},
                      .padding = CLAY_PADDING_ALL(8),
                      .layoutDirection = CLAY_TOP_TO_BOTTOM,
                      .childGap = 4},
-          .backgroundColor = bg}) {
+          .backgroundColor = COLOR_CARD_BG_ALPHA(200)}) {
       Clay_String stake_name;
       append_clay_string(&stake_name, "%s", get_stake_name(state.navigation.hovered));
 
@@ -746,11 +743,8 @@ void render_overlay_select_stake() {
 
 void render_overlay_poker_hands() {
   CLAY(overlay_bg_config) {
-    Clay_Color bg = COLOR_CARD_BG;
-    bg.a = 200;
-
     CLAY({.id = CLAY_ID_LOCAL("Wrapper"),
-          .backgroundColor = bg,
+          .backgroundColor = COLOR_CARD_BG_ALPHA(200),
           .layout = {
               .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
               .padding = CLAY_PADDING_ALL(4),
