@@ -678,7 +678,9 @@ double get_required_score(uint8_t ante, uint8_t blind) {
                        : 2);
 }
 
-uint8_t get_blind_money(uint8_t blind) { return blind == 0 ? 3 : blind == 1 ? 4 : 5; }
+uint8_t get_blind_money(uint8_t blind) {
+  return blind == 0 ? state.game.stake >= STAKE_RED ? 0 : 3 : blind == 1 ? 4 : 5;
+}
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
 
