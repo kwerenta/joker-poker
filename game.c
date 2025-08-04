@@ -647,6 +647,52 @@ ScorePair get_poker_hand_total_score(uint16_t hand_union) {
 }
 
 double get_ante_base_score(uint8_t ante) {
+  if (state.game.stake >= STAKE_PURPLE) {
+    switch (ante) {
+      case 0:
+        return 100;
+      case 1:
+        return 300;
+      case 2:
+        return 1000;
+      case 3:
+        return 3200;
+      case 4:
+        return 9000;
+      case 5:
+        return 25000;
+      case 6:
+        return 60000;
+      case 7:
+        return 110000;
+      case 8:
+        return 200000;
+    }
+  }
+
+  if (state.game.stake >= STAKE_GREEN) {
+    switch (ante) {
+      case 0:
+        return 100;
+      case 1:
+        return 300;
+      case 2:
+        return 900;
+      case 3:
+        return 2600;
+      case 4:
+        return 8000;
+      case 5:
+        return 20000;
+      case 6:
+        return 36000;
+      case 7:
+        return 60000;
+      case 8:
+        return 100000;
+    }
+  }
+
   switch (ante) {
     case 0:
       return 100;
