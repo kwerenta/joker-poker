@@ -332,6 +332,10 @@ void handle_controls() {
       if (button_pressed(PSP_CTRL_CROSS)) get_cash_out();
       break;
 
+    case STAGE_SELECT_BLIND:
+      if (button_pressed(PSP_CTRL_CROSS)) change_stage(STAGE_GAME);
+      break;
+
     case STAGE_SHOP:
       if (button_pressed(PSP_CTRL_CIRCLE)) {
         exit_shop();
