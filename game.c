@@ -38,7 +38,7 @@ void game_init(Deck deck, Stake stake) {
   state.game.hands.remaining = state.game.hands.total;
   state.game.discards.remaining = state.game.discards.total;
 
-  change_stage(STAGE_GAME);
+  change_stage(STAGE_SELECT_BLIND);
 
   state.game.fool_last_used.was_used = 0;
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
