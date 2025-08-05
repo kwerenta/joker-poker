@@ -1153,5 +1153,5 @@ void exit_shop() {
   fill_hand();
   sort_hand();
 
-  change_stage(STAGE_GAME);
+  change_stage(STAGE_SELECT_BLIND);
 }

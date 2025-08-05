@@ -61,6 +61,7 @@ void render_shop();
 void render_booster_pack_content();
 
 void render_cash_out();
+void render_select_blind();
 
 void render_game_over();
 

@@ -47,6 +47,9 @@ void update_render_commands() {
         case STAGE_SHOP:
           render_shop();
           break;
+        case STAGE_SELECT_BLIND:
+          render_select_blind();
+          break;
         case STAGE_GAME_OVER:
           render_game_over();
           break;
@@ -682,6 +685,86 @@ void render_cash_out() {
           CLAY_TEXT(interest_money, WHITE_TEXT_CONFIG);
         }
       }
+    }
+  }
+}
+
+void render_select_blind() {
+  CLAY({.id = CLAY_ID("SelectBlind"),
+        .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                   .childGap = 16,
+                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+                   .padding = {.top = 16}}}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(1.0f)},
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_TOP},
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 4,
+                     .padding = CLAY_PADDING_ALL(8)},
+          .backgroundColor = COLOR_CARD_BG}) {
+      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
+                       .padding = {.top = 4, .bottom = 4},
+                       .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+            .backgroundColor = COLOR_MONEY}) {
+        CLAY_TEXT(CLAY_STRING("Select"), WHITE_TEXT_CONFIG);
+      }
+
+      CLAY_TEXT(CLAY_STRING("Blind 1"), WHITE_TEXT_CONFIG);
+
+      Clay_String score;
+      append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, 0));
+      CLAY_TEXT(score, WHITE_TEXT_CONFIG);
+
+      Clay_String money;
+      append_clay_string(&money, "Reward: $%d", get_blind_money(0));
+      CLAY_TEXT(money, WHITE_TEXT_CONFIG);
+    }
+
+    CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(0.85f)},
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_TOP},
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 4,
+                     .padding = CLAY_PADDING_ALL(8)},
+          .backgroundColor = COLOR_CARD_BG}) {
+      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
+                       .padding = {.top = 4, .bottom = 4},
+                       .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+            .backgroundColor = COLOR_CARD_LIGHT_BG}) {
+        CLAY_TEXT(CLAY_STRING("Upcoming"), WHITE_TEXT_CONFIG);
+      }
+
+      CLAY_TEXT(CLAY_STRING("Blind 2"), WHITE_TEXT_CONFIG);
+
+      Clay_String score;
+      append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, 1));
+      CLAY_TEXT(score, WHITE_TEXT_CONFIG);
+
+      Clay_String money;
+      append_clay_string(&money, "Reward: $%d", get_blind_money(1));
+      CLAY_TEXT(money, WHITE_TEXT_CONFIG);
+    }
+
+    CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(0.85f)},
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_TOP},
+                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                     .childGap = 4,
+                     .padding = CLAY_PADDING_ALL(8)},
+          .backgroundColor = COLOR_CARD_BG}) {
+      CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
+                       .padding = {.top = 4, .bottom = 4},
+                       .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+            .backgroundColor = COLOR_CARD_LIGHT_BG}) {
+        CLAY_TEXT(CLAY_STRING("Upcoming"), WHITE_TEXT_CONFIG);
+      }
+
+      CLAY_TEXT(CLAY_STRING("Blind 3"), WHITE_TEXT_CONFIG);
+
+      Clay_String score;
+      append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, 2));
+      CLAY_TEXT(score, WHITE_TEXT_CONFIG);
+
+      Clay_String money;
+      append_clay_string(&money, "Reward: $%d", get_blind_money(2));
+      CLAY_TEXT(money, WHITE_TEXT_CONFIG);
     }
   }
 }
