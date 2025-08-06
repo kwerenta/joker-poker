@@ -696,10 +696,10 @@ void render_cash_out() {
 
 void render_blind_element(uint8_t blind_index) {
   Blind *blind = &state.game.blinds[blind_index];
-  uint8_t is_next_blind = blind_index == state.game.current_blind;
+  uint8_t is_current_blind = blind_index == state.game.current_blind;
 
   CLAY({.id = CLAY_IDI_LOCAL("Blind", blind_index),
-        .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_next_blind ? 1.0f : 0.85f)},
+        .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_current_blind ? 1.0f : 0.85f)},
                    .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_TOP},
                    .layoutDirection = CLAY_TOP_TO_BOTTOM,
                    .childGap = 4,
@@ -708,8 +708,12 @@ void render_blind_element(uint8_t blind_index) {
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = is_next_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
-      CLAY_TEXT(is_next_blind ? CLAY_STRING("Select") : CLAY_STRING("Upcoming"), WHITE_TEXT_CONFIG);
+          .backgroundColor = is_current_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
+      CLAY_TEXT(is_current_blind                         ? CLAY_STRING("Select")
+                : blind->was_skipped                     ? CLAY_STRING("Skipped")
+                : blind_index < state.game.current_blind ? CLAY_STRING("Defeated")
+                                                         : CLAY_STRING("Upcoming"),
+                WHITE_TEXT_CONFIG);
     }
 
     Clay_String blind_name;
