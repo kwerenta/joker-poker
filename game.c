@@ -287,7 +287,7 @@ void play_hand() {
   }
 }
 
-void get_cash_out() {
+void cash_out() {
   state.game.money += get_interest_money() + get_hands_money() + get_discards_money() +
                       get_blind_money(state.game.blinds[state.game.current_blind].type);
 

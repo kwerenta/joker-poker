@@ -363,7 +363,7 @@ uint8_t get_hands_money();
 uint8_t get_discards_money();
 uint8_t get_interest_money();
 
-void get_cash_out();
+void cash_out();
 
 uint8_t use_consumable(Consumable *consumable);
 uint8_t add_item_to_player(ShopItem *item);
