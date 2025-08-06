@@ -356,9 +356,9 @@ ScorePair get_poker_hand_base_score(uint16_t hand_union);
 ScorePair get_planet_card_base_score(uint16_t hand_union);
 ScorePair get_poker_hand_total_score(uint16_t hand_union);
 double get_ante_base_score(uint8_t ante);
-double get_required_score(uint8_t ante, Blind *blind);
+double get_required_score(uint8_t ante, BlindType blind_type);
 
-uint8_t get_blind_money(Blind *blind);
+uint8_t get_blind_money(BlindType blind_type);
 uint8_t get_hands_money();
 uint8_t get_discards_money();
 uint8_t get_interest_money();

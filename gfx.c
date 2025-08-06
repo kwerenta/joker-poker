@@ -459,7 +459,7 @@ void render_sidebar() {
                 CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
       Clay_String required_score;
       append_clay_string(&required_score, "%.0lf",
-                         get_required_score(state.game.ante, &state.game.blinds[state.game.current_blind]));
+                         get_required_score(state.game.ante, state.game.blinds[state.game.current_blind].type));
 
       CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
     }
@@ -650,7 +650,7 @@ void render_cash_out() {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
       uint8_t discards = get_discards_money();
-      uint8_t blind = get_blind_money(&state.game.blinds[state.game.current_blind]);
+      uint8_t blind = get_blind_money(state.game.blinds[state.game.current_blind].type);
 
       CLAY({.layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
@@ -715,11 +715,11 @@ void render_blind_element(uint8_t blind_index) {
     CLAY_TEXT(blind_name, WHITE_TEXT_CONFIG);
 
     Clay_String score;
-    append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, blind));
+    append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, blind->type));
     CLAY_TEXT(score, WHITE_TEXT_CONFIG);
 
     Clay_String money;
-    append_clay_string(&money, "Reward: $%d", get_blind_money(blind));
+    append_clay_string(&money, "Reward: $%d", get_blind_money(blind->type));
     CLAY_TEXT(money, WHITE_TEXT_CONFIG);
   }
 }

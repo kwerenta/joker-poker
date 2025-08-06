@@ -270,7 +270,7 @@ void play_hand() {
   else
     state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
-  double required_score = get_required_score(state.game.ante, &state.game.blinds[state.game.current_blind]);
+  double required_score = get_required_score(state.game.ante, state.game.blinds[state.game.current_blind].type);
 
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
@@ -289,7 +289,7 @@ void play_hand() {
 
 void get_cash_out() {
   state.game.money += get_interest_money() + get_hands_money() + get_discards_money() +
-                      get_blind_money(&state.game.blinds[state.game.current_blind]);
+                      get_blind_money(state.game.blinds[state.game.current_blind].type);
 
   state.game.score = 0;
 
@@ -722,15 +722,15 @@ double get_ante_base_score(uint8_t ante) {
   return 0;
 }
 
-double get_required_score(uint8_t ante, Blind *blind) {
+double get_required_score(uint8_t ante, BlindType blind_type) {
   return (state.game.deck_type == DECK_PLASMA ? 2 : 1) * get_ante_base_score(ante) *
-         (blind->type == BLIND_SMALL ? 1
-          : blind->type == BLIND_BIG ? 1.5
-                                     : 2);
+         (blind_type == BLIND_SMALL ? 1
+          : blind_type == BLIND_BIG ? 1.5
+                                    : 2);
 }
 
-uint8_t get_blind_money(Blind *blind) {
-  return blind->type == BLIND_SMALL ? state.game.stake >= STAKE_RED ? 0 : 3 : blind->type == BLIND_BIG ? 4 : 5;
+uint8_t get_blind_money(BlindType blind_type) {
+  return blind_type == BLIND_SMALL ? state.game.stake >= STAKE_RED ? 0 : 3 : blind_type == BLIND_BIG ? 4 : 5;
 }
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
