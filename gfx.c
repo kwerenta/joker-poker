@@ -446,10 +446,12 @@ void render_sidebar() {
       Clay_String stage;
       if (state.stage == STAGE_GAME)
         append_clay_string(&stage, "%s", get_blind_name(state.game.blinds[state.game.current_blind].type));
+      else if (state.stage == STAGE_SELECT_BLIND)
+        append_clay_string(&stage, "Choose your next Blind");
       else
         append_clay_string(&stage, "SHOP");
 
-      CLAY_TEXT(stage, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(stage, CLAY_TEXT_CONFIG({.textAlignment = CLAY_TEXT_ALIGN_CENTER, .textColor = COLOR_WHITE}));
     }
 
     CLAY(sidebar_block_config) {
