@@ -454,14 +454,16 @@ void render_sidebar() {
       CLAY_TEXT(stage, CLAY_TEXT_CONFIG({.textAlignment = CLAY_TEXT_ALIGN_CENTER, .textColor = COLOR_WHITE}));
     }
 
-    CLAY(sidebar_block_config) {
-      CLAY_TEXT(CLAY_STRING("Score at least:"),
-                CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
-      Clay_String required_score;
-      append_clay_string(&required_score, "%.0lf",
-                         get_required_score(state.game.ante, state.game.blinds[state.game.current_blind].type));
+    if (state.stage == STAGE_GAME) {
+      CLAY(sidebar_block_config) {
+        CLAY_TEXT(CLAY_STRING("Score at least:"),
+                  CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
+        Clay_String required_score;
+        append_clay_string(&required_score, "%.0lf",
+                           get_required_score(state.game.ante, state.game.blinds[state.game.current_blind].type));
 
-      CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+        CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+      }
     }
 
     CLAY({.id = CLAY_ID("Score"),
