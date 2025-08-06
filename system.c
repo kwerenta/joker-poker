@@ -333,7 +333,10 @@ void handle_controls() {
       break;
 
     case STAGE_SELECT_BLIND:
-      if (button_pressed(PSP_CTRL_CROSS)) change_stage(STAGE_GAME);
+      if (button_pressed(PSP_CTRL_CROSS))
+        select_blind();
+      else if (button_pressed(PSP_CTRL_TRIANGLE))
+        skip_blind();
       break;
 
     case STAGE_SHOP:
@@ -362,7 +365,6 @@ void handle_controls() {
         game_destroy();
         game_init(current_deck, current_stake);
       }
-
       break;
   }
 

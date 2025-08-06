@@ -1158,3 +1158,13 @@ void exit_shop() {
 
   change_stage(STAGE_SELECT_BLIND);
 }
+
+void select_blind() { change_stage(STAGE_GAME); }
+
+void skip_blind() {
+  Blind *blind = &state.game.blinds[state.game.current_blind];
+  if (blind->type > BLIND_BIG) return;
+
+  blind->was_skipped = 1;
+  state.game.current_blind++;
+}

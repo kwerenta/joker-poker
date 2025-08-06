@@ -382,4 +382,7 @@ void fill_shop_items();
 void restock_shop();
 void exit_shop();
 
+void select_blind();
+void skip_blind();
+
 #endif
