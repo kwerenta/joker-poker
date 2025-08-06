@@ -416,3 +416,15 @@ char *get_stake_description(Stake stake) {
              "bought for $1)";
   }
 }
+
+char *get_blind_name(BlindType blind_type) {
+  switch (blind_type) {
+    case BLIND_SMALL:
+      return "Small Blind";
+    case BLIND_BIG:
+      return "Big Blind";
+
+    case BLIND_BOSS:
+      return "Boss Blind";
+  }
+}

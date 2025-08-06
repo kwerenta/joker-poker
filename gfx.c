@@ -445,7 +445,7 @@ void render_sidebar() {
           .backgroundColor = COLOR_MONEY}) {
       Clay_String stage;
       if (state.stage == STAGE_GAME)
-        append_clay_string(&stage, "Blind %d", state.game.current_blind + 1);
+        append_clay_string(&stage, "%s", get_blind_name(state.game.blinds[state.game.current_blind].type));
       else
         append_clay_string(&stage, "SHOP");
 
@@ -690,10 +690,11 @@ void render_cash_out() {
   }
 }
 
-void render_blind_element(uint8_t blind) {
-  uint8_t is_next_blind = blind == state.game.current_blind;
+void render_blind_element(uint8_t blind_index) {
+  Blind *blind = &state.game.blinds[blind_index];
+  uint8_t is_next_blind = blind_index == state.game.current_blind;
 
-  CLAY({.id = CLAY_IDI_LOCAL("Blind", blind),
+  CLAY({.id = CLAY_IDI_LOCAL("Blind", blind_index),
         .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_next_blind ? 1.0f : 0.85f)},
                    .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_TOP},
                    .layoutDirection = CLAY_TOP_TO_BOTTOM,
@@ -708,16 +709,15 @@ void render_blind_element(uint8_t blind) {
     }
 
     Clay_String blind_name;
-    append_clay_string(&blind_name, "Blind %d", blind);
+    append_clay_string(&blind_name, "%s", get_blind_name(blind->type));
     CLAY_TEXT(blind_name, WHITE_TEXT_CONFIG);
 
     Clay_String score;
-    append_clay_string(&score, "Score at least:\n%.0lf",
-                       get_required_score(state.game.ante, &state.game.blinds[blind]));
+    append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, blind));
     CLAY_TEXT(score, WHITE_TEXT_CONFIG);
 
     Clay_String money;
-    append_clay_string(&money, "Reward: $%d", get_blind_money(&state.game.blinds[blind]));
+    append_clay_string(&money, "Reward: $%d", get_blind_money(blind));
     CLAY_TEXT(money, WHITE_TEXT_CONFIG);
   }
 }
