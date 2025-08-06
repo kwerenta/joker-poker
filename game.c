@@ -1148,8 +1148,11 @@ void exit_shop() {
   state.game.current_blind++;
 
   if (state.game.current_blind > 2) {
-    state.game.current_blind = 0;
     state.game.ante++;
+
+    state.game.current_blind = 0;
+    state.game.blinds[0].was_skipped = 0;
+    state.game.blinds[1].was_skipped = 0;
   }
 
   shuffle_deck();
