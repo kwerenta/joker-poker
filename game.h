@@ -112,6 +112,18 @@ typedef struct {
   uint32_t chips;
 } ScorePair;
 
+typedef enum {
+  BLIND_SMALL,
+  BLIND_BIG,
+
+  BLIND_BOSS,
+} BlindType;
+
+typedef struct {
+  BlindType type;
+  uint8_t was_skipped;
+} Blind;
+
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
 
 typedef enum { ACTIVATION_INDEPENDENT, ACTIVATION_ON_SCORED, ACTIVATION_ON_HELD } ActivationType;
@@ -297,7 +309,9 @@ typedef struct {
   double score;
   uint8_t ante;
   uint8_t round;
-  uint8_t blind;
+
+  uint8_t current_blind;
+  Blind blinds[3];
 
   UsageState hands;
   UsageState discards;
@@ -342,9 +356,9 @@ ScorePair get_poker_hand_base_score(uint16_t hand_union);
 ScorePair get_planet_card_base_score(uint16_t hand_union);
 ScorePair get_poker_hand_total_score(uint16_t hand_union);
 double get_ante_base_score(uint8_t ante);
-double get_required_score(uint8_t ante, uint8_t blind);
+double get_required_score(uint8_t ante, Blind *blind);
 
-uint8_t get_blind_money(uint8_t blind);
+uint8_t get_blind_money(Blind *blind);
 uint8_t get_hands_money();
 uint8_t get_discards_money();
 uint8_t get_interest_money();

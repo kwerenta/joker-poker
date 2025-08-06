@@ -445,7 +445,7 @@ void render_sidebar() {
           .backgroundColor = COLOR_MONEY}) {
       Clay_String stage;
       if (state.stage == STAGE_GAME)
-        append_clay_string(&stage, "Blind %d", state.game.blind + 1);
+        append_clay_string(&stage, "Blind %d", state.game.current_blind + 1);
       else
         append_clay_string(&stage, "SHOP");
 
@@ -456,7 +456,8 @@ void render_sidebar() {
       CLAY_TEXT(CLAY_STRING("Score at least:"),
                 CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
       Clay_String required_score;
-      append_clay_string(&required_score, "%.0lf", get_required_score(state.game.ante, state.game.blind));
+      append_clay_string(&required_score, "%.0lf",
+                         get_required_score(state.game.ante, &state.game.blinds[state.game.current_blind]));
 
       CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
     }
@@ -647,7 +648,7 @@ void render_cash_out() {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
       uint8_t discards = get_discards_money();
-      uint8_t blind = get_blind_money(state.game.blind);
+      uint8_t blind = get_blind_money(&state.game.blinds[state.game.current_blind]);
 
       CLAY({.layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
@@ -690,7 +691,7 @@ void render_cash_out() {
 }
 
 void render_blind_element(uint8_t blind) {
-  uint8_t is_next_blind = blind == state.game.blind;
+  uint8_t is_next_blind = blind == state.game.current_blind;
 
   CLAY({.id = CLAY_IDI_LOCAL("Blind", blind),
         .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_next_blind ? 1.0f : 0.85f)},
@@ -711,11 +712,12 @@ void render_blind_element(uint8_t blind) {
     CLAY_TEXT(blind_name, WHITE_TEXT_CONFIG);
 
     Clay_String score;
-    append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, blind));
+    append_clay_string(&score, "Score at least:\n%.0lf",
+                       get_required_score(state.game.ante, &state.game.blinds[blind]));
     CLAY_TEXT(score, WHITE_TEXT_CONFIG);
 
     Clay_String money;
-    append_clay_string(&money, "Reward: $%d", get_blind_money(blind));
+    append_clay_string(&money, "Reward: $%d", get_blind_money(&state.game.blinds[blind]));
     CLAY_TEXT(money, WHITE_TEXT_CONFIG);
   }
 }
