@@ -300,6 +300,15 @@ void cash_out() {
   cvector_clear(state.game.hand.cards);
   cvector_copy(state.game.full_deck, state.game.deck);
 
+  if (state.game.current_blind->type > BLIND_BIG) {
+    state.game.ante++;
+
+    state.game.current_blind = &state.game.blinds[0];
+    for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
+  } else {
+    state.game.current_blind++;
+  }
+
   change_stage(STAGE_SHOP);
   restock_shop();
 }
@@ -1126,7 +1135,7 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  if (is_ante_first_shop) {
+  if (is_ante_first_shop || state.game.round == 1) {
     uint8_t count = 0;
     for (uint8_t i = 0; i < 32; i++) {
       if (state.game.vouchers & (1 << i)) continue;
@@ -1150,17 +1159,6 @@ void restock_shop() {
 }
 
 void exit_shop() {
-  if (state.game.current_blind->type > BLIND_BIG) {
-    state.game.ante++;
-
-    state.game.current_blind = &state.game.blinds[0];
-    for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
-  } else {
-    state.game.current_blind++;
-  }
-
-  state.game.round++;
-
   shuffle_deck();
   fill_hand();
   sort_hand();
@@ -1168,7 +1166,10 @@ void exit_shop() {
   change_stage(STAGE_SELECT_BLIND);
 }
 
-void select_blind() { change_stage(STAGE_GAME); }
+void select_blind() {
+  state.game.round++;
+  change_stage(STAGE_GAME);
+}
 
 void skip_blind() {
   if (state.game.current_blind->type > BLIND_BIG) return;
