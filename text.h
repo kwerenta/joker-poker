@@ -26,4 +26,6 @@ char *get_deck_description(Deck deck);
 char *get_stake_name(Stake stake);
 char *get_stake_description(Stake stake);
 
+char *get_blind_name(BlindType blind_type);
+
 #endif

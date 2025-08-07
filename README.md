@@ -80,5 +80,8 @@ There are currently no in-game control hints.
   - SQUARE - play selected cards
   - TRIANGLE - discard selected cards
   - CIRCLE - deselect all cards
-- BOOSTER PACK
+- Choose blind
+  - CROSS - select current blind
+  - TRIANGLE - skip current blind
+- Booster Pack
   - CIRCLE - skip booster pack

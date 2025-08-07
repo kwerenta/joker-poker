@@ -112,6 +112,18 @@ typedef struct {
   uint32_t chips;
 } ScorePair;
 
+typedef enum {
+  BLIND_SMALL,
+  BLIND_BIG,
+
+  BLIND_BOSS,
+} BlindType;
+
+typedef struct {
+  BlindType type;
+  uint8_t is_active;
+} Blind;
+
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
 
 typedef enum { ACTIVATION_INDEPENDENT, ACTIVATION_ON_SCORED, ACTIVATION_ON_HELD } ActivationType;
@@ -297,7 +309,9 @@ typedef struct {
   double score;
   uint8_t ante;
   uint8_t round;
-  uint8_t blind;
+
+  Blind *current_blind;
+  Blind blinds[3];
 
   UsageState hands;
   UsageState discards;
@@ -342,14 +356,14 @@ ScorePair get_poker_hand_base_score(uint16_t hand_union);
 ScorePair get_planet_card_base_score(uint16_t hand_union);
 ScorePair get_poker_hand_total_score(uint16_t hand_union);
 double get_ante_base_score(uint8_t ante);
-double get_required_score(uint8_t ante, uint8_t blind);
+double get_required_score(uint8_t ante, BlindType blind_type);
 
-uint8_t get_blind_money(uint8_t blind);
+uint8_t get_blind_money(BlindType blind_type);
 uint8_t get_hands_money();
 uint8_t get_discards_money();
 uint8_t get_interest_money();
 
-void get_cash_out();
+void cash_out();
 
 uint8_t use_consumable(Consumable *consumable);
 uint8_t add_item_to_player(ShopItem *item);
@@ -367,5 +381,8 @@ void skip_booster_pack();
 void fill_shop_items();
 void restock_shop();
 void exit_shop();
+
+void select_blind();
+void skip_blind();
 
 #endif

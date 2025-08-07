@@ -17,8 +17,12 @@ void game_init(Deck deck, Stake stake) {
 
   state.game.score = 0;
   state.game.ante = 1;
-  state.game.blind = 0;
   state.game.round = 0;
+
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .is_active = 1};
+  state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .is_active = 1};
+  state.game.current_blind = &state.game.blinds[0];
 
   state.game.money = 4;
 
@@ -38,7 +42,7 @@ void game_init(Deck deck, Stake stake) {
   state.game.hands.remaining = state.game.hands.total;
   state.game.discards.remaining = state.game.discards.total;
 
-  change_stage(STAGE_GAME);
+  change_stage(STAGE_SELECT_BLIND);
 
   state.game.fool_last_used.was_used = 0;
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
@@ -267,7 +271,7 @@ void play_hand() {
   else
     state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
-  double required_score = get_required_score(state.game.ante, state.game.blind);
+  double required_score = get_required_score(state.game.ante, state.game.current_blind->type);
 
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
@@ -284,9 +288,9 @@ void play_hand() {
   }
 }
 
-void get_cash_out() {
+void cash_out() {
   state.game.money +=
-      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.blind);
+      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.current_blind->type);
 
   state.game.score = 0;
 
@@ -295,6 +299,15 @@ void get_cash_out() {
   state.game.discards.remaining = state.game.discards.total;
   cvector_clear(state.game.hand.cards);
   cvector_copy(state.game.full_deck, state.game.deck);
+
+  if (state.game.current_blind->type > BLIND_BIG) {
+    state.game.ante++;
+
+    state.game.current_blind = &state.game.blinds[0];
+    for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
+  } else {
+    state.game.current_blind++;
+  }
 
   change_stage(STAGE_SHOP);
   restock_shop();
@@ -719,15 +732,15 @@ double get_ante_base_score(uint8_t ante) {
   return 0;
 }
 
-double get_required_score(uint8_t ante, uint8_t blind) {
+double get_required_score(uint8_t ante, BlindType blind_type) {
   return (state.game.deck_type == DECK_PLASMA ? 2 : 1) * get_ante_base_score(ante) *
-         (blind == 0   ? 1
-          : blind == 1 ? 1.5
-                       : 2);
+         (blind_type == BLIND_SMALL ? 1
+          : blind_type == BLIND_BIG ? 1.5
+                                    : 2);
 }
 
-uint8_t get_blind_money(uint8_t blind) {
-  return blind == 0 ? state.game.stake >= STAKE_RED ? 0 : 3 : blind == 1 ? 4 : 5;
+uint8_t get_blind_money(BlindType blind_type) {
+  return blind_type == BLIND_SMALL ? state.game.stake >= STAKE_RED ? 0 : 3 : blind_type == BLIND_BIG ? 4 : 5;
 }
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
@@ -1110,6 +1123,11 @@ void restock_shop() {
   cvector_clear(state.game.shop.items);
   cvector_clear(state.game.shop.booster_packs);
 
+  uint8_t is_ante_first_shop = state.game.current_blind->type == BLIND_SMALL ||
+                               (!state.game.blinds[0].is_active &&
+                                (state.game.current_blind->type == BLIND_BIG ||
+                                 (!state.game.blinds[1].is_active && state.game.current_blind->type > BLIND_BIG)));
+
   fill_shop_items();
 
   for (uint8_t i = 0; i < 2; i++) {
@@ -1117,7 +1135,7 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  if (state.game.blind % 3 == 0) {
+  if (is_ante_first_shop || state.game.round == 1) {
     uint8_t count = 0;
     for (uint8_t i = 0; i < 32; i++) {
       if (state.game.vouchers & (1 << i)) continue;
@@ -1141,17 +1159,21 @@ void restock_shop() {
 }
 
 void exit_shop() {
-  state.game.round++;
-  state.game.blind++;
-
-  if (state.game.blind > 2) {
-    state.game.blind = 0;
-    state.game.ante++;
-  }
-
   shuffle_deck();
   fill_hand();
   sort_hand();
 
+  change_stage(STAGE_SELECT_BLIND);
+}
+
+void select_blind() {
+  state.game.round++;
   change_stage(STAGE_GAME);
+}
+
+void skip_blind() {
+  if (state.game.current_blind->type > BLIND_BIG) return;
+
+  state.game.current_blind->is_active = 0;
+  state.game.current_blind++;
 }

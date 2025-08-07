@@ -47,6 +47,9 @@ void update_render_commands() {
         case STAGE_SHOP:
           render_shop();
           break;
+        case STAGE_SELECT_BLIND:
+          render_select_blind();
+          break;
         case STAGE_GAME_OVER:
           render_game_over();
           break;
@@ -442,20 +445,25 @@ void render_sidebar() {
           .backgroundColor = COLOR_MONEY}) {
       Clay_String stage;
       if (state.stage == STAGE_GAME)
-        append_clay_string(&stage, "Blind %d", state.game.blind + 1);
+        append_clay_string(&stage, "%s", get_blind_name(state.game.current_blind->type));
+      else if (state.stage == STAGE_SELECT_BLIND)
+        append_clay_string(&stage, "Choose your next Blind");
       else
         append_clay_string(&stage, "SHOP");
 
-      CLAY_TEXT(stage, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(stage, CLAY_TEXT_CONFIG({.textAlignment = CLAY_TEXT_ALIGN_CENTER, .textColor = COLOR_WHITE}));
     }
 
-    CLAY(sidebar_block_config) {
-      CLAY_TEXT(CLAY_STRING("Score at least:"),
-                CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
-      Clay_String required_score;
-      append_clay_string(&required_score, "%.0lf", get_required_score(state.game.ante, state.game.blind));
+    if (state.stage == STAGE_GAME) {
+      CLAY(sidebar_block_config) {
+        CLAY_TEXT(CLAY_STRING("Score at least:"),
+                  CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
+        Clay_String required_score;
+        append_clay_string(&required_score, "%.0lf",
+                           get_required_score(state.game.ante, state.game.current_blind->type));
 
-      CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+        CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
+      }
     }
 
     CLAY({.id = CLAY_ID("Score"),
@@ -644,7 +652,7 @@ void render_cash_out() {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
       uint8_t discards = get_discards_money();
-      uint8_t blind = get_blind_money(state.game.blind);
+      uint8_t blind = get_blind_money(state.game.current_blind->type);
 
       CLAY({.layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
@@ -683,6 +691,54 @@ void render_cash_out() {
         }
       }
     }
+  }
+}
+
+void render_blind_element(uint8_t blind_index) {
+  Blind *blind = &state.game.blinds[blind_index];
+  uint8_t is_current_blind = blind == state.game.current_blind;
+
+  CLAY({.id = CLAY_IDI_LOCAL("Blind", blind_index),
+        .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_current_blind ? 1.0f : 0.85f)},
+                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_TOP},
+                   .layoutDirection = CLAY_TOP_TO_BOTTOM,
+                   .childGap = 4,
+                   .padding = CLAY_PADDING_ALL(8)},
+        .backgroundColor = COLOR_CARD_BG}) {
+    CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
+                     .padding = {.top = 4, .bottom = 4},
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+          .backgroundColor = is_current_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
+      CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
+                : !blind->is_active                ? CLAY_STRING("Skipped")
+                : blind < state.game.current_blind ? CLAY_STRING("Defeated")
+                                                   : CLAY_STRING("Upcoming"),
+                WHITE_TEXT_CONFIG);
+    }
+
+    Clay_String blind_name;
+    append_clay_string(&blind_name, "%s", get_blind_name(blind->type));
+    CLAY_TEXT(blind_name, WHITE_TEXT_CONFIG);
+
+    Clay_String score;
+    append_clay_string(&score, "Score at least:\n%.0lf", get_required_score(state.game.ante, blind->type));
+    CLAY_TEXT(score, WHITE_TEXT_CONFIG);
+
+    Clay_String money;
+    append_clay_string(&money, "Reward: $%d", get_blind_money(blind->type));
+    CLAY_TEXT(money, WHITE_TEXT_CONFIG);
+  }
+}
+
+void render_select_blind() {
+  CLAY({.id = CLAY_ID("SelectBlind"),
+        .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+                   .childGap = 16,
+                   .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_BOTTOM},
+                   .padding = {.top = 16}}}) {
+    render_blind_element(0);
+    render_blind_element(1);
+    render_blind_element(2);
   }
 }
 
