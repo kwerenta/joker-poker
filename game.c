@@ -1113,6 +1113,11 @@ void restock_shop() {
   cvector_clear(state.game.shop.items);
   cvector_clear(state.game.shop.booster_packs);
 
+  uint8_t is_ante_first_shop =
+      state.game.current_blind == 0 ||
+      (!state.game.blinds[0].is_active &&
+       (state.game.current_blind == 1 || (!state.game.blinds[1].is_active && state.game.current_blind == 2)));
+
   fill_shop_items();
 
   for (uint8_t i = 0; i < 2; i++) {
@@ -1120,7 +1125,7 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  if (state.game.current_blind % 3 == 0) {
+  if (is_ante_first_shop) {
     uint8_t count = 0;
     for (uint8_t i = 0; i < 32; i++) {
       if (state.game.vouchers & (1 << i)) continue;
