@@ -19,9 +19,9 @@ void game_init(Deck deck, Stake stake) {
   state.game.ante = 1;
   state.game.round = 0;
   state.game.current_blind = 0;
-  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .was_skipped = 0};
-  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .was_skipped = 0};
-  state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .was_skipped = 0};
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .is_active = 1};
+  state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .is_active = 1};
 
   state.game.money = 4;
 
@@ -1151,8 +1151,7 @@ void exit_shop() {
     state.game.ante++;
 
     state.game.current_blind = 0;
-    state.game.blinds[0].was_skipped = 0;
-    state.game.blinds[1].was_skipped = 0;
+    for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
   }
 
   shuffle_deck();
@@ -1168,6 +1167,6 @@ void skip_blind() {
   Blind *blind = &state.game.blinds[state.game.current_blind];
   if (blind->type > BLIND_BIG) return;
 
-  blind->was_skipped = 1;
+  blind->is_active = 0;
   state.game.current_blind++;
 }

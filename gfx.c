@@ -710,7 +710,7 @@ void render_blind_element(uint8_t blind_index) {
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = is_current_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
       CLAY_TEXT(is_current_blind                         ? CLAY_STRING("Select")
-                : blind->was_skipped                     ? CLAY_STRING("Skipped")
+                : !blind->is_active                      ? CLAY_STRING("Skipped")
                 : blind_index < state.game.current_blind ? CLAY_STRING("Defeated")
                                                          : CLAY_STRING("Upcoming"),
                 WHITE_TEXT_CONFIG);

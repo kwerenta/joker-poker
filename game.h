@@ -121,7 +121,7 @@ typedef enum {
 
 typedef struct {
   BlindType type;
-  uint8_t was_skipped;
+  uint8_t is_active;
 } Blind;
 
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
