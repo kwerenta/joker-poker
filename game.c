@@ -18,10 +18,11 @@ void game_init(Deck deck, Stake stake) {
   state.game.score = 0;
   state.game.ante = 1;
   state.game.round = 0;
-  state.game.current_blind = 0;
+
   state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .is_active = 1};
   state.game.blinds[1] = (Blind){.type = BLIND_BIG, .is_active = 1};
   state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .is_active = 1};
+  state.game.current_blind = &state.game.blinds[0];
 
   state.game.money = 4;
 
@@ -270,7 +271,7 @@ void play_hand() {
   else
     state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
-  double required_score = get_required_score(state.game.ante, state.game.blinds[state.game.current_blind].type);
+  double required_score = get_required_score(state.game.ante, state.game.current_blind->type);
 
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
@@ -288,8 +289,8 @@ void play_hand() {
 }
 
 void cash_out() {
-  state.game.money += get_interest_money() + get_hands_money() + get_discards_money() +
-                      get_blind_money(state.game.blinds[state.game.current_blind].type);
+  state.game.money +=
+      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.current_blind->type);
 
   state.game.score = 0;
 
@@ -1113,10 +1114,10 @@ void restock_shop() {
   cvector_clear(state.game.shop.items);
   cvector_clear(state.game.shop.booster_packs);
 
-  uint8_t is_ante_first_shop =
-      state.game.current_blind == 0 ||
-      (!state.game.blinds[0].is_active &&
-       (state.game.current_blind == 1 || (!state.game.blinds[1].is_active && state.game.current_blind == 2)));
+  uint8_t is_ante_first_shop = state.game.current_blind->type == BLIND_SMALL ||
+                               (!state.game.blinds[0].is_active &&
+                                (state.game.current_blind->type == BLIND_BIG ||
+                                 (!state.game.blinds[1].is_active && state.game.current_blind->type > BLIND_BIG)));
 
   fill_shop_items();
 
@@ -1149,15 +1150,16 @@ void restock_shop() {
 }
 
 void exit_shop() {
-  state.game.round++;
-  state.game.current_blind++;
-
-  if (state.game.current_blind > 2) {
+  if (state.game.current_blind->type > BLIND_BIG) {
     state.game.ante++;
 
-    state.game.current_blind = 0;
+    state.game.current_blind = &state.game.blinds[0];
     for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
+  } else {
+    state.game.current_blind++;
   }
+
+  state.game.round++;
 
   shuffle_deck();
   fill_hand();
@@ -1169,9 +1171,8 @@ void exit_shop() {
 void select_blind() { change_stage(STAGE_GAME); }
 
 void skip_blind() {
-  Blind *blind = &state.game.blinds[state.game.current_blind];
-  if (blind->type > BLIND_BIG) return;
+  if (state.game.current_blind->type > BLIND_BIG) return;
 
-  blind->is_active = 0;
+  state.game.current_blind->is_active = 0;
   state.game.current_blind++;
 }

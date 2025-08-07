@@ -445,7 +445,7 @@ void render_sidebar() {
           .backgroundColor = COLOR_MONEY}) {
       Clay_String stage;
       if (state.stage == STAGE_GAME)
-        append_clay_string(&stage, "%s", get_blind_name(state.game.blinds[state.game.current_blind].type));
+        append_clay_string(&stage, "%s", get_blind_name(state.game.current_blind->type));
       else if (state.stage == STAGE_SELECT_BLIND)
         append_clay_string(&stage, "Choose your next Blind");
       else
@@ -460,7 +460,7 @@ void render_sidebar() {
                   CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
         Clay_String required_score;
         append_clay_string(&required_score, "%.0lf",
-                           get_required_score(state.game.ante, state.game.blinds[state.game.current_blind].type));
+                           get_required_score(state.game.ante, state.game.current_blind->type));
 
         CLAY_TEXT(required_score, CLAY_TEXT_CONFIG({.textColor = {255, 63, 52, 255}}));
       }
@@ -652,7 +652,7 @@ void render_cash_out() {
       uint8_t interest = get_interest_money();
       uint8_t hands = get_hands_money();
       uint8_t discards = get_discards_money();
-      uint8_t blind = get_blind_money(state.game.blinds[state.game.current_blind].type);
+      uint8_t blind = get_blind_money(state.game.current_blind->type);
 
       CLAY({.layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
@@ -696,7 +696,7 @@ void render_cash_out() {
 
 void render_blind_element(uint8_t blind_index) {
   Blind *blind = &state.game.blinds[blind_index];
-  uint8_t is_current_blind = blind_index == state.game.current_blind;
+  uint8_t is_current_blind = blind == state.game.current_blind;
 
   CLAY({.id = CLAY_IDI_LOCAL("Blind", blind_index),
         .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_current_blind ? 1.0f : 0.85f)},
@@ -709,10 +709,10 @@ void render_blind_element(uint8_t blind_index) {
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = is_current_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
-      CLAY_TEXT(is_current_blind                         ? CLAY_STRING("Select")
-                : !blind->is_active                      ? CLAY_STRING("Skipped")
-                : blind_index < state.game.current_blind ? CLAY_STRING("Defeated")
-                                                         : CLAY_STRING("Upcoming"),
+      CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
+                : !blind->is_active                ? CLAY_STRING("Skipped")
+                : blind < state.game.current_blind ? CLAY_STRING("Defeated")
+                                                   : CLAY_STRING("Upcoming"),
                 WHITE_TEXT_CONFIG);
     }
 

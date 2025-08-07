@@ -310,7 +310,7 @@ typedef struct {
   uint8_t ante;
   uint8_t round;
 
-  uint8_t current_blind;
+  Blind *current_blind;
   Blind blinds[3];
 
   UsageState hands;
