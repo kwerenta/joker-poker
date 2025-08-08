@@ -428,3 +428,109 @@ char *get_blind_name(BlindType blind_type) {
       return "Boss Blind";
   }
 }
+
+char *get_tag_name(Tag tag) {
+  switch (tag) {
+    case TAG_UNCOMMON:
+      return "Uncommon";
+    case TAG_RARE:
+      return "Rare";
+    case TAG_NEGATIVE:
+      return "Negative";
+    case TAG_FOIL:
+      return "Foil";
+    case TAG_HOLOGRAPHIC:
+      return "Holographic";
+    case TAG_POLYCHROME:
+      return "Polychrome";
+    case TAG_INVESTMENT:
+      return "Investment";
+    case TAG_VOUCHER:
+      return "Voucher";
+    case TAG_BOSS:
+      return "Boss";
+    case TAG_STANDARD:
+      return "Standard";
+    case TAG_CHARM:
+      return "Charm";
+    case TAG_METEOR:
+      return "Meteor";
+    case TAG_BUFFOON:
+      return "Buffoon";
+    case TAG_HANDY:
+      return "Handy";
+    case TAG_GARBAGE:
+      return "Garbage";
+    case TAG_ETHEREAL:
+      return "Ethereal";
+    case TAG_COUPON:
+      return "Coupon";
+    case TAG_DOUBLE:
+      return "Double";
+    case TAG_JUGGLE:
+      return "Juggle";
+    case TAG_D6:
+      return "D6";
+    case TAG_TOPUP:
+      return "Top-up";
+    case TAG_SPEED:
+      return "Speed";
+    case TAG_ORBITAL:
+      return "Orbital";
+    case TAG_ECONOMY:
+      return "Economy";
+  }
+}
+
+char *get_tag_description(Tag tag) {
+  switch (tag) {
+    case TAG_UNCOMMON:
+      return "The next shop will have a free Uncommon Joker";
+    case TAG_RARE:
+      return "The next shop will have a free Rare Joker";
+    case TAG_NEGATIVE:
+      return "The next base edition Joker you find in a shop becomes Negative (+1 joker slot) and free.";
+    case TAG_FOIL:
+      return "The next base edition Joker you find in a shop becomes Foil (+50 chips) and free.";
+    case TAG_HOLOGRAPHIC:
+      return "The next base edition Joker you find in a shop becomes Holographic (+10 mult) and free.";
+    case TAG_POLYCHROME:
+      return "The next base edition Joker you find in a shop becomes Polychrome (X1.5 mult) and free";
+    case TAG_INVESTMENT:
+      return "Gain $25 after defeating the next Boss Blind.";
+    case TAG_VOUCHER:
+      return "Adds a Voucher to the next Shop.";
+    case TAG_BOSS:
+      return "Re-rolls the next Boss Blind.";
+    case TAG_STANDARD:
+      return "Immediately open a free Mega Standard Pack.";
+    case TAG_CHARM:
+      return "Immediately open a free Mega Arcana Pack.";
+    case TAG_METEOR:
+      return "Immediately open a free Mega Celestial Pack.";
+    case TAG_BUFFOON:
+      return "Immediately open a free Mega Buffoon Pack.";
+    case TAG_HANDY:
+      return "Gain $1 for each hand played this run.";
+    case TAG_GARBAGE:
+      return "Gain $1 for each unused discard this run.";
+    case TAG_ETHEREAL:
+      return "Immediately open a free Spectral Pack.";
+    case TAG_COUPON:
+      return "In the next shop, initial Jokers, Consumables, Cards and Booster Packs are free ($0).";
+    case TAG_DOUBLE:
+      return "Gives a copy of the next Tag selected (excluding Double Tags).";
+    case TAG_JUGGLE:
+      return "+3 Hand Size for the next round only.";
+    case TAG_D6:
+      return "In the next Shop, Rerolls start at $0.";
+    case TAG_TOPUP:
+      return "Create up to 2 Common Jokers (if you have space).";
+    case TAG_SPEED:
+      return "Gives $5 for each Blind you've skipped this run.";
+    case TAG_ORBITAL:
+      return "Upgrades specified random Poker Hand by three levels.";
+    case TAG_ECONOMY:
+      return "Doubles your money (adds a maximum of $40).";
+  }
+}
