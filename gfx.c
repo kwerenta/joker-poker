@@ -727,6 +727,24 @@ void render_blind_element(uint8_t blind_index) {
     Clay_String money;
     append_clay_string(&money, "Reward: $%d", get_blind_money(blind->type));
     CLAY_TEXT(money, WHITE_TEXT_CONFIG);
+
+    if (blind->type > BLIND_BIG) continue;
+
+    CLAY_TEXT(CLAY_STRING("or"), WHITE_TEXT_CONFIG);
+    CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
+                     .padding = {.top = 4, .bottom = 4},
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+          .backgroundColor = COLOR_MULT}) {
+      CLAY_TEXT(CLAY_STRING("Skip Blind"), WHITE_TEXT_CONFIG);
+    }
+
+    Clay_String tag_name;
+    append_clay_string(&tag_name, "%s", get_tag_name(blind->tag));
+    CLAY_TEXT(tag_name, WHITE_TEXT_CONFIG);
+
+    Clay_String tag_description;
+    append_clay_string(&tag_description, "%s", get_tag_description(blind->tag));
+    CLAY_TEXT(tag_description, WHITE_TEXT_CONFIG);
   }
 }
 
