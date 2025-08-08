@@ -485,9 +485,9 @@ char *get_tag_name(Tag tag) {
 char *get_tag_description(Tag tag) {
   switch (tag) {
     case TAG_UNCOMMON:
-      return "The next shop will have a free Uncommon Joker";
+      return "The next shop will have a free Uncommon Joker.";
     case TAG_RARE:
-      return "The next shop will have a free Rare Joker";
+      return "The next shop will have a free Rare Joker.";
     case TAG_NEGATIVE:
       return "The next base edition Joker you find in a shop becomes Negative (+1 joker slot) and free.";
     case TAG_FOIL:
