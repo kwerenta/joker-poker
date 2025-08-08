@@ -52,10 +52,6 @@ void game_init(Deck deck, Stake stake) {
   cvector_copy(state.game.full_deck, state.game.deck);
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
 
-  shuffle_deck();
-  fill_hand();
-  sort_hand();
-
   log_message(LOG_INFO, "Game has been initialized.");
 }
 
@@ -1162,16 +1158,15 @@ void restock_shop() {
   }
 }
 
-void exit_shop() {
+void exit_shop() { change_stage(STAGE_SELECT_BLIND); }
+
+void select_blind() {
+  state.game.round++;
+
   shuffle_deck();
   fill_hand();
   sort_hand();
 
-  change_stage(STAGE_SELECT_BLIND);
-}
-
-void select_blind() {
-  state.game.round++;
   change_stage(STAGE_GAME);
 }
 
