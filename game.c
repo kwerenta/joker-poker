@@ -19,8 +19,8 @@ void game_init(Deck deck, Stake stake) {
   state.game.ante = 1;
   state.game.round = 0;
 
-  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .is_active = 1};
-  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .is_active = 1};
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = rand() % 24, .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = rand() % 24, .is_active = 1};
   state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .is_active = 1};
   state.game.current_blind = &state.game.blinds[0];
 
@@ -305,7 +305,10 @@ void cash_out() {
     state.game.ante++;
 
     state.game.current_blind = &state.game.blinds[0];
-    for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
+    for (uint8_t i = 0; i < 3; i++) {
+      state.game.blinds[i].is_active = 1;
+      if (i != 2) state.game.blinds[i].tag = rand() % 24;
+    }
   } else {
     state.game.current_blind++;
   }
