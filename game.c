@@ -1179,5 +1179,6 @@ void skip_blind() {
   if (state.game.current_blind->type > BLIND_BIG) return;
 
   state.game.current_blind->is_active = 0;
+  cvector_push_back(state.game.tags, state.game.current_blind->tag);
   state.game.current_blind++;
 }
