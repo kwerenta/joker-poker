@@ -337,6 +337,7 @@ typedef struct {
   uint8_t ante;
   uint8_t round;
 
+  cvector_vector_type(Tag) tags;
   Blind *current_blind;
   Blind blinds[3];
 

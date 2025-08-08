@@ -68,6 +68,7 @@ void game_destroy() {
   cvector_destroy(state.game.shop.items);
   cvector_destroy(state.game.shop.booster_packs);
   cvector_destroy(state.game.booster_pack.content);
+  cvector_destroy(state.game.tags);
 
   log_message(LOG_INFO, "Game has been destroyed.");
 }
