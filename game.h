@@ -391,6 +391,7 @@ uint8_t get_blind_money(BlindType blind_type);
 uint8_t get_hands_money();
 uint8_t get_discards_money();
 uint8_t get_interest_money();
+uint8_t get_investment_tag_money();
 
 void cash_out();
 

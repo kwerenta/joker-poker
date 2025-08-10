@@ -286,8 +286,8 @@ void play_hand() {
 }
 
 void cash_out() {
-  state.game.money +=
-      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.current_blind->type);
+  state.game.money += get_interest_money() + get_hands_money() + get_discards_money() +
+                      get_blind_money(state.game.current_blind->type) + get_investment_tag_money();
 
   state.game.score = 0;
 
@@ -299,6 +299,13 @@ void cash_out() {
 
   if (state.game.current_blind->type > BLIND_BIG) {
     state.game.ante++;
+
+    for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+      if (state.game.tags[i] == TAG_INVESTMENT) {
+        cvector_erase(state.game.tags, i);
+        i--;
+      }
+    }
 
     state.game.current_blind = &state.game.blinds[0];
     for (uint8_t i = 0; i < 3; i++) {
@@ -744,6 +751,16 @@ uint8_t get_blind_money(BlindType blind_type) {
 }
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
+uint8_t get_investment_tag_money() {
+  if (state.game.current_blind->type <= BLIND_BIG) return 0;
+
+  uint8_t total = 0;
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_INVESTMENT) total += 25;
+  }
+
+  return total;
+}
 
 uint8_t get_interest_money() {
   if (state.game.deck_type == DECK_GREEN) return 0;
