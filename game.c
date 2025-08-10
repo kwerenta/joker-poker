@@ -1135,6 +1135,37 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    Tag tag = state.game.tags[i];
+
+    cvector_for_each(state.game.shop.items, ShopItem, shop_item) {
+      if (shop_item->type != SHOP_ITEM_JOKER || shop_item->joker.edition != EDITION_BASE) continue;
+
+      switch (tag) {
+        case TAG_NEGATIVE:
+          shop_item->joker.edition = EDITION_NEGATIVE;
+          break;
+        case TAG_FOIL:
+          shop_item->joker.edition = EDITION_FOIL;
+          break;
+        case TAG_HOLOGRAPHIC:
+          shop_item->joker.edition = EDITION_HOLOGRAPHIC;
+          break;
+        case TAG_POLYCHROME:
+          shop_item->joker.edition = EDITION_POLYCHROME;
+          break;
+        default:
+          continue;
+      }
+
+      // TODO Fix modifying base price as it modifies sell price as well, probably adding sell price property to shop
+      // items will be a way to go
+      shop_item->joker.base_price = 0;
+      cvector_erase(state.game.tags, i);
+      i--;
+    }
+  }
+
   if (is_ante_first_shop || state.game.round == 1) {
     uint8_t count = 0;
     for (uint8_t i = 0; i < 32; i++) {
