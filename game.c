@@ -52,6 +52,8 @@ void game_init(Deck deck, Stake stake) {
   cvector_copy(state.game.full_deck, state.game.deck);
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
 
+  memset(&state.game.stats, 0, sizeof(Stats));
+
   log_message(LOG_INFO, "Game has been initialized.");
 }
 
@@ -273,6 +275,11 @@ void play_hand() {
       trigger_end_of_round_card(card);
       if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
+
+    state.game.stats.hands.total += state.game.hands.total;
+    state.game.stats.hands.remaining += state.game.hands.remaining;
+    state.game.stats.discards.total += state.game.discards.total;
+    state.game.stats.discards.remaining += state.game.discards.remaining;
 
     change_stage(STAGE_CASH_OUT);
   } else if (state.game.hands.remaining == 0) {
@@ -1292,6 +1299,12 @@ void trigger_immediate_tags() {
       case TAG_BUFFOON:
         open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_BUFFON, BOOSTER_PACK_MEGA});
         should_stop = 1;
+        break;
+      case TAG_HANDY:
+        state.game.money += state.game.stats.hands.total - state.game.stats.hands.remaining;
+        break;
+      case TAG_GARBAGE:
+        state.game.money += state.game.stats.discards.remaining;
         break;
       case TAG_ETHEREAL:
         open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_SPECTRAL, BOOSTER_PACK_NORMAL});

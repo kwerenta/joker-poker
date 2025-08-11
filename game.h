@@ -321,6 +321,11 @@ typedef struct {
 } UsageState;
 
 typedef struct {
+  UsageState hands;
+  UsageState discards;
+} Stats;
+
+typedef struct {
   Deck deck_type;
   Stake stake;
 
@@ -354,6 +359,7 @@ typedef struct {
   FoolLastUsed fool_last_used;
 
   SortingMode sorting_mode;
+  Stats stats;
 } Game;
 
 void game_init(Deck deck, Stake stake);
