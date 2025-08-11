@@ -1242,4 +1242,12 @@ void skip_blind() {
   state.game.current_blind->is_active = 0;
   cvector_push_back(state.game.tags, state.game.current_blind->tag);
   state.game.current_blind++;
+
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_ECONOMY) {
+      if (state.game.money > 0) state.game.money += state.game.money > 40 ? 40 : state.game.money;
+      cvector_erase(state.game.tags, i);
+      i--;
+    }
+  }
 }
