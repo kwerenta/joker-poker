@@ -134,8 +134,6 @@ void apply_deck_settings() {
       state.game.jokers.size--;
       break;
     case DECK_ANAGLYPH:
-      // TODO Implement when Tags will be added
-      break;
     case DECK_PLASMA:
     case DECK_ERRATIC:
       break;
