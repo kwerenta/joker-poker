@@ -328,7 +328,7 @@ char *get_deck_name(Deck deck) {
     case DECK_PAINTED:
       return "Painted Deck";
     case DECK_ANAGLYPH:
-      return "Anaglyph Deck NOT IMPLEMENTED";
+      return "Anaglyph Deck";
     case DECK_PLASMA:
       return "Plasma Deck";
     case DECK_ERRATIC:

@@ -315,6 +315,8 @@ void cash_out() {
       }
     }
 
+    if (state.game.deck_type == DECK_ANAGLYPH) cvector_push_back(state.game.tags, TAG_DOUBLE);
+
     state.game.current_blind = &state.game.blinds[0];
     for (uint8_t i = 0; i < 3; i++) {
       state.game.blinds[i].is_active = 1;
