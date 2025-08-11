@@ -103,6 +103,7 @@ typedef struct {
   Controls controls;
 
   Stage stage;
+  Stage prev_stage;
   Overlay overlay;
   Navigation navigation;
   Navigation prev_navigation;

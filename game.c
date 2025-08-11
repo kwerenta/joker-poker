@@ -1094,7 +1094,8 @@ void close_booster_pack() {
   cvector_clear(state.game.hand.cards);
   cvector_copy(state.game.full_deck, state.game.deck);
 
-  change_stage(STAGE_SHOP);
+  change_stage(state.prev_stage);
+  if (state.stage == STAGE_SELECT_BLIND) trigger_immediate_tags();
 }
 
 void select_booster_pack_item() {
@@ -1261,8 +1262,33 @@ void skip_blind() {
   }
   state.game.current_blind++;
 
+  trigger_immediate_tags();
+}
+
+void trigger_immediate_tags() {
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    uint8_t should_stop = 0;
     switch (state.game.tags[i]) {
+      case TAG_STANDARD:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_STANDARD, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_CHARM:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_ARCANA, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_METEOR:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_BUFFOON:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_BUFFON, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_ETHEREAL:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_SPECTRAL, BOOSTER_PACK_NORMAL});
+        should_stop = 1;
+        break;
       case TAG_TOPUP:
         // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
         for (uint8_t i = 0; i < 2; i++)
@@ -1288,5 +1314,7 @@ void skip_blind() {
 
     cvector_erase(state.game.tags, i);
     i--;
+
+    if (should_stop) break;
   }
 }

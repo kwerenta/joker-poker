@@ -235,6 +235,7 @@ void move_nav_hovered(uint8_t new_position) {
 }
 
 void change_stage(Stage stage) {
+  state.prev_stage = state.stage;
   state.stage = stage;
   state.overlay = OVERLAY_NONE;
 
