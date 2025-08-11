@@ -1253,6 +1253,10 @@ void skip_blind() {
 
   state.game.current_blind->is_active = 0;
   cvector_push_back(state.game.tags, state.game.current_blind->tag);
+  for (int8_t i = cvector_size(state.game.tags) - 2; i >= 0; i--) {
+    if (state.game.tags[i] != TAG_DOUBLE) break;
+    state.game.tags[i] = state.game.current_blind->tag;
+  }
   state.game.current_blind++;
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
