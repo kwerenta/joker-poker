@@ -1257,6 +1257,11 @@ void skip_blind() {
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     switch (state.game.tags[i]) {
+      case TAG_TOPUP:
+        // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
+        for (uint8_t i = 0; i < 2; i++)
+          add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]});
+        break;
       case TAG_SPEED: {
         uint8_t total_rounds = (state.game.ante - 1) * 3 + (state.game.current_blind->type == BLIND_BIG ? 1 : 2);
         if (state.game.vouchers & VOUCHER_HIEROGLYPH) total_rounds += 3;
