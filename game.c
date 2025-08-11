@@ -1256,10 +1256,19 @@ void skip_blind() {
   state.game.current_blind++;
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
-    if (state.game.tags[i] == TAG_ECONOMY) {
-      if (state.game.money > 0) state.game.money += state.game.money > 40 ? 40 : state.game.money;
-      cvector_erase(state.game.tags, i);
-      i--;
+    switch (state.game.tags[i]) {
+      case TAG_ORBITAL:
+        state.game.poker_hands[rand() % 12].level += 3;
+        break;
+      case TAG_ECONOMY:
+        if (state.game.money > 0) state.game.money += state.game.money > 40 ? 40 : state.game.money;
+        break;
+
+      default:
+        continue;
     }
+
+    cvector_erase(state.game.tags, i);
+    i--;
   }
 }
