@@ -866,8 +866,11 @@ uint8_t apply_sale(uint8_t price) {
 }
 
 uint8_t get_shop_item_price(ShopItem *item) {
-  uint8_t price = 0;
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_COUPON) return 0;
+  }
 
+  uint8_t price = 0;
   switch (item->type) {
     case SHOP_ITEM_CARD:
       price = 1;
@@ -942,7 +945,13 @@ void add_voucher_to_player(Voucher voucher) {
   }
 }
 
-uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return apply_sale(4 + booster_pack->size * 2); }
+uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) {
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_COUPON) return 0;
+  }
+
+  return apply_sale(4 + booster_pack->size * 2);
+}
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
   if (booster_pack->type == BOOSTER_PACK_BUFFON) count--;
@@ -1206,7 +1215,16 @@ void restock_shop() {
   }
 }
 
-void exit_shop() { change_stage(STAGE_SELECT_BLIND); }
+void exit_shop() {
+  for (uint8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_COUPON) {
+      cvector_erase(state.game.tags, i);
+      break;
+    }
+  }
+
+  change_stage(STAGE_SELECT_BLIND);
+}
 
 void select_blind() {
   state.game.round++;
