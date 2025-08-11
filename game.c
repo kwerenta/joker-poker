@@ -1257,6 +1257,13 @@ void skip_blind() {
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     switch (state.game.tags[i]) {
+      case TAG_SPEED: {
+        uint8_t total_rounds = (state.game.ante - 1) * 3 + (state.game.current_blind->type == BLIND_BIG ? 1 : 2);
+        if (state.game.vouchers & VOUCHER_HIEROGLYPH) total_rounds += 3;
+        if (state.game.vouchers & VOUCHER_PTEROGLYPH) total_rounds += 3;
+        state.game.money += 5 * (total_rounds - state.game.round);
+        break;
+      }
       case TAG_ORBITAL:
         state.game.poker_hands[rand() % 12].level += 3;
         break;
