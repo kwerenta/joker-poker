@@ -1163,6 +1163,18 @@ void restock_shop() {
                                 (state.game.current_blind->type == BLIND_BIG ||
                                  (!state.game.blinds[1].is_active && state.game.current_blind->type > BLIND_BIG)));
 
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    Tag tag = state.game.tags[i];
+    if (tag != TAG_UNCOMMON && tag != TAG_RARE) continue;
+
+    // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
+    ShopItem joker = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};
+    cvector_push_back(state.game.shop.items, joker);
+
+    cvector_erase(state.game.tags, i);
+    i--;
+  }
+
   fill_shop_items();
 
   for (uint8_t i = 0; i < 2; i++) {
@@ -1171,12 +1183,10 @@ void restock_shop() {
   }
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
-    Tag tag = state.game.tags[i];
-
     cvector_for_each(state.game.shop.items, ShopItem, shop_item) {
       if (shop_item->type != SHOP_ITEM_JOKER || shop_item->joker.edition != EDITION_BASE) continue;
 
-      switch (tag) {
+      switch (state.game.tags[i]) {
         case TAG_NEGATIVE:
           shop_item->joker.edition = EDITION_NEGATIVE;
           break;
