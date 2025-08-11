@@ -291,6 +291,14 @@ void cash_out() {
 
   state.game.score = 0;
 
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_JUGGLE) {
+      state.game.hand.size -= 3;
+      cvector_erase(state.game.tags, i);
+      i--;
+    }
+  }
+
   // Reset hand and deck for new blind
   state.game.hands.remaining = state.game.hands.total;
   state.game.discards.remaining = state.game.discards.total;
@@ -1228,6 +1236,10 @@ void exit_shop() {
 
 void select_blind() {
   state.game.round++;
+
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_JUGGLE) state.game.hand.size += 3;
+  }
 
   shuffle_deck();
   fill_hand();
