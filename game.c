@@ -1291,6 +1291,7 @@ void skip_blind() {
   state.game.current_blind++;
 
   trigger_immediate_tags();
+  set_nav_hovered(0);
 }
 
 void trigger_immediate_tags() {
