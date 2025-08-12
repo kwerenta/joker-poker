@@ -294,7 +294,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
           CLAY({.id = CLAY_ID("Tooltip"),
                 .floating = {
                     .attachTo = CLAY_ATTACH_TO_PARENT,
-                    .zIndex = is_shop ? 5 : 10,
+                    .zIndex = 10,
                     .offset = {.y = y_offset},
                     .attachPoints = attach_points,
                 }}) {
@@ -316,7 +316,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
                            .offset = {.y = CHAR_HEIGHT},
-                           .zIndex = 5,
+                           .zIndex = is_hovered ? 10 : 1,
                            .attachPoints = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM}}}) {
           CLAY({.backgroundColor = COLOR_CARD_BG,
