@@ -709,6 +709,7 @@ void render_cash_out() {
 void render_blind_element(uint8_t blind_index) {
   Blind *blind = &state.game.blinds[blind_index];
   uint8_t is_current_blind = blind == state.game.current_blind;
+  uint8_t is_current_section = get_current_section() == NAVIGATION_SELECT_BLIND;
 
   CLAY({.id = CLAY_IDI_LOCAL("Blind", blind_index),
         .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_current_blind ? 1.0f : 0.85f)},
@@ -720,8 +721,9 @@ void render_blind_element(uint8_t blind_index) {
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor =
-              is_current_blind ? state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
+          .backgroundColor = is_current_blind
+                                 ? is_current_section && state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MONEY
+                                 : COLOR_CARD_LIGHT_BG}) {
       CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
                 : !blind->is_active                ? CLAY_STRING("Skipped")
                 : blind < state.game.current_blind ? CLAY_STRING("Defeated")
@@ -748,14 +750,15 @@ void render_blind_element(uint8_t blind_index) {
     Clay_String tag_description;
     append_clay_string(&tag_description, "%s", get_tag_description(blind->tag));
 
+    uint8_t is_skip_button_hovered = is_current_blind && is_current_section && state.navigation.hovered == 1;
     CLAY_TEXT(CLAY_STRING("or"), WHITE_TEXT_CONFIG);
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = is_current_blind && state.navigation.hovered == 1 ? COLOR_CHIPS : COLOR_MULT}) {
+          .backgroundColor = is_skip_button_hovered ? COLOR_CHIPS : COLOR_MULT}) {
       CLAY_TEXT(CLAY_STRING("Skip Blind"), WHITE_TEXT_CONFIG);
 
-      if (is_current_blind && state.navigation.hovered == 1)
+      if (is_skip_button_hovered)
         render_tooltip(&tag_name, &tag_description, -4,
                        &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
                                                     .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
