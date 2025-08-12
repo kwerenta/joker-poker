@@ -19,8 +19,8 @@ void game_init(Deck deck, Stake stake) {
   state.game.ante = 1;
   state.game.round = 0;
 
-  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .is_active = 1};
-  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .is_active = 1};
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = rand() % 24, .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = rand() % 24, .is_active = 1};
   state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .is_active = 1};
   state.game.current_blind = &state.game.blinds[0];
 
@@ -34,6 +34,7 @@ void game_init(Deck deck, Stake stake) {
   state.game.consumables.size = 2;
 
   state.game.shop.size = 2;
+  cvector_push_back(state.game.shop.vouchers, 0);
 
   apply_deck_settings();
 
@@ -52,9 +53,7 @@ void game_init(Deck deck, Stake stake) {
   cvector_copy(state.game.full_deck, state.game.deck);
   cvector_reserve(state.game.hand.cards, state.game.hand.size);
 
-  shuffle_deck();
-  fill_hand();
-  sort_hand();
+  memset(&state.game.stats, 0, sizeof(Stats));
 
   log_message(LOG_INFO, "Game has been initialized.");
 }
@@ -68,6 +67,8 @@ void game_destroy() {
   cvector_destroy(state.game.shop.items);
   cvector_destroy(state.game.shop.booster_packs);
   cvector_destroy(state.game.booster_pack.content);
+  cvector_destroy(state.game.shop.vouchers);
+  cvector_destroy(state.game.tags);
 
   log_message(LOG_INFO, "Game has been destroyed.");
 }
@@ -137,8 +138,6 @@ void apply_deck_settings() {
       state.game.jokers.size--;
       break;
     case DECK_ANAGLYPH:
-      // TODO Implement when Tags will be added
-      break;
     case DECK_PLASMA:
     case DECK_ERRATIC:
       break;
@@ -279,6 +278,11 @@ void play_hand() {
       if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
 
+    state.game.stats.hands.total += state.game.hands.total;
+    state.game.stats.hands.remaining += state.game.hands.remaining;
+    state.game.stats.discards.total += state.game.discards.total;
+    state.game.stats.discards.remaining += state.game.discards.remaining;
+
     change_stage(STAGE_CASH_OUT);
   } else if (state.game.hands.remaining == 0) {
     change_stage(STAGE_GAME_OVER);
@@ -289,10 +293,18 @@ void play_hand() {
 }
 
 void cash_out() {
-  state.game.money +=
-      get_interest_money() + get_hands_money() + get_discards_money() + get_blind_money(state.game.current_blind->type);
+  state.game.money += get_interest_money() + get_hands_money() + get_discards_money() +
+                      get_blind_money(state.game.current_blind->type) + get_investment_tag_money();
 
   state.game.score = 0;
+
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_JUGGLE) {
+      state.game.hand.size -= 3;
+      cvector_erase(state.game.tags, i);
+      i--;
+    }
+  }
 
   // Reset hand and deck for new blind
   state.game.hands.remaining = state.game.hands.total;
@@ -303,8 +315,20 @@ void cash_out() {
   if (state.game.current_blind->type > BLIND_BIG) {
     state.game.ante++;
 
+    for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+      if (state.game.tags[i] == TAG_INVESTMENT) {
+        cvector_erase(state.game.tags, i);
+        i--;
+      }
+    }
+
+    if (state.game.deck_type == DECK_ANAGLYPH) cvector_push_back(state.game.tags, TAG_DOUBLE);
+
     state.game.current_blind = &state.game.blinds[0];
-    for (uint8_t i = 0; i < 3; i++) state.game.blinds[i].is_active = 1;
+    for (uint8_t i = 0; i < 3; i++) {
+      state.game.blinds[i].is_active = 1;
+      if (i != 2) state.game.blinds[i].tag = rand() % 24;
+    }
   } else {
     state.game.current_blind++;
   }
@@ -744,6 +768,16 @@ uint8_t get_blind_money(BlindType blind_type) {
 }
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
+uint8_t get_investment_tag_money() {
+  if (state.game.current_blind->type <= BLIND_BIG) return 0;
+
+  uint8_t total = 0;
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_INVESTMENT) total += 25;
+  }
+
+  return total;
+}
 
 uint8_t get_interest_money() {
   if (state.game.deck_type == DECK_GREEN) return 0;
@@ -849,8 +883,11 @@ uint8_t apply_sale(uint8_t price) {
 }
 
 uint8_t get_shop_item_price(ShopItem *item) {
-  uint8_t price = 0;
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_COUPON) return 0;
+  }
 
+  uint8_t price = 0;
   switch (item->type) {
     case SHOP_ITEM_CARD:
       price = 1;
@@ -925,7 +962,13 @@ void add_voucher_to_player(Voucher voucher) {
   }
 }
 
-uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) { return apply_sale(4 + booster_pack->size * 2); }
+uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) {
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_COUPON) return 0;
+  }
+
+  return apply_sale(4 + booster_pack->size * 2);
+}
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
   if (booster_pack->type == BOOSTER_PACK_BUFFON) count--;
@@ -949,7 +992,7 @@ void buy_shop_item() {
   if (!is_booster_pack && !is_voucher && section != NAVIGATION_SHOP_ITEMS) return;
 
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
-                  : is_voucher    ? get_voucher_price(state.game.shop.voucher)
+                  : is_voucher    ? get_voucher_price(state.game.shop.vouchers[item_index])
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
 
   if (state.game.money < price) return;
@@ -958,8 +1001,11 @@ void buy_shop_item() {
     open_booster_pack(&state.game.shop.booster_packs[item_index]);
     cvector_erase(state.game.shop.booster_packs, item_index);
   } else if (is_voucher) {
-    add_voucher_to_player(state.game.shop.voucher);
-    state.game.shop.voucher = 0;
+    add_voucher_to_player(state.game.shop.vouchers[item_index]);
+    if (item_index == cvector_size(state.game.shop.vouchers) - 1)
+      state.game.shop.vouchers[item_index] = 0;
+    else
+      cvector_erase(state.game.shop.vouchers, item_index);
   } else {
     if (add_item_to_player(&state.game.shop.items[item_index]) == 0) return;
     cvector_erase(state.game.shop.items, item_index);
@@ -1058,7 +1104,8 @@ void close_booster_pack() {
   cvector_clear(state.game.hand.cards);
   cvector_copy(state.game.full_deck, state.game.deck);
 
-  change_stage(STAGE_SHOP);
+  change_stage(state.prev_stage);
+  if (state.stage == STAGE_SELECT_BLIND) trigger_immediate_tags();
 }
 
 void select_booster_pack_item() {
@@ -1122,11 +1169,24 @@ void fill_shop_items() {
 void restock_shop() {
   cvector_clear(state.game.shop.items);
   cvector_clear(state.game.shop.booster_packs);
+  while (cvector_size(state.game.shop.vouchers) > 1) cvector_erase(state.game.shop.vouchers, 0);
 
   uint8_t is_ante_first_shop = state.game.current_blind->type == BLIND_SMALL ||
                                (!state.game.blinds[0].is_active &&
                                 (state.game.current_blind->type == BLIND_BIG ||
                                  (!state.game.blinds[1].is_active && state.game.current_blind->type > BLIND_BIG)));
+
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    Tag tag = state.game.tags[i];
+    if (tag != TAG_UNCOMMON && tag != TAG_RARE) continue;
+
+    // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
+    ShopItem joker = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]};
+    cvector_push_back(state.game.shop.items, joker);
+
+    cvector_erase(state.game.tags, i);
+    i--;
+  }
 
   fill_shop_items();
 
@@ -1135,39 +1195,101 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  if (is_ante_first_shop || state.game.round == 1) {
-    uint8_t count = 0;
-    for (uint8_t i = 0; i < 32; i++) {
-      if (state.game.vouchers & (1 << i)) continue;
+  uint8_t available_vouchers_count = 0;
+  for (uint8_t i = 0; i < 32; i++) {
+    if (state.game.vouchers & (1 << i)) continue;
 
-      if (i < 16) {
-        count++;
-        continue;
+    if (i < 16) {
+      available_vouchers_count++;
+      continue;
+    }
+    if (state.game.vouchers & (1 << (i - 16))) available_vouchers_count++;
+  }
+  uint32_t combined_vouchers = state.game.vouchers;
+
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_VOUCHER) {
+      uint8_t voucher_index = rand() % available_vouchers_count;
+
+      for (uint8_t i = 0; i < 32; i++) {
+        Voucher voucher = 1 << i;
+        if (combined_vouchers & voucher) continue;
+
+        if (voucher_index == 0) {
+          cvector_insert(state.game.shop.vouchers, 0, voucher);
+          combined_vouchers |= voucher;
+          available_vouchers_count--;
+          break;
+        }
+        voucher_index--;
       }
-      if (state.game.vouchers & (1 << (i - 16))) count++;
+
+      cvector_erase(state.game.tags, i);
+      i--;
     }
 
-    uint8_t voucher_index = rand() % count;
+    cvector_for_each(state.game.shop.items, ShopItem, shop_item) {
+      if (shop_item->type != SHOP_ITEM_JOKER || shop_item->joker.edition != EDITION_BASE) continue;
+
+      switch (state.game.tags[i]) {
+        case TAG_NEGATIVE:
+          shop_item->joker.edition = EDITION_NEGATIVE;
+          break;
+        case TAG_FOIL:
+          shop_item->joker.edition = EDITION_FOIL;
+          break;
+        case TAG_HOLOGRAPHIC:
+          shop_item->joker.edition = EDITION_HOLOGRAPHIC;
+          break;
+        case TAG_POLYCHROME:
+          shop_item->joker.edition = EDITION_POLYCHROME;
+          break;
+        default:
+          continue;
+      }
+
+      // TODO Fix modifying base price as it modifies sell price as well, probably adding sell price property to shop
+      // items will be a way to go
+      shop_item->joker.base_price = 0;
+      cvector_erase(state.game.tags, i);
+      i--;
+    }
+  }
+
+  if (is_ante_first_shop || state.game.round == 1) {
+    uint8_t voucher_index = rand() % available_vouchers_count;
 
     for (uint8_t i = 0; i < 32; i++) {
-      if (state.game.vouchers & (1 << i)) continue;
+      if (combined_vouchers & (1 << i)) continue;
 
-      if (voucher_index == 0) state.game.shop.voucher = 1 << i;
+      if (voucher_index == 0) cvector_back(state.game.shop.vouchers) = 1 << i;
       voucher_index--;
     }
   }
 }
 
 void exit_shop() {
-  shuffle_deck();
-  fill_hand();
-  sort_hand();
+  for (uint8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_COUPON) {
+      cvector_erase(state.game.tags, i);
+      break;
+    }
+  }
 
   change_stage(STAGE_SELECT_BLIND);
 }
 
 void select_blind() {
   state.game.round++;
+
+  cvector_for_each(state.game.tags, Tag, tag) {
+    if (*tag == TAG_JUGGLE) state.game.hand.size += 3;
+  }
+
+  shuffle_deck();
+  fill_hand();
+  sort_hand();
+
   change_stage(STAGE_GAME);
 }
 
@@ -1175,5 +1297,73 @@ void skip_blind() {
   if (state.game.current_blind->type > BLIND_BIG) return;
 
   state.game.current_blind->is_active = 0;
+  cvector_push_back(state.game.tags, state.game.current_blind->tag);
+  for (int8_t i = cvector_size(state.game.tags) - 2; i >= 0; i--) {
+    if (state.game.tags[i] != TAG_DOUBLE) break;
+    state.game.tags[i] = state.game.current_blind->tag;
+  }
   state.game.current_blind++;
+
+  trigger_immediate_tags();
+  set_nav_hovered(0);
+}
+
+void trigger_immediate_tags() {
+  for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    uint8_t should_stop = 0;
+    switch (state.game.tags[i]) {
+      case TAG_STANDARD:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_STANDARD, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_CHARM:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_ARCANA, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_METEOR:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_CELESTIAL, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_BUFFOON:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_BUFFON, BOOSTER_PACK_MEGA});
+        should_stop = 1;
+        break;
+      case TAG_HANDY:
+        state.game.money += state.game.stats.hands.total - state.game.stats.hands.remaining;
+        break;
+      case TAG_GARBAGE:
+        state.game.money += state.game.stats.discards.remaining;
+        break;
+      case TAG_ETHEREAL:
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_SPECTRAL, BOOSTER_PACK_NORMAL});
+        should_stop = 1;
+        break;
+      case TAG_TOPUP:
+        // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
+        for (uint8_t i = 0; i < 2; i++)
+          add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[rand() % JOKER_COUNT]});
+        break;
+      case TAG_SPEED: {
+        uint8_t total_rounds = (state.game.ante - 1) * 3 + (state.game.current_blind->type == BLIND_BIG ? 1 : 2);
+        if (state.game.vouchers & VOUCHER_HIEROGLYPH) total_rounds += 3;
+        if (state.game.vouchers & VOUCHER_PTEROGLYPH) total_rounds += 3;
+        state.game.money += 5 * (total_rounds - state.game.round);
+        break;
+      }
+      case TAG_ORBITAL:
+        state.game.poker_hands[rand() % 12].level += 3;
+        break;
+      case TAG_ECONOMY:
+        if (state.game.money > 0) state.game.money += state.game.money > 40 ? 40 : state.game.money;
+        break;
+
+      default:
+        continue;
+    }
+
+    cvector_erase(state.game.tags, i);
+    i--;
+
+    if (should_stop) break;
+  }
 }

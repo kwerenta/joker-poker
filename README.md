@@ -71,7 +71,7 @@ There are currently no in-game control hints.
 - General
   - UP/DOWN/LEFT/RIGHT - move between different sections
   - LEFT/RIGHT - change currently hovered item
-  - CROSS - select/buy/use currently hovered item
+  - CROSS - select/buy/use currently hovered item/button
   - LTRIGGER/RTRIGGER - move hovered item to the left/right
   - START - open/close overlay menu
   - TRIANGLE - sell currently hovered item
@@ -81,7 +81,7 @@ There are currently no in-game control hints.
   - TRIANGLE - discard selected cards
   - CIRCLE - deselect all cards
 - Choose blind
-  - CROSS - select current blind
+  - SQUARE - select current blind
   - TRIANGLE - skip current blind
 - Booster Pack
   - CIRCLE - skip booster pack

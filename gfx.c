@@ -235,8 +235,30 @@ void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
 
 void render_deck(Deck deck, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 3, .y = 3}, dst); }
 
+void render_tooltip(Clay_String *title, Clay_String *description, float y_offset,
+                    Clay_FloatingAttachPoints *attach_points) {
+  CLAY({.id = CLAY_ID("Tooltip"),
+        .floating = {
+            .attachTo = CLAY_ATTACH_TO_PARENT,
+            .zIndex = 10,
+            .offset = {.y = y_offset},
+            .attachPoints = *attach_points,
+        }}) {
+    CLAY({.backgroundColor = COLOR_CARD_BG,
+          .layout = {
+              .padding = CLAY_PADDING_ALL(4),
+              .childGap = 2,
+              .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          }}) {
+      CLAY_TEXT(*title, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(*description, WHITE_TEXT_CONFIG);
+    }
+  }
+}
+
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
-  size_t item_count = get_nav_section_size(section);
+  uint8_t item_count = get_nav_section_size(section);
   if (item_count == 0) return;
   size_t items_width = item_count * CARD_WIDTH;
 
@@ -291,24 +313,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
           }
 
-          CLAY({.id = CLAY_ID("Tooltip"),
-                .floating = {
-                    .attachTo = CLAY_ATTACH_TO_PARENT,
-                    .zIndex = is_shop ? 5 : 10,
-                    .offset = {.y = y_offset},
-                    .attachPoints = attach_points,
-                }}) {
-            CLAY({.backgroundColor = COLOR_CARD_BG,
-                  .layout = {
-                      .padding = CLAY_PADDING_ALL(4),
-                      .childGap = 2,
-                      .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
-                      .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                  }}) {
-              CLAY_TEXT(name, WHITE_TEXT_CONFIG);
-              CLAY_TEXT(description, WHITE_TEXT_CONFIG);
-            }
-          }
+          render_tooltip(&name, &description, y_offset, &attach_points);
         }
 
         if (!is_shop) continue;
@@ -316,7 +321,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
         CLAY({.id = CLAY_ID_LOCAL("Price"),
               .floating = {.attachTo = CLAY_ATTACH_TO_PARENT,
                            .offset = {.y = CHAR_HEIGHT},
-                           .zIndex = 5,
+                           .zIndex = is_hovered ? 10 : 1,
                            .attachPoints = {.parent = CLAY_ATTACH_POINT_CENTER_TOP,
                                             .element = CLAY_ATTACH_POINT_CENTER_BOTTOM}}}) {
           CLAY({.backgroundColor = COLOR_CARD_BG,
@@ -328,7 +333,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             append_clay_string(&price, "$%d",
                                section == NAVIGATION_SHOP_BOOSTER_PACKS
                                    ? get_booster_pack_price(&state.game.shop.booster_packs[i])
-                               : section == NAVIGATION_SHOP_VOUCHER ? get_voucher_price(state.game.shop.voucher)
+                               : section == NAVIGATION_SHOP_VOUCHER ? get_voucher_price(state.game.shop.vouchers[i])
                                                                     : get_shop_item_price(&state.game.shop.items[i]));
             CLAY_TEXT(price, WHITE_TEXT_CONFIG);
           }
@@ -603,7 +608,7 @@ void render_shop() {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
             }}) {
         CLAY({.id = CLAY_ID("ShopVoucher"),
-              .layout = {.sizing = CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {}
+              .layout = {.sizing = CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {}
         render_spread_items(NAVIGATION_SHOP_VOUCHER, CLAY_STRING("ShopVoucher"));
 
         CLAY({.id = CLAY_ID("ShopBoosterPacks"),
@@ -653,13 +658,14 @@ void render_cash_out() {
       uint8_t hands = get_hands_money();
       uint8_t discards = get_discards_money();
       uint8_t blind = get_blind_money(state.game.current_blind->type);
+      uint8_t investment_tag = get_investment_tag_money();
 
       CLAY({.layout = {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIT(0)},
                 .childAlignment = {CLAY_ALIGN_X_CENTER},
             }}) {
         Clay_String cash_out_text;
-        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + discards + blind);
+        append_clay_string(&cash_out_text, "Cash Out: $%d", interest + hands + discards + blind + investment_tag);
         CLAY_TEXT(cash_out_text, CLAY_TEXT_CONFIG({.textColor = COLOR_MONEY}));
       }
 
@@ -689,6 +695,12 @@ void render_cash_out() {
           append_clay_string(&interest_money, "Interest: $%d", interest);
           CLAY_TEXT(interest_money, WHITE_TEXT_CONFIG);
         }
+
+        if (investment_tag != 0) {
+          Clay_String investment_tag_money;
+          append_clay_string(&investment_tag_money, "Investment Tag: $%d", investment_tag);
+          CLAY_TEXT(investment_tag_money, WHITE_TEXT_CONFIG);
+        }
       }
     }
   }
@@ -697,6 +709,7 @@ void render_cash_out() {
 void render_blind_element(uint8_t blind_index) {
   Blind *blind = &state.game.blinds[blind_index];
   uint8_t is_current_blind = blind == state.game.current_blind;
+  uint8_t is_current_section = get_current_section() == NAVIGATION_SELECT_BLIND;
 
   CLAY({.id = CLAY_IDI_LOCAL("Blind", blind_index),
         .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_PERCENT(is_current_blind ? 1.0f : 0.85f)},
@@ -708,7 +721,9 @@ void render_blind_element(uint8_t blind_index) {
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = is_current_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
+          .backgroundColor = is_current_blind
+                                 ? is_current_section && state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MONEY
+                                 : COLOR_CARD_LIGHT_BG}) {
       CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
                 : !blind->is_active                ? CLAY_STRING("Skipped")
                 : blind < state.game.current_blind ? CLAY_STRING("Defeated")
@@ -727,6 +742,29 @@ void render_blind_element(uint8_t blind_index) {
     Clay_String money;
     append_clay_string(&money, "Reward: $%d", get_blind_money(blind->type));
     CLAY_TEXT(money, WHITE_TEXT_CONFIG);
+
+    if (blind->type > BLIND_BIG) continue;
+
+    Clay_String tag_name;
+    append_clay_string(&tag_name, "%s", get_tag_name(blind->tag));
+    Clay_String tag_description;
+    append_clay_string(&tag_description, "%s", get_tag_description(blind->tag));
+
+    uint8_t is_skip_button_hovered = is_current_blind && is_current_section && state.navigation.hovered == 1;
+    CLAY_TEXT(CLAY_STRING("or"), WHITE_TEXT_CONFIG);
+    CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
+                     .padding = {.top = 4, .bottom = 4},
+                     .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
+          .backgroundColor = is_skip_button_hovered ? COLOR_CHIPS : COLOR_MULT}) {
+      CLAY_TEXT(CLAY_STRING("Skip Blind"), WHITE_TEXT_CONFIG);
+
+      if (is_skip_button_hovered)
+        render_tooltip(&tag_name, &tag_description, -4,
+                       &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
+    }
+
+    CLAY_TEXT(tag_name, WHITE_TEXT_CONFIG);
   }
 }
 

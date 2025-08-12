@@ -36,6 +36,33 @@ typedef enum {
   STAKE_GOLD,
 } Stake;
 
+typedef enum {
+  TAG_UNCOMMON,
+  TAG_RARE,
+  TAG_NEGATIVE,
+  TAG_FOIL,
+  TAG_HOLOGRAPHIC,
+  TAG_POLYCHROME,
+  TAG_INVESTMENT,
+  TAG_VOUCHER,
+  TAG_BOSS,
+  TAG_STANDARD,
+  TAG_CHARM,
+  TAG_METEOR,
+  TAG_BUFFOON,
+  TAG_HANDY,
+  TAG_GARBAGE,
+  TAG_ETHEREAL,
+  TAG_COUPON,
+  TAG_DOUBLE,
+  TAG_JUGGLE,
+  TAG_D6,
+  TAG_TOPUP,
+  TAG_SPEED,
+  TAG_ORBITAL,
+  TAG_ECONOMY,
+} Tag;
+
 typedef enum { SUIT_HEARTS, SUIT_DIAMONDS, SUIT_SPADES, SUIT_CLUBS } Suit;
 typedef enum {
   RANK_ACE,
@@ -122,6 +149,7 @@ typedef enum {
 typedef struct {
   BlindType type;
   uint8_t is_active;
+  Tag tag;
 } Blind;
 
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
@@ -280,7 +308,7 @@ typedef struct {
 
 typedef struct {
   uint8_t size;
-  Voucher voucher;
+  cvector_vector_type(Voucher) vouchers;
   cvector_vector_type(ShopItem) items;
   cvector_vector_type(BoosterPackItem) booster_packs;
 } Shop;
@@ -291,6 +319,11 @@ typedef struct {
   uint8_t remaining;
   uint8_t total;
 } UsageState;
+
+typedef struct {
+  UsageState hands;
+  UsageState discards;
+} Stats;
 
 typedef struct {
   Deck deck_type;
@@ -310,6 +343,7 @@ typedef struct {
   uint8_t ante;
   uint8_t round;
 
+  cvector_vector_type(Tag) tags;
   Blind *current_blind;
   Blind blinds[3];
 
@@ -325,6 +359,7 @@ typedef struct {
   FoolLastUsed fool_last_used;
 
   SortingMode sorting_mode;
+  Stats stats;
 } Game;
 
 void game_init(Deck deck, Stake stake);
@@ -362,6 +397,7 @@ uint8_t get_blind_money(BlindType blind_type);
 uint8_t get_hands_money();
 uint8_t get_discards_money();
 uint8_t get_interest_money();
+uint8_t get_investment_tag_money();
 
 void cash_out();
 
@@ -384,5 +420,6 @@ void exit_shop();
 
 void select_blind();
 void skip_blind();
+void trigger_immediate_tags();
 
 #endif
