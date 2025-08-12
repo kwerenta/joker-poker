@@ -432,9 +432,11 @@ char *get_blind_name(BlindType blind_type) {
 char *get_tag_name(Tag tag) {
   switch (tag) {
     case TAG_UNCOMMON:
-      return "Uncommon";
+      // TODO Implement properly when uncommon jokers and rng utilities will be added
+      return "Uncommon PARTIALLY IMPLEMENTED";
     case TAG_RARE:
-      return "Rare";
+      // TODO Implement properly when rare jokers and rng utilities will be added
+      return "Rare PARTIALLY IMPLEMENTED";
     case TAG_NEGATIVE:
       return "Negative";
     case TAG_FOIL:
@@ -448,7 +450,8 @@ char *get_tag_name(Tag tag) {
     case TAG_VOUCHER:
       return "Voucher";
     case TAG_BOSS:
-      return "Boss";
+      // TODO Implement when boss blinds will be added
+      return "Boss NOT IMPLEMENTED";
     case TAG_STANDARD:
       return "Standard";
     case TAG_CHARM:
@@ -470,9 +473,11 @@ char *get_tag_name(Tag tag) {
     case TAG_JUGGLE:
       return "Juggle";
     case TAG_D6:
-      return "D6";
+      // TODO Implement when shop re-rolls will be added
+      return "D6 NOT IMPLEMENTED";
     case TAG_TOPUP:
-      return "Top-up";
+      // TODO Implement properly when rng utilities will be added
+      return "Top-up PARTIALLY IMPLEMENTED";
     case TAG_SPEED:
       return "Speed";
     case TAG_ORBITAL:
