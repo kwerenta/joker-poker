@@ -1195,10 +1195,35 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
+  uint8_t available_vouchers_count = 0;
+  for (uint8_t i = 0; i < 32; i++) {
+    if (state.game.vouchers & (1 << i)) continue;
+
+    if (i < 16) {
+      available_vouchers_count++;
+      continue;
+    }
+    if (state.game.vouchers & (1 << (i - 16))) available_vouchers_count++;
+  }
+  uint32_t combined_vouchers = state.game.vouchers;
+
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     if (state.game.tags[i] == TAG_VOUCHER) {
-      // FIX These vouchers should be generated according to voucher rules
-      cvector_insert(state.game.shop.vouchers, 0, 1 << rand() % 32);
+      uint8_t voucher_index = rand() % available_vouchers_count;
+
+      for (uint8_t i = 0; i < 32; i++) {
+        Voucher voucher = 1 << i;
+        if (combined_vouchers & voucher) continue;
+
+        if (voucher_index == 0) {
+          cvector_insert(state.game.shop.vouchers, 0, voucher);
+          combined_vouchers |= voucher;
+          available_vouchers_count--;
+          break;
+        }
+        voucher_index--;
+      }
+
       cvector_erase(state.game.tags, i);
       i--;
     }
@@ -1232,21 +1257,10 @@ void restock_shop() {
   }
 
   if (is_ante_first_shop || state.game.round == 1) {
-    uint8_t count = 0;
-    for (uint8_t i = 0; i < 32; i++) {
-      if (state.game.vouchers & (1 << i)) continue;
-
-      if (i < 16) {
-        count++;
-        continue;
-      }
-      if (state.game.vouchers & (1 << (i - 16))) count++;
-    }
-
-    uint8_t voucher_index = rand() % count;
+    uint8_t voucher_index = rand() % available_vouchers_count;
 
     for (uint8_t i = 0; i < 32; i++) {
-      if (state.game.vouchers & (1 << i)) continue;
+      if (combined_vouchers & (1 << i)) continue;
 
       if (voucher_index == 0) cvector_back(state.game.shop.vouchers) = 1 << i;
       voucher_index--;
