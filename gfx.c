@@ -235,6 +235,28 @@ void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
 
 void render_deck(Deck deck, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 3, .y = 3}, dst); }
 
+void render_tooltip(Clay_String *title, Clay_String *description, float y_offset,
+                    Clay_FloatingAttachPoints *attach_points) {
+  CLAY({.id = CLAY_ID("Tooltip"),
+        .floating = {
+            .attachTo = CLAY_ATTACH_TO_PARENT,
+            .zIndex = 10,
+            .offset = {.y = y_offset},
+            .attachPoints = *attach_points,
+        }}) {
+    CLAY({.backgroundColor = COLOR_CARD_BG,
+          .layout = {
+              .padding = CLAY_PADDING_ALL(4),
+              .childGap = 2,
+              .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
+              .layoutDirection = CLAY_TOP_TO_BOTTOM,
+          }}) {
+      CLAY_TEXT(*title, WHITE_TEXT_CONFIG);
+      CLAY_TEXT(*description, WHITE_TEXT_CONFIG);
+    }
+  }
+}
+
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
   uint8_t item_count = get_nav_section_size(section);
   if (item_count == 0) return;
@@ -291,24 +313,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
           }
 
-          CLAY({.id = CLAY_ID("Tooltip"),
-                .floating = {
-                    .attachTo = CLAY_ATTACH_TO_PARENT,
-                    .zIndex = 10,
-                    .offset = {.y = y_offset},
-                    .attachPoints = attach_points,
-                }}) {
-            CLAY({.backgroundColor = COLOR_CARD_BG,
-                  .layout = {
-                      .padding = CLAY_PADDING_ALL(4),
-                      .childGap = 2,
-                      .sizing = {CLAY_SIZING_GROW(0, 100), CLAY_SIZING_GROW(0)},
-                      .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                  }}) {
-              CLAY_TEXT(name, WHITE_TEXT_CONFIG);
-              CLAY_TEXT(description, WHITE_TEXT_CONFIG);
-            }
-          }
+          render_tooltip(&name, &description, y_offset, &attach_points);
         }
 
         if (!is_shop) continue;
@@ -738,21 +743,25 @@ void render_blind_element(uint8_t blind_index) {
 
     if (blind->type > BLIND_BIG) continue;
 
+    Clay_String tag_name;
+    append_clay_string(&tag_name, "%s", get_tag_name(blind->tag));
+    Clay_String tag_description;
+    append_clay_string(&tag_description, "%s", get_tag_description(blind->tag));
+
     CLAY_TEXT(CLAY_STRING("or"), WHITE_TEXT_CONFIG);
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
           .backgroundColor = is_current_blind && state.navigation.hovered == 1 ? COLOR_CHIPS : COLOR_MULT}) {
       CLAY_TEXT(CLAY_STRING("Skip Blind"), WHITE_TEXT_CONFIG);
+
+      if (is_current_blind && state.navigation.hovered == 1)
+        render_tooltip(&tag_name, &tag_description, -4,
+                       &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
     }
 
-    Clay_String tag_name;
-    append_clay_string(&tag_name, "%s", get_tag_name(blind->tag));
     CLAY_TEXT(tag_name, WHITE_TEXT_CONFIG);
-
-    Clay_String tag_description;
-    append_clay_string(&tag_description, "%s", get_tag_description(blind->tag));
-    CLAY_TEXT(tag_description, WHITE_TEXT_CONFIG);
   }
 }
 
