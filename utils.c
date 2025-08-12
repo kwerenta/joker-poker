@@ -11,6 +11,8 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
   switch (section) {
     case NAVIGATION_NONE:
     case NAVIGATION_MAIN_MENU:
+    case NAVIGATION_SELECT_DECK:
+    case NAVIGATION_SELECT_STAKE:
     case NAVIGATION_OVERLAY_MENU:
       return (CustomElementData){0};
 
@@ -44,7 +46,7 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
     }
 
     case NAVIGATION_SHOP_VOUCHER:
-      return (CustomElementData){.type = CUSTOM_ELEMENT_VOUCHER, .voucher = state.game.shop.voucher};
+      return (CustomElementData){.type = CUSTOM_ELEMENT_VOUCHER, .voucher = state.game.shop.vouchers[i]};
 
     case NAVIGATION_SHOP_BOOSTER_PACKS:
       return (CustomElementData){.type = CUSTOM_ELEMENT_BOOSTER_PACK, .booster_pack = state.game.shop.booster_packs[i]};
@@ -115,6 +117,8 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
   switch (section) {
     case NAVIGATION_NONE:
     case NAVIGATION_MAIN_MENU:
+    case NAVIGATION_SELECT_DECK:
+    case NAVIGATION_SELECT_STAKE:
     case NAVIGATION_OVERLAY_MENU:
       return;
 
@@ -155,12 +159,13 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
       break;
     }
 
-    case NAVIGATION_SHOP_VOUCHER:
-      *name = (Clay_String){.chars = get_voucher_name(state.game.shop.voucher),
-                            .length = strlen(get_voucher_name(state.game.shop.voucher))};
-      *description = (Clay_String){.chars = get_voucher_description(state.game.shop.voucher),
-                                   .length = strlen(get_voucher_description(state.game.shop.voucher))};
+    case NAVIGATION_SHOP_VOUCHER: {
+      Voucher voucher = state.game.shop.vouchers[state.navigation.hovered];
+      *name = (Clay_String){.chars = get_voucher_name(voucher), .length = strlen(get_voucher_name(voucher))};
+      *description =
+          (Clay_String){.chars = get_voucher_description(voucher), .length = strlen(get_voucher_description(voucher))};
       break;
+    }
 
     case NAVIGATION_SHOP_BOOSTER_PACKS: {
       BoosterPackItem *booster_pack = &state.game.shop.booster_packs[state.navigation.hovered];

@@ -236,7 +236,7 @@ void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
 void render_deck(Deck deck, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 3, .y = 3}, dst); }
 
 void render_spread_items(NavigationSection section, Clay_String parent_id) {
-  size_t item_count = get_nav_section_size(section);
+  uint8_t item_count = get_nav_section_size(section);
   if (item_count == 0) return;
   size_t items_width = item_count * CARD_WIDTH;
 
@@ -328,7 +328,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             append_clay_string(&price, "$%d",
                                section == NAVIGATION_SHOP_BOOSTER_PACKS
                                    ? get_booster_pack_price(&state.game.shop.booster_packs[i])
-                               : section == NAVIGATION_SHOP_VOUCHER ? get_voucher_price(state.game.shop.voucher)
+                               : section == NAVIGATION_SHOP_VOUCHER ? get_voucher_price(state.game.shop.vouchers[i])
                                                                     : get_shop_item_price(&state.game.shop.items[i]));
             CLAY_TEXT(price, WHITE_TEXT_CONFIG);
           }
@@ -603,7 +603,7 @@ void render_shop() {
                 .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
             }}) {
         CLAY({.id = CLAY_ID("ShopVoucher"),
-              .layout = {.sizing = CLAY_SIZING_FIXED(CARD_WIDTH), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {}
+              .layout = {.sizing = CLAY_SIZING_PERCENT(0.3), CLAY_SIZING_FIXED(CARD_HEIGHT)}}) {}
         render_spread_items(NAVIGATION_SHOP_VOUCHER, CLAY_STRING("ShopVoucher"));
 
         CLAY({.id = CLAY_ID("ShopBoosterPacks"),

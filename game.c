@@ -34,6 +34,7 @@ void game_init(Deck deck, Stake stake) {
   state.game.consumables.size = 2;
 
   state.game.shop.size = 2;
+  cvector_push_back(state.game.shop.vouchers, 0);
 
   apply_deck_settings();
 
@@ -66,6 +67,7 @@ void game_destroy() {
   cvector_destroy(state.game.shop.items);
   cvector_destroy(state.game.shop.booster_packs);
   cvector_destroy(state.game.booster_pack.content);
+  cvector_destroy(state.game.shop.vouchers);
   cvector_destroy(state.game.tags);
 
   log_message(LOG_INFO, "Game has been destroyed.");
@@ -990,7 +992,7 @@ void buy_shop_item() {
   if (!is_booster_pack && !is_voucher && section != NAVIGATION_SHOP_ITEMS) return;
 
   uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
-                  : is_voucher    ? get_voucher_price(state.game.shop.voucher)
+                  : is_voucher    ? get_voucher_price(state.game.shop.vouchers[item_index])
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
 
   if (state.game.money < price) return;
@@ -999,8 +1001,11 @@ void buy_shop_item() {
     open_booster_pack(&state.game.shop.booster_packs[item_index]);
     cvector_erase(state.game.shop.booster_packs, item_index);
   } else if (is_voucher) {
-    add_voucher_to_player(state.game.shop.voucher);
-    state.game.shop.voucher = 0;
+    add_voucher_to_player(state.game.shop.vouchers[item_index]);
+    if (item_index == cvector_size(state.game.shop.vouchers) - 1)
+      state.game.shop.vouchers[item_index] = 0;
+    else
+      cvector_erase(state.game.shop.vouchers, item_index);
   } else {
     if (add_item_to_player(&state.game.shop.items[item_index]) == 0) return;
     cvector_erase(state.game.shop.items, item_index);
@@ -1164,6 +1169,7 @@ void fill_shop_items() {
 void restock_shop() {
   cvector_clear(state.game.shop.items);
   cvector_clear(state.game.shop.booster_packs);
+  while (cvector_size(state.game.shop.vouchers) > 1) cvector_erase(state.game.shop.vouchers, 0);
 
   uint8_t is_ante_first_shop = state.game.current_blind->type == BLIND_SMALL ||
                                (!state.game.blinds[0].is_active &&
@@ -1190,6 +1196,13 @@ void restock_shop() {
   }
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    if (state.game.tags[i] == TAG_VOUCHER) {
+      // FIX These vouchers should be generated according to voucher rules
+      cvector_insert(state.game.shop.vouchers, 0, 1 << rand() % 32);
+      cvector_erase(state.game.tags, i);
+      i--;
+    }
+
     cvector_for_each(state.game.shop.items, ShopItem, shop_item) {
       if (shop_item->type != SHOP_ITEM_JOKER || shop_item->joker.edition != EDITION_BASE) continue;
 
@@ -1235,7 +1248,7 @@ void restock_shop() {
     for (uint8_t i = 0; i < 32; i++) {
       if (state.game.vouchers & (1 << i)) continue;
 
-      if (voucher_index == 0) state.game.shop.voucher = 1 << i;
+      if (voucher_index == 0) cvector_back(state.game.shop.vouchers) = 1 << i;
       voucher_index--;
     }
   }

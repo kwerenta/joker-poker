@@ -165,7 +165,7 @@ uint8_t get_nav_section_size(NavigationSection section) {
     case NAVIGATION_SHOP_ITEMS:
       return cvector_size(state.game.shop.items);
     case NAVIGATION_SHOP_VOUCHER:
-      return state.game.shop.voucher != 0 ? 1 : 0;
+      return cvector_size(state.game.shop.vouchers) - (cvector_back(state.game.shop.vouchers) == 0 ? 1 : 0);
     case NAVIGATION_BOOSTER_PACK:
       return cvector_size(state.game.booster_pack.content);
     case NAVIGATION_CONSUMABLES:
