@@ -334,6 +334,8 @@ void handle_controls() {
 
     case STAGE_SELECT_BLIND:
       if (button_pressed(PSP_CTRL_CROSS))
+        select_blind_button_click();
+      else if (button_pressed(PSP_CTRL_SQUARE))
         select_blind();
       else if (button_pressed(PSP_CTRL_TRIANGLE))
         skip_blind();

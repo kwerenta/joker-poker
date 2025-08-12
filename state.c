@@ -37,6 +37,7 @@ static const NavigationLayout stage_nav_layouts[] = {
              {1, {NAVIGATION_HAND}},
              {1, {NAVIGATION_BOOSTER_PACK}},
          }},
+    {.row_count = 1, .rows = {{1, {NAVIGATION_SELECT_BLIND}}}},
     {.row_count = 0},
 };
 
@@ -160,6 +161,8 @@ uint8_t get_nav_section_size(NavigationSection section) {
       return 15;
     case NAVIGATION_SELECT_STAKE:
       return 8;
+    case NAVIGATION_SELECT_BLIND:
+      return 2;
     case NAVIGATION_HAND:
       return cvector_size(state.game.hand.cards);
     case NAVIGATION_SHOP_ITEMS:
@@ -181,7 +184,7 @@ uint8_t get_nav_section_size(NavigationSection section) {
 }
 
 uint8_t is_nav_section_horizontal(NavigationSection section) {
-  if (section == NAVIGATION_OVERLAY_MENU) return 0;
+  if (section == NAVIGATION_OVERLAY_MENU || section == NAVIGATION_SELECT_BLIND) return 0;
 
   return 1;
 }
@@ -296,15 +299,25 @@ void main_menu_button_click() {
     case 0:
       change_stage(STAGE_SELECT_DECK);
       break;
-
     case 1:
       change_stage(STAGE_CREDITS);
       break;
-
     case 2:
       state.running = 0;
       break;
+    default:
+      return;
+  }
+}
 
+void select_blind_button_click() {
+  switch (state.navigation.hovered) {
+    case 0:
+      select_blind();
+      break;
+    case 1:
+      skip_blind();
+      break;
     default:
       return;
   }

@@ -715,7 +715,8 @@ void render_blind_element(uint8_t blind_index) {
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = is_current_blind ? COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
+          .backgroundColor =
+              is_current_blind ? state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
       CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
                 : !blind->is_active                ? CLAY_STRING("Skipped")
                 : blind < state.game.current_blind ? CLAY_STRING("Defeated")
@@ -741,7 +742,7 @@ void render_blind_element(uint8_t blind_index) {
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = COLOR_MULT}) {
+          .backgroundColor = is_current_blind && state.navigation.hovered == 1 ? COLOR_CHIPS : COLOR_MULT}) {
       CLAY_TEXT(CLAY_STRING("Skip Blind"), WHITE_TEXT_CONFIG);
     }
 

@@ -37,6 +37,7 @@ typedef enum {
   NAVIGATION_MAIN_MENU,
   NAVIGATION_SELECT_DECK,
   NAVIGATION_SELECT_STAKE,
+  NAVIGATION_SELECT_BLIND,
   NAVIGATION_HAND,
   NAVIGATION_SHOP_ITEMS,
   NAVIGATION_SHOP_VOUCHER,
@@ -90,6 +91,7 @@ void change_overlay(Overlay overlay);
 
 void overlay_menu_button_click();
 void main_menu_button_click();
+void select_blind_button_click();
 
 typedef struct {
   Arena frame_arena;
