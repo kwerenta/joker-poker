@@ -251,6 +251,10 @@ void play_hand() {
   remove_selected_cards();
   state.game.hands.remaining--;
 
+  if (state.game.current_blind->type == BLIND_HOOK) {
+    for (uint8_t i = 0; i < 2; i++) discard_card(rand() % cvector_size(state.game.hand.cards));
+  }
+
   cvector_for_each(state.game.hand.cards, Card, card) {
     trigger_in_hand_card(card);
     if (card->seal == SEAL_RED) trigger_in_hand_card(card);
@@ -387,6 +391,11 @@ void remove_selected_cards() {
   }
 
   state.game.selected_hand.count = 0;
+}
+
+void discard_card(uint8_t index) {
+  if (index >= cvector_size(state.game.hand.cards)) return;
+  cvector_erase(state.game.hand.cards, index);
 }
 
 void shuffle_deck() {

@@ -409,6 +409,7 @@ void sort_hand();
 void toggle_card_select(uint8_t index);
 void deselect_all_cards();
 void remove_selected_cards();
+void discard_card(uint8_t index);
 
 uint16_t evaluate_hand();
 uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);
