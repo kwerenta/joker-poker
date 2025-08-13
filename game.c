@@ -170,6 +170,8 @@ void draw_card() {
   if (state.stage == STAGE_SELECT_BLIND || state.stage == STAGE_GAME) {
     state.game.stats.drawn_cards++;
 
+    if (!state.game.current_blind->is_active) return;
+
     switch (state.game.current_blind->type) {
       case BLIND_WHEEL:
         if (state.game.stats.drawn_cards % 7 == 0) cvector_back(state.game.hand.cards).status |= CARD_STATUS_FACE_DOWN;
@@ -250,43 +252,45 @@ void play_hand() {
 
   update_scoring_hand();
 
-  switch (state.game.current_blind->type) {
-    case BLIND_OX:
-      if (get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) state.game.money = 0;
-      break;
-    case BLIND_ARM: {
-      PokerHandStats *played_hand_stats = get_poker_hand_stats(state.game.selected_hand.hand_union);
-      if (played_hand_stats->level >= 1) played_hand_stats->level--;
-      break;
+  if (state.game.current_blind->is_active) {
+    switch (state.game.current_blind->type) {
+      case BLIND_OX:
+        if (get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) state.game.money = 0;
+        break;
+      case BLIND_ARM: {
+        PokerHandStats *played_hand_stats = get_poker_hand_stats(state.game.selected_hand.hand_union);
+        if (played_hand_stats->level >= 1) played_hand_stats->level--;
+        break;
+      }
+      case BLIND_PSYCHIC:
+        if (state.game.selected_hand.count != 5) {
+          replace_selected_cards();
+          return;
+        }
+        break;
+      case BLIND_EYE:
+        if (state.game.played_poker_hands & get_poker_hand(state.game.selected_hand.hand_union)) {
+          replace_selected_cards();
+          return;
+        }
+        break;
+      case BLIND_MOUTH:
+        if (state.game.played_poker_hands &&
+            !(state.game.played_poker_hands & get_poker_hand(state.game.selected_hand.hand_union))) {
+          replace_selected_cards();
+          return;
+        }
+        break;
+      case BLIND_TOOTH:
+        state.game.money -= state.game.selected_hand.count;
+        break;
+      case BLIND_FLINT:
+        state.game.selected_hand.score_pair.mult /= 2;
+        state.game.selected_hand.score_pair.chips /= 2;
+        break;
+      default:
+        break;
     }
-    case BLIND_PSYCHIC:
-      if (state.game.selected_hand.count != 5) {
-        replace_selected_cards();
-        return;
-      }
-      break;
-    case BLIND_EYE:
-      if (state.game.played_poker_hands & get_poker_hand(state.game.selected_hand.hand_union)) {
-        replace_selected_cards();
-        return;
-      }
-      break;
-    case BLIND_MOUTH:
-      if (state.game.played_poker_hands &&
-          !(state.game.played_poker_hands & get_poker_hand(state.game.selected_hand.hand_union))) {
-        replace_selected_cards();
-        return;
-      }
-      break;
-    case BLIND_TOOTH:
-      state.game.money -= state.game.selected_hand.count;
-      break;
-    case BLIND_FLINT:
-      state.game.selected_hand.score_pair.mult /= 2;
-      state.game.selected_hand.score_pair.chips /= 2;
-      break;
-    default:
-      break;
   }
 
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
@@ -311,7 +315,7 @@ void play_hand() {
   remove_selected_cards();
   state.game.hands.remaining--;
 
-  if (state.game.current_blind->type == BLIND_HOOK) {
+  if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_HOOK) {
     for (uint8_t i = 0; i < 2; i++) discard_card(rand() % cvector_size(state.game.hand.cards));
   }
 
@@ -346,21 +350,26 @@ void play_hand() {
       if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
 
-    state.game.stats.hands.total += state.game.current_blind->type == BLIND_NEEDLE ? 1 : state.game.hands.total;
+    state.game.stats.hands.total +=
+        state.game.current_blind->is_active && state.game.current_blind->type == BLIND_NEEDLE ? 1
+                                                                                              : state.game.hands.total;
     state.game.stats.hands.remaining += state.game.hands.remaining;
-    state.game.stats.discards.total += state.game.current_blind->type == BLIND_WATER ? 0 : state.game.discards.total;
+    state.game.stats.discards.total +=
+        state.game.current_blind->is_active && state.game.current_blind->type == BLIND_WATER
+            ? 0
+            : state.game.discards.total;
     state.game.stats.discards.remaining += state.game.discards.remaining;
 
     change_stage(STAGE_CASH_OUT);
   } else if (state.game.hands.remaining == 0) {
     change_stage(STAGE_GAME_OVER);
   } else {
-    if (state.game.current_blind->type == BLIND_SERPENT)
+    if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_SERPENT)
       for (uint8_t i = 0; i < 3; i++) draw_card();
     else
       fill_hand();
 
-    if (state.game.current_blind->type == BLIND_FISH)
+    if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_FISH)
       for (int8_t i = cards_played; i > 0; i--)
         state.game.hand.cards[cvector_size(state.game.hand.cards) - i].status |= CARD_STATUS_FACE_DOWN;
 
@@ -452,7 +461,7 @@ void discard_hand() {
   state.game.selected_hand.count = 0;
   state.game.discards.remaining--;
 
-  if (state.game.current_blind->type == BLIND_SERPENT)
+  if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_SERPENT)
     for (uint8_t i = 0; i < 3; i++) draw_card();
   else
     fill_hand();
@@ -882,11 +891,11 @@ double get_required_score(uint8_t ante, BlindType blind_type) {
       return 1.5 * base_score;
 
     case BLIND_WALL:
-      return 4.0 * base_score;
+      return (state.game.current_blind->is_active ? 4.0 : 2.0) * base_score;
     case BLIND_NEEDLE:
       return base_score;
     case BLIND_VIOLET_VESSEL:
-      return 6.0 * base_score;
+      return (state.game.current_blind->is_active ? 6.0 : 2.0) * base_score;
 
     default:
       return 2.0 * base_score;
@@ -1534,5 +1543,10 @@ void enable_boss_blind() {
 }
 
 void disable_boss_blind() {
+  state.game.current_blind->is_active = 0;
   if (state.game.current_blind->type == BLIND_MANACLE) state.game.hand.size++;
+
+  cvector_for_each(state.game.hand.cards, Card, card) card->status = CARD_STATUS_NORMAL;
+  cvector_for_each(state.game.deck, Card, card) card->status = CARD_STATUS_NORMAL;
+  cvector_for_each(state.game.jokers.cards, Joker, joker) joker->status = CARD_STATUS_NORMAL;
 }
