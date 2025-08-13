@@ -386,7 +386,9 @@ typedef struct {
   Shop shop;
 
   BoosterPack booster_pack;
+
   FoolLastUsed fool_last_used;
+  uint32_t played_poker_hands;
 
   SortingMode sorting_mode;
   Stats stats;
@@ -409,6 +411,7 @@ void sort_hand();
 void toggle_card_select(uint8_t index);
 void deselect_all_cards();
 void remove_selected_cards();
+void replace_selected_cards();
 void discard_card(uint8_t index);
 
 uint16_t evaluate_hand();

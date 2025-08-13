@@ -46,6 +46,7 @@ void game_init(Deck deck, Stake stake) {
   change_stage(STAGE_SELECT_BLIND);
 
   state.game.fool_last_used.was_used = 0;
+  state.game.played_poker_hands = 0;
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
 
   cvector_reserve(state.game.shop.booster_packs, 2);
@@ -244,11 +245,20 @@ void play_hand() {
     }
     case BLIND_PSYCHIC:
       if (state.game.selected_hand.count != 5) {
-        remove_selected_cards();
-        state.game.hands.remaining--;
-
-        fill_hand();
-        sort_hand();
+        replace_selected_cards();
+        return;
+      }
+      break;
+    case BLIND_EYE:
+      if (state.game.played_poker_hands & get_poker_hand(state.game.selected_hand.hand_union)) {
+        replace_selected_cards();
+        return;
+      }
+      break;
+    case BLIND_MOUTH:
+      if (state.game.played_poker_hands &&
+          !(state.game.played_poker_hands & get_poker_hand(state.game.selected_hand.hand_union))) {
+        replace_selected_cards();
         return;
       }
       break;
@@ -264,6 +274,7 @@ void play_hand() {
   }
 
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
+  state.game.played_poker_hands |= get_poker_hand(state.game.selected_hand.hand_union);
 
   for (uint8_t i = 0; i < 5; i++) {
     Card *card = state.game.selected_hand.scoring_cards[i];
@@ -335,6 +346,7 @@ void cash_out() {
                       get_blind_money(state.game.current_blind->type) + get_investment_tag_money();
 
   state.game.score = 0;
+  state.game.played_poker_hands = 0;
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     if (state.game.tags[i] == TAG_JUGGLE) {
@@ -432,6 +444,19 @@ void remove_selected_cards() {
   }
 
   state.game.selected_hand.count = 0;
+}
+
+void replace_selected_cards() {
+  remove_selected_cards();
+  state.game.hands.remaining--;
+
+  if (state.game.hands.remaining == 0) {
+    change_stage(STAGE_GAME_OVER);
+    return;
+  }
+
+  fill_hand();
+  sort_hand();
 }
 
 void discard_card(uint8_t index) {

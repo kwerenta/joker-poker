@@ -428,7 +428,6 @@ char *get_blind_name(BlindType blind_type) {
       return "The Hook";
     case BLIND_OX:
       return "The House";
-
     case BLIND_HOUSE:
       return "The House";
     case BLIND_WALL:
