@@ -453,4 +453,6 @@ void select_blind();
 void skip_blind();
 void trigger_immediate_tags();
 
+PokerHand get_most_played_poker_hand();
+
 #endif

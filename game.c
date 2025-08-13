@@ -232,6 +232,12 @@ void play_hand() {
   if (state.game.hands.remaining == 0 || state.game.selected_hand.count == 0) return;
 
   update_scoring_hand();
+
+  if (state.game.current_blind->type == BLIND_OX &&
+      get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) {
+    state.game.money = 0;
+  }
+
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
 
   for (uint8_t i = 0; i < 5; i++) {
@@ -1108,14 +1114,8 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         break;
       case BOOSTER_PACK_CELESTIAL:
         if (state.game.vouchers & VOUCHER_TELESCOPE && i == 0) {
-          uint16_t max_played = 0;
-
-          for (int8_t j = 11; j >= 0; j--) {
-            if (state.game.poker_hands[j].played >= max_played) {
-              max_played = state.game.poker_hands[j].played;
-              content.planet = j;
-            }
-          }
+          PokerHand most_played = get_most_played_poker_hand();
+          content.planet = ffs(most_played) - 1;
         } else {
           content.planet = rand() % 12;
         }
@@ -1398,4 +1398,18 @@ void trigger_immediate_tags() {
 
     if (should_stop) break;
   }
+}
+
+PokerHand get_most_played_poker_hand() {
+  uint16_t max_played = 0;
+  PokerHand max_hand = HAND_HIGH_CARD;
+
+  for (int8_t i = 11; i >= 0; i--) {
+    if (state.game.poker_hands[i].played > max_played) {
+      max_played = state.game.poker_hands[i].played;
+      max_hand = 1 << i;
+    }
+  }
+
+  return max_hand;
 }
