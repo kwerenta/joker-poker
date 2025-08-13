@@ -233,19 +233,27 @@ void play_hand() {
 
   update_scoring_hand();
 
-  if (state.game.current_blind->type == BLIND_OX &&
-      get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) {
-    state.game.money = 0;
-  } else if (state.game.current_blind->type == BLIND_ARM) {
-    PokerHandStats *played_hand_stats = get_poker_hand_stats(state.game.selected_hand.hand_union);
-    if (played_hand_stats->level >= 1) played_hand_stats->level--;
-  } else if (state.game.current_blind->type == BLIND_PSYCHIC && state.game.selected_hand.count != 5) {
-    remove_selected_cards();
-    state.game.hands.remaining--;
+  switch (state.game.current_blind->type) {
+    case BLIND_OX:
+      if (get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) state.game.money = 0;
+      break;
+    case BLIND_ARM: {
+      PokerHandStats *played_hand_stats = get_poker_hand_stats(state.game.selected_hand.hand_union);
+      if (played_hand_stats->level >= 1) played_hand_stats->level--;
+      break;
+    }
+    case BLIND_PSYCHIC:
+      if (state.game.selected_hand.count != 5) {
+        remove_selected_cards();
+        state.game.hands.remaining--;
 
-    fill_hand();
-    sort_hand();
-    return;
+        fill_hand();
+        sort_hand();
+        return;
+      }
+      break;
+    default:
+      break;
   }
 
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
@@ -307,7 +315,10 @@ void play_hand() {
   } else if (state.game.hands.remaining == 0) {
     change_stage(STAGE_GAME_OVER);
   } else {
-    fill_hand();
+    if (state.game.current_blind->type == BLIND_SERPENT)
+      for (uint8_t i = 0; i < 3; i++) draw_card();
+    else
+      fill_hand();
     sort_hand();
   }
 }
@@ -384,14 +395,20 @@ void update_scoring_edition(Edition edition) {
 void discard_hand() {
   if (state.game.selected_hand.count == 0 || state.game.discards.remaining == 0) return;
 
-  cvector_for_each(state.game.hand.cards, Card, card) {
-    if (card->selected == 1 && card->seal == SEAL_PURPLE)
-      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22});
+  for (uint8_t i = 0; i < cvector_size(state.game.hand.cards); i++) {
+    if (state.game.hand.cards[i].selected > 0) {
+      discard_card(i);
+      i--;
+    }
   }
 
+  state.game.selected_hand.count = 0;
   state.game.discards.remaining--;
-  remove_selected_cards();
-  fill_hand();
+
+  if (state.game.current_blind->type == BLIND_SERPENT)
+    for (uint8_t i = 0; i < 3; i++) draw_card();
+  else
+    fill_hand();
   sort_hand();
 }
 
@@ -411,6 +428,10 @@ void remove_selected_cards() {
 
 void discard_card(uint8_t index) {
   if (index >= cvector_size(state.game.hand.cards)) return;
+
+  if (state.game.hand.cards[index].seal == SEAL_PURPLE)
+    add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22});
+
   cvector_erase(state.game.hand.cards, index);
 }
 
