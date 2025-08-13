@@ -757,10 +757,24 @@ double get_ante_base_score(uint8_t ante) {
 }
 
 double get_required_score(uint8_t ante, BlindType blind_type) {
-  return (state.game.deck_type == DECK_PLASMA ? 2 : 1) * get_ante_base_score(ante) *
-         (blind_type == BLIND_SMALL ? 1
-          : blind_type == BLIND_BIG ? 1.5
-                                    : 2);
+  double base_score = (state.game.deck_type == DECK_PLASMA ? 2 : 1) * get_ante_base_score(ante);
+
+  switch (blind_type) {
+    case BLIND_SMALL:
+      return base_score;
+    case BLIND_BIG:
+      return 1.5 * base_score;
+
+    case BLIND_WALL:
+      return 4.0 * base_score;
+    case BLIND_NEEDLE:
+      return base_score;
+    case BLIND_VIOLET_VESSEL:
+      return 6.0 * base_score;
+
+    default:
+      return 2.0 * base_score;
+  }
 }
 
 uint8_t get_blind_money(BlindType blind_type) {
