@@ -21,7 +21,7 @@ void game_init(Deck deck, Stake stake) {
 
   state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = rand() % 24, .is_active = 1};
   state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = rand() % 24, .is_active = 1};
-  state.game.blinds[2] = (Blind){.type = BLIND_BOSS, .is_active = 1};
+  state.game.blinds[2] = (Blind){.type = BLIND_HOOK, .is_active = 1};
   state.game.current_blind = &state.game.blinds[0];
 
   state.game.money = 4;

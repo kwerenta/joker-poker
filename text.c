@@ -424,8 +424,64 @@ char *get_blind_name(BlindType blind_type) {
     case BLIND_BIG:
       return "Big Blind";
 
-    case BLIND_BOSS:
-      return "Boss Blind";
+    case BLIND_HOOK:
+      return "The Hook";
+    case BLIND_OX:
+      return "The House";
+
+    case BLIND_HOUSE:
+      return "The House";
+    case BLIND_WALL:
+      return "The Wall";
+    case BLIND_WHEEL:
+      return "The Wheel";
+    case BLIND_ARM:
+      return "The Arm";
+    case BLIND_CLUB:
+      return "The Club";
+    case BLIND_FISH:
+      return "The Fish";
+    case BLIND_PSYCHIC:
+      return "The Psychic";
+    case BLIND_GOAD:
+      return "The Goad";
+    case BLIND_WATER:
+      return "The Water";
+    case BLIND_WINDOW:
+      return "The Window";
+    case BLIND_MANACLE:
+      return "The Manacle";
+    case BLIND_EYE:
+      return "The Eye";
+    case BLIND_MOUTH:
+      return "The Mouth";
+    case BLIND_PLANT:
+      return "The Plant";
+    case BLIND_SERPENT:
+      return "The Serpent";
+    case BLIND_PILLAR:
+      return "The Pillar";
+    case BLIND_NEEDLE:
+      return "The Needle";
+    case BLIND_HEAD:
+      return "The Head";
+    case BLIND_TOOTH:
+      return "The Tooth";
+    case BLIND_FLINT:
+      return "The Flint";
+    case BLIND_MARK:
+      return "The Mark";
+
+    case BLIND_AMBER_ACORN:
+      return "Amber Acorn";
+    case BLIND_VERDANT_LEAF:
+      return "Verdant Leaf";
+    case BLIND_VIOLET_VESSEL:
+      return "Violet Vessel";
+    case BLIND_CRIMSON_HEART:
+      return "Crimson Heart";
+    case BLIND_CERULEAN_BELL:
+      return "Cerulean Bell";
   }
 }
 
