@@ -778,7 +778,11 @@ double get_required_score(uint8_t ante, BlindType blind_type) {
 }
 
 uint8_t get_blind_money(BlindType blind_type) {
-  return blind_type == BLIND_SMALL ? state.game.stake >= STAKE_RED ? 0 : 3 : blind_type == BLIND_BIG ? 4 : 5;
+  // BLIND_AMBER_ACORN is the first Finisher Boss Blind, they have higher reward
+  return blind_type == BLIND_SMALL        ? state.game.stake >= STAKE_RED ? 0 : 3
+         : blind_type == BLIND_BIG        ? 4
+         : blind_type < BLIND_AMBER_ACORN ? 5
+                                          : 8;
 }
 uint8_t get_hands_money() { return (state.game.deck_type == DECK_GREEN ? 2 : 1) * state.game.hands.remaining; }
 uint8_t get_discards_money() { return (state.game.deck_type == DECK_GREEN ? 1 : 0) * state.game.discards.remaining; }
