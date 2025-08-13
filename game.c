@@ -255,6 +255,10 @@ void play_hand() {
     case BLIND_TOOTH:
       state.game.money -= state.game.selected_hand.count;
       break;
+    case BLIND_FLINT:
+      state.game.selected_hand.score_pair.mult /= 2;
+      state.game.selected_hand.score_pair.chips /= 2;
+      break;
     default:
       break;
   }
