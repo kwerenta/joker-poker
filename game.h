@@ -382,7 +382,7 @@ typedef struct {
 
   PokerHandStats poker_hands[12];
 
-  uint16_t money;
+  int16_t money;
   Shop shop;
 
   BoosterPack booster_pack;
