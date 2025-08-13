@@ -166,6 +166,22 @@ Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement,
 void draw_card() {
   cvector_push_back(state.game.hand.cards, cvector_back(state.game.deck));
   cvector_pop_back(state.game.deck);
+
+  if (state.stage == STAGE_SELECT_BLIND || state.stage == STAGE_GAME) {
+    state.game.stats.drawn_cards++;
+
+    switch (state.game.current_blind->type) {
+      case BLIND_WHEEL:
+        if (state.game.stats.drawn_cards % 7 == 0) cvector_back(state.game.hand.cards).status |= CARD_STATUS_FACE_DOWN;
+        break;
+      case BLIND_MARK:
+        if (is_face_card(&cvector_back(state.game.hand.cards)))
+          cvector_back(state.game.hand.cards).status |= CARD_STATUS_FACE_DOWN;
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 void fill_hand() {
@@ -291,6 +307,7 @@ void play_hand() {
     update_scoring_edition(joker->edition);
   }
 
+  uint8_t cards_played = state.game.selected_hand.count;
   remove_selected_cards();
   state.game.hands.remaining--;
 
@@ -342,6 +359,11 @@ void play_hand() {
       for (uint8_t i = 0; i < 3; i++) draw_card();
     else
       fill_hand();
+
+    if (state.game.current_blind->type == BLIND_FISH)
+      for (int8_t i = cards_played; i > 0; i--)
+        state.game.hand.cards[cvector_size(state.game.hand.cards) - i].status |= CARD_STATUS_FACE_DOWN;
+
     sort_hand();
   }
 }
@@ -471,6 +493,11 @@ void discard_card(uint8_t index) {
     add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22});
 
   cvector_erase(state.game.hand.cards, index);
+}
+
+uint8_t is_face_card(Card *card) {
+  if (card->rank >= RANK_JACK && card->rank <= RANK_KING) return 1;
+  return 0;
 }
 
 void shuffle_deck() {
@@ -1165,11 +1192,11 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
   state.game.booster_pack.item = *booster_pack;
   state.game.booster_pack.uses = booster_pack->size == BOOSTER_PACK_MEGA ? 2 : 1;
 
+  change_stage(STAGE_BOOSTER_PACK);
+
   shuffle_deck();
   fill_hand();
   sort_hand();
-
-  change_stage(STAGE_BOOSTER_PACK);
 
   for (uint8_t i = 0; i < get_booster_pack_items_count(booster_pack); i++) {
     BoosterPackContent content = {0};
