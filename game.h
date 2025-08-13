@@ -455,4 +455,7 @@ void trigger_immediate_tags();
 
 PokerHand get_most_played_poker_hand();
 
+void enable_boss_blind();
+void disable_boss_blind();
+
 #endif

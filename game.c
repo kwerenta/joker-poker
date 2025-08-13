@@ -306,9 +306,9 @@ void play_hand() {
       if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
 
-    state.game.stats.hands.total += state.game.hands.total;
+    state.game.stats.hands.total += state.game.current_blind->type == BLIND_NEEDLE ? 1 : state.game.hands.total;
     state.game.stats.hands.remaining += state.game.hands.remaining;
-    state.game.stats.discards.total += state.game.discards.total;
+    state.game.stats.discards.total += state.game.current_blind->type == BLIND_WATER ? 0 : state.game.discards.total;
     state.game.stats.discards.remaining += state.game.discards.remaining;
 
     change_stage(STAGE_CASH_OUT);
@@ -337,13 +337,8 @@ void cash_out() {
     }
   }
 
-  // Reset hand and deck for new blind
-  state.game.hands.remaining = state.game.hands.total;
-  state.game.discards.remaining = state.game.discards.total;
-  cvector_clear(state.game.hand.cards);
-  cvector_copy(state.game.full_deck, state.game.deck);
-
   if (state.game.current_blind->type > BLIND_BIG) {
+    disable_boss_blind();
     state.game.ante++;
 
     for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
@@ -368,6 +363,12 @@ void cash_out() {
   } else {
     state.game.current_blind++;
   }
+
+  // Reset hand and deck for new blind
+  state.game.hands.remaining = state.game.hands.total;
+  state.game.discards.remaining = state.game.discards.total;
+  cvector_clear(state.game.hand.cards);
+  cvector_copy(state.game.full_deck, state.game.deck);
 
   change_stage(STAGE_SHOP);
   restock_shop();
@@ -1349,6 +1350,8 @@ void select_blind() {
     if (*tag == TAG_JUGGLE) state.game.hand.size += 3;
   }
 
+  if (state.game.current_blind->type > BLIND_BIG) enable_boss_blind();
+
   shuffle_deck();
   fill_hand();
   sort_hand();
@@ -1443,4 +1446,24 @@ PokerHand get_most_played_poker_hand() {
   }
 
   return max_hand;
+}
+
+void enable_boss_blind() {
+  switch (state.game.current_blind->type) {
+    case BLIND_WATER:
+      state.game.discards.remaining = 0;
+      break;
+    case BLIND_MANACLE:
+      state.game.hand.size--;
+      break;
+    case BLIND_NEEDLE:
+      state.game.hands.remaining = 1;
+      break;
+    default:
+      break;
+  }
+}
+
+void disable_boss_blind() {
+  if (state.game.current_blind->type == BLIND_MANACLE) state.game.hand.size++;
 }
