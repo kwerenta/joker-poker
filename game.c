@@ -236,6 +236,9 @@ void play_hand() {
   if (state.game.current_blind->type == BLIND_OX &&
       get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) {
     state.game.money = 0;
+  } else if (state.game.current_blind->type == BLIND_ARM) {
+    PokerHandStats *played_hand_stats = get_poker_hand_stats(state.game.selected_hand.hand_union);
+    if (played_hand_stats->level >= 1) played_hand_stats->level--;
   }
 
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
