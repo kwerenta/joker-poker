@@ -252,6 +252,9 @@ void play_hand() {
         return;
       }
       break;
+    case BLIND_TOOTH:
+      state.game.money -= state.game.selected_hand.count;
+      break;
     default:
       break;
   }
