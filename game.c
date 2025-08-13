@@ -1387,11 +1387,11 @@ void select_blind() {
     if (*tag == TAG_JUGGLE) state.game.hand.size += 3;
   }
 
-  if (state.game.current_blind->type > BLIND_BIG) enable_boss_blind();
-
   shuffle_deck();
   fill_hand();
   sort_hand();
+
+  if (state.game.current_blind->type > BLIND_BIG) enable_boss_blind();
 
   change_stage(STAGE_GAME);
 }
@@ -1487,11 +1487,16 @@ PokerHand get_most_played_poker_hand() {
 
 void enable_boss_blind() {
   switch (state.game.current_blind->type) {
+    case BLIND_HOUSE:
+      cvector_for_each(state.game.hand.cards, Card, card) card->status |= CARD_STATUS_FACE_DOWN;
+      break;
     case BLIND_WATER:
       state.game.discards.remaining = 0;
       break;
     case BLIND_MANACLE:
       state.game.hand.size--;
+      cvector_push_back(state.game.deck, cvector_back(state.game.hand.cards));
+      cvector_pop_back(state.game.hand.cards);
       break;
     case BLIND_NEEDLE:
       state.game.hands.remaining = 1;
