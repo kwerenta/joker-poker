@@ -278,15 +278,16 @@ void play_hand() {
 
   for (uint8_t i = 0; i < 5; i++) {
     Card *card = state.game.selected_hand.scoring_cards[i];
-    if (card == NULL) continue;
+    if (card == NULL || card->status & CARD_STATUS_DEBUFFED) continue;
 
     trigger_scoring_card(card);
     if (card->seal == SEAL_RED) trigger_scoring_card(card);
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
-    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
+    if (joker->status & CARD_STATUS_DEBUFFED) continue;
 
+    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
     update_scoring_edition(joker->edition);
   }
 
@@ -298,6 +299,8 @@ void play_hand() {
   }
 
   cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->status & CARD_STATUS_DEBUFFED) continue;
+
     trigger_in_hand_card(card);
     if (card->seal == SEAL_RED) trigger_in_hand_card(card);
   }
@@ -320,6 +323,8 @@ void play_hand() {
 
   if (state.game.score >= required_score) {
     cvector_for_each(state.game.hand.cards, Card, card) {
+      if (card->status & CARD_STATUS_DEBUFFED) continue;
+
       trigger_end_of_round_card(card);
       if (card->seal == SEAL_RED) trigger_end_of_round_card(card);
     }
@@ -462,7 +467,7 @@ void replace_selected_cards() {
 void discard_card(uint8_t index) {
   if (index >= cvector_size(state.game.hand.cards)) return;
 
-  if (state.game.hand.cards[index].seal == SEAL_PURPLE)
+  if (!(state.game.hand.cards[index].status & CARD_STATUS_DEBUFFED) && state.game.hand.cards[index].seal == SEAL_PURPLE)
     add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = rand() % 22});
 
   cvector_erase(state.game.hand.cards, index);

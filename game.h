@@ -182,6 +182,8 @@ typedef struct {
   Tag tag;
 } Blind;
 
+typedef enum { CARD_STATUS_NORMAL = 0, CARD_STATUS_FACE_DOWN = 1 << 0, CARD_STATUS_DEBUFFED = 1 << 1 } CardStatus;
+
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
 
 typedef enum { ACTIVATION_INDEPENDENT, ACTIVATION_ON_SCORED, ACTIVATION_ON_HELD } ActivationType;
@@ -197,6 +199,7 @@ typedef struct {
 
   ActivationType activation_type;
   void (*activate)();
+  CardStatus status;
 } Joker;
 
 extern const Joker JOKERS[];
@@ -212,6 +215,8 @@ typedef struct {
 
   uint16_t chips;
   uint8_t selected;
+
+  CardStatus status;
 } Card;
 
 typedef struct {

@@ -184,6 +184,15 @@ void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
 }
 
 void render_card(Card *card, Rect *dst) {
+  if (card->status & CARD_STATUS_FACE_DOWN) {
+    render_card_atlas_sprite(&(Vector2){3, 7}, dst);
+    return;
+  }
+  if (card->status & CARD_STATUS_DEBUFFED) {
+    render_card_atlas_sprite(&(Vector2){3, 1}, dst);
+    return;
+  }
+
   Vector2 background = {.x = 9, .y = 7};
   if (card->enhancement != ENHANCEMENT_NONE) {
     uint8_t enhancement_offset = card->enhancement - 1;
@@ -203,6 +212,15 @@ void render_card(Card *card, Rect *dst) {
 }
 
 void render_joker(Joker *joker, Rect *dst) {
+  if (joker->status & CARD_STATUS_FACE_DOWN) {
+    render_card_atlas_sprite(&(Vector2){3, 7}, dst);
+    return;
+  }
+  if (joker->status & CARD_STATUS_DEBUFFED) {
+    render_card_atlas_sprite(&(Vector2){3, 1}, dst);
+    return;
+  }
+
   Vector2 src = {.x = 9, .y = 1};
   if (joker->id == 6) src.y += 2;
 
