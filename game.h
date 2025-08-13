@@ -216,6 +216,7 @@ typedef struct {
   uint16_t chips;
   uint8_t selected;
 
+  uint8_t was_played;
   CardStatus status;
 } Card;
 

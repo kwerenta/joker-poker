@@ -147,7 +147,7 @@ void apply_deck_settings() {
 
 uint8_t compare_cards(Card *a, Card *b) {
   return a->chips == b->chips && a->enhancement == b->enhancement && a->edition == b->edition && a->rank == b->rank &&
-         a->suit == b->suit && a->seal == b->seal;
+         a->suit == b->suit && a->seal == b->seal && a->was_played == b->was_played;
 }
 
 Card create_card(Suit suit, Rank rank, Edition edition, Enhancement enhancement, Seal seal) {
@@ -311,6 +311,17 @@ void play_hand() {
     update_scoring_edition(joker->edition);
   }
 
+  if (state.game.current_blind->type <= BLIND_BIG) {
+    cvector_for_each(state.game.hand.cards, Card, card) {
+      cvector_for_each(state.game.full_deck, Card, deck_card) {
+        if (card->selected > 0 && compare_cards(card, deck_card)) {
+          deck_card->was_played = 1;
+          break;
+        }
+      }
+    }
+  }
+
   uint8_t cards_played = state.game.selected_hand.count;
   remove_selected_cards();
   state.game.hands.remaining--;
@@ -394,6 +405,8 @@ void cash_out() {
 
   if (state.game.current_blind->type > BLIND_BIG) {
     disable_boss_blind();
+    cvector_for_each(state.game.full_deck, Card, card) card->was_played = 0;
+
     state.game.ante++;
 
     for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
@@ -1554,6 +1567,9 @@ void enable_boss_blind() {
     case BLIND_HEAD:
       cvector_for_each(state.game.deck, Card, card) if (is_suit(card, SUIT_HEARTS)) card->status |=
           CARD_STATUS_DEBUFFED;
+      break;
+    case BLIND_PILLAR:
+      cvector_for_each(state.game.deck, Card, card) if (card->was_played) card->status |= CARD_STATUS_DEBUFFED;
       break;
     case BLIND_NEEDLE:
       state.game.hands.remaining = 1;
