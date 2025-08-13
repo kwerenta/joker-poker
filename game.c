@@ -1548,6 +1548,9 @@ void enable_boss_blind() {
     case BLIND_MANACLE:
       state.game.hand.size--;
       break;
+    case BLIND_PLANT:
+      cvector_for_each(state.game.deck, Card, card) if (is_face_card(card)) card->status |= CARD_STATUS_DEBUFFED;
+      break;
     case BLIND_HEAD:
       cvector_for_each(state.game.deck, Card, card) if (is_suit(card, SUIT_HEARTS)) card->status |=
           CARD_STATUS_DEBUFFED;
