@@ -420,6 +420,7 @@ void remove_selected_cards();
 void replace_selected_cards();
 void discard_card(uint8_t index);
 uint8_t is_face_card(Card *card);
+uint8_t is_suit(Card *card, Suit suit);
 
 uint16_t evaluate_hand();
 uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);
