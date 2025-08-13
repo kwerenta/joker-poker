@@ -239,6 +239,13 @@ void play_hand() {
   } else if (state.game.current_blind->type == BLIND_ARM) {
     PokerHandStats *played_hand_stats = get_poker_hand_stats(state.game.selected_hand.hand_union);
     if (played_hand_stats->level >= 1) played_hand_stats->level--;
+  } else if (state.game.current_blind->type == BLIND_PSYCHIC && state.game.selected_hand.count != 5) {
+    remove_selected_cards();
+    state.game.hands.remaining--;
+
+    fill_hand();
+    sort_hand();
+    return;
   }
 
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
