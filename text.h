@@ -27,6 +27,7 @@ char *get_stake_name(Stake stake);
 char *get_stake_description(Stake stake);
 
 char *get_blind_name(BlindType blind_type);
+char *get_blind_description(BlindType blind_type);
 
 char *get_tag_name(Tag tag);
 char *get_tag_description(Tag tag);

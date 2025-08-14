@@ -484,6 +484,72 @@ char *get_blind_name(BlindType blind_type) {
   }
 }
 
+char *get_blind_description(BlindType blind_type) {
+  switch (blind_type) {
+    case BLIND_SMALL:
+    case BLIND_BIG:
+      return "No special effects";
+
+    case BLIND_HOOK:
+      return "Discards 2 random cards held in hand after every played hand";
+    case BLIND_OX:
+      return "Playing your most played hand this run sets money to $0";
+    case BLIND_HOUSE:
+      return "First hand is drawn face down";
+    case BLIND_WALL:
+      return "Extra large blind";
+    case BLIND_WHEEL:
+      return "1 in 7 cards get drawn face down during that round";
+    case BLIND_ARM:
+      return "Decrease level of played poker hand by 1";
+    case BLIND_CLUB:
+      return "All Club cards are debuffed";
+    case BLIND_FISH:
+      return "Cards drawn face down after each hand played";
+    case BLIND_PSYCHIC:
+      return "Must play 5 cards (not all cards need to score)";
+    case BLIND_GOAD:
+      return "All Spade cards are debuffed";
+    case BLIND_WATER:
+      return "Start with 0 discards";
+    case BLIND_WINDOW:
+      return "All Diamond cards are debuffed";
+    case BLIND_MANACLE:
+      return "-1 Hand Size";
+    case BLIND_EYE:
+      return "No repeat hand types this round";
+    case BLIND_MOUTH:
+      return "Only one hand type can be played this round";
+    case BLIND_PLANT:
+      return "All face cards are debuffed";
+    case BLIND_SERPENT:
+      return "After Play or Discard always draw 3 cards (ignores hand size)";
+    case BLIND_PILLAR:
+      return "Cards played previously this Ante are debuffed";
+    case BLIND_NEEDLE:
+      return "Play only 1 hand";
+    case BLIND_HEAD:
+      return "All Heart cards are debuffed";
+    case BLIND_TOOTH:
+      return "Lose $1 per card played";
+    case BLIND_FLINT:
+      return "Base Chips and Mult for played poker hands are halved for the entire round";
+    case BLIND_MARK:
+      return "All face cards are drawn face down";
+
+    case BLIND_AMBER_ACORN:
+      return "Flips and shuffles all Joker cards";
+    case BLIND_VERDANT_LEAF:
+      return "All cards debuffed until 1 Joker sold";
+    case BLIND_VIOLET_VESSEL:
+      return "Very large blind";
+    case BLIND_CRIMSON_HEART:
+      return "One random Joker disabled every hand (changes every hand)";
+    case BLIND_CERULEAN_BELL:
+      return "Forces 1 card to always be selected";
+  }
+}
+
 char *get_tag_name(Tag tag) {
   switch (tag) {
     case TAG_UNCOMMON:

@@ -748,17 +748,30 @@ void render_blind_element(uint8_t blind_index) {
                    .childGap = 4,
                    .padding = CLAY_PADDING_ALL(8)},
         .backgroundColor = COLOR_CARD_BG}) {
+    uint8_t is_select_button_hovered = is_current_section && state.navigation.hovered == 0;
+
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = is_current_blind
-                                 ? is_current_section && state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MONEY
-                                 : COLOR_CARD_LIGHT_BG}) {
+          .backgroundColor =
+              is_current_blind ? is_select_button_hovered ? COLOR_CHIPS : COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
       CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
                 : !blind->is_active                ? CLAY_STRING("Skipped")
                 : blind < state.game.current_blind ? CLAY_STRING("Defeated")
                                                    : CLAY_STRING("Upcoming"),
                 WHITE_TEXT_CONFIG);
+
+      if (is_current_blind && is_select_button_hovered && state.game.current_blind->type > BLIND_BIG) {
+        Clay_String blind_name;
+        append_clay_string(&blind_name, "%s", get_blind_name(state.game.current_blind->type));
+
+        Clay_String blind_description;
+        append_clay_string(&blind_description, "%s", get_blind_description(state.game.current_blind->type));
+
+        render_tooltip(&blind_name, &blind_description, -4,
+                       &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
+      }
     }
 
     Clay_String blind_name;
