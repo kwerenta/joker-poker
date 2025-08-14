@@ -192,7 +192,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_HIEROGLYPH:
       return "Hieroglyph";
     case VOUCHER_DIRECTORS_CUT:
-      return "Director's Cut NOT IMPLEMENTED";
+      return "Director's Cut";
     case VOUCHER_PAINT_BRUSH:
       return "Paint Brush";
 
@@ -225,7 +225,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_PTEROGLYPH:
       return "Pteroglyph";
     case VOUCHER_RETCON:
-      return "Retcon NOT IMPLEMENTED";
+      return "Retcon";
     case VOUCHER_PALETTE:
       return "Palette";
   }
@@ -424,8 +424,129 @@ char *get_blind_name(BlindType blind_type) {
     case BLIND_BIG:
       return "Big Blind";
 
-    case BLIND_BOSS:
-      return "Boss Blind";
+    case BLIND_HOOK:
+      return "The Hook";
+    case BLIND_OX:
+      return "The Ox";
+    case BLIND_HOUSE:
+      return "The House";
+    case BLIND_WALL:
+      return "The Wall";
+    case BLIND_WHEEL:
+      return "The Wheel";
+    case BLIND_ARM:
+      return "The Arm";
+    case BLIND_CLUB:
+      return "The Club";
+    case BLIND_FISH:
+      return "The Fish";
+    case BLIND_PSYCHIC:
+      return "The Psychic";
+    case BLIND_GOAD:
+      return "The Goad";
+    case BLIND_WATER:
+      return "The Water";
+    case BLIND_WINDOW:
+      return "The Window";
+    case BLIND_MANACLE:
+      return "The Manacle";
+    case BLIND_EYE:
+      return "The Eye";
+    case BLIND_MOUTH:
+      return "The Mouth";
+    case BLIND_PLANT:
+      return "The Plant";
+    case BLIND_SERPENT:
+      return "The Serpent";
+    case BLIND_PILLAR:
+      return "The Pillar";
+    case BLIND_NEEDLE:
+      return "The Needle";
+    case BLIND_HEAD:
+      return "The Head";
+    case BLIND_TOOTH:
+      return "The Tooth";
+    case BLIND_FLINT:
+      return "The Flint";
+    case BLIND_MARK:
+      return "The Mark";
+
+    case BLIND_AMBER_ACORN:
+      return "Amber Acorn";
+    case BLIND_VERDANT_LEAF:
+      return "Verdant Leaf";
+    case BLIND_VIOLET_VESSEL:
+      return "Violet Vessel";
+    case BLIND_CRIMSON_HEART:
+      return "Crimson Heart";
+    case BLIND_CERULEAN_BELL:
+      return "Cerulean Bell";
+  }
+}
+
+char *get_blind_description(BlindType blind_type) {
+  switch (blind_type) {
+    case BLIND_SMALL:
+    case BLIND_BIG:
+      return "No special effects";
+
+    case BLIND_HOOK:
+      return "Discards 2 random cards held in hand after every played hand";
+    case BLIND_OX:
+      return "Playing your most played hand this run sets money to $0";
+    case BLIND_HOUSE:
+      return "First hand is drawn face down";
+    case BLIND_WALL:
+      return "Extra large blind";
+    case BLIND_WHEEL:
+      return "1 in 7 cards get drawn face down during that round";
+    case BLIND_ARM:
+      return "Decrease level of played poker hand by 1";
+    case BLIND_CLUB:
+      return "All Club cards are debuffed";
+    case BLIND_FISH:
+      return "Cards drawn face down after each hand played";
+    case BLIND_PSYCHIC:
+      return "Must play 5 cards (not all cards need to score)";
+    case BLIND_GOAD:
+      return "All Spade cards are debuffed";
+    case BLIND_WATER:
+      return "Start with 0 discards";
+    case BLIND_WINDOW:
+      return "All Diamond cards are debuffed";
+    case BLIND_MANACLE:
+      return "-1 Hand Size";
+    case BLIND_EYE:
+      return "No repeat hand types this round";
+    case BLIND_MOUTH:
+      return "Only one hand type can be played this round";
+    case BLIND_PLANT:
+      return "All face cards are debuffed";
+    case BLIND_SERPENT:
+      return "After Play or Discard always draw 3 cards (ignores hand size)";
+    case BLIND_PILLAR:
+      return "Cards played previously this Ante are debuffed";
+    case BLIND_NEEDLE:
+      return "Play only 1 hand";
+    case BLIND_HEAD:
+      return "All Heart cards are debuffed";
+    case BLIND_TOOTH:
+      return "Lose $1 per card played";
+    case BLIND_FLINT:
+      return "Base Chips and Mult for played poker hands are halved for the entire round";
+    case BLIND_MARK:
+      return "All face cards are drawn face down";
+
+    case BLIND_AMBER_ACORN:
+      return "Flips and shuffles all Joker cards";
+    case BLIND_VERDANT_LEAF:
+      return "All cards debuffed until 1 Joker sold";
+    case BLIND_VIOLET_VESSEL:
+      return "Very large blind";
+    case BLIND_CRIMSON_HEART:
+      return "One random Joker disabled every hand (changes every hand)";
+    case BLIND_CERULEAN_BELL:
+      return "Forces 1 card to always be selected";
   }
 }
 
@@ -450,8 +571,7 @@ char *get_tag_name(Tag tag) {
     case TAG_VOUCHER:
       return "Voucher";
     case TAG_BOSS:
-      // TODO Implement when boss blinds will be added
-      return "Boss NOT IMPLEMENTED";
+      return "Boss";
     case TAG_STANDARD:
       return "Standard";
     case TAG_CHARM:

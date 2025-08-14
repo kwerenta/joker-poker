@@ -143,7 +143,37 @@ typedef enum {
   BLIND_SMALL,
   BLIND_BIG,
 
-  BLIND_BOSS,
+  // Boss Blinds
+  BLIND_HOOK,
+  BLIND_OX,
+  BLIND_HOUSE,
+  BLIND_WALL,
+  BLIND_WHEEL,
+  BLIND_ARM,
+  BLIND_CLUB,
+  BLIND_FISH,
+  BLIND_PSYCHIC,
+  BLIND_GOAD,
+  BLIND_WATER,
+  BLIND_WINDOW,
+  BLIND_MANACLE,
+  BLIND_EYE,
+  BLIND_MOUTH,
+  BLIND_PLANT,
+  BLIND_SERPENT,
+  BLIND_PILLAR,
+  BLIND_NEEDLE,
+  BLIND_HEAD,
+  BLIND_TOOTH,
+  BLIND_FLINT,
+  BLIND_MARK,
+
+  // Finisher Boss Blinds
+  BLIND_AMBER_ACORN,
+  BLIND_VERDANT_LEAF,
+  BLIND_VIOLET_VESSEL,
+  BLIND_CRIMSON_HEART,
+  BLIND_CERULEAN_BELL
 } BlindType;
 
 typedef struct {
@@ -151,6 +181,8 @@ typedef struct {
   uint8_t is_active;
   Tag tag;
 } Blind;
+
+typedef enum { CARD_STATUS_NORMAL = 0, CARD_STATUS_FACE_DOWN = 1 << 0, CARD_STATUS_DEBUFFED = 1 << 1 } CardStatus;
 
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
 
@@ -167,6 +199,7 @@ typedef struct {
 
   ActivationType activation_type;
   void (*activate)();
+  CardStatus status;
 } Joker;
 
 extern const Joker JOKERS[];
@@ -182,6 +215,9 @@ typedef struct {
 
   uint16_t chips;
   uint8_t selected;
+
+  uint8_t was_played;
+  CardStatus status;
 } Card;
 
 typedef struct {
@@ -323,6 +359,7 @@ typedef struct {
 typedef struct {
   UsageState hands;
   UsageState discards;
+  uint16_t drawn_cards;
 } Stats;
 
 typedef struct {
@@ -352,11 +389,15 @@ typedef struct {
 
   PokerHandStats poker_hands[12];
 
-  uint16_t money;
+  int16_t money;
   Shop shop;
 
   BoosterPack booster_pack;
+
   FoolLastUsed fool_last_used;
+  uint32_t played_poker_hands;
+  uint32_t defeated_boss_blinds;
+  uint8_t has_rerolled_boss;
 
   SortingMode sorting_mode;
   Stats stats;
@@ -377,8 +418,14 @@ void fill_hand();
 void sort_hand();
 
 void toggle_card_select(uint8_t index);
+void force_card_select(uint8_t index);
 void deselect_all_cards();
 void remove_selected_cards();
+void replace_selected_cards();
+void discard_card(uint8_t index);
+uint8_t is_face_card(Card *card);
+uint8_t is_suit(Card *card, Suit suit);
+uint8_t is_poker_hand_unknown();
 
 uint16_t evaluate_hand();
 uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);
@@ -421,5 +468,13 @@ void exit_shop();
 void select_blind();
 void skip_blind();
 void trigger_immediate_tags();
+
+PokerHand get_most_played_poker_hand();
+
+uint8_t get_blind_min_ante(BlindType blind);
+void roll_boss_blind();
+void trigger_reroll_boss_voucher();
+void enable_boss_blind();
+void disable_boss_blind();
 
 #endif

@@ -13,6 +13,7 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
     case NAVIGATION_MAIN_MENU:
     case NAVIGATION_SELECT_DECK:
     case NAVIGATION_SELECT_STAKE:
+    case NAVIGATION_SELECT_BLIND:
     case NAVIGATION_OVERLAY_MENU:
       return (CustomElementData){0};
 
@@ -119,6 +120,7 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
     case NAVIGATION_MAIN_MENU:
     case NAVIGATION_SELECT_DECK:
     case NAVIGATION_SELECT_STAKE:
+    case NAVIGATION_SELECT_BLIND:
     case NAVIGATION_OVERLAY_MENU:
       return;
 

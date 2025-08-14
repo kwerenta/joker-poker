@@ -339,6 +339,8 @@ void handle_controls() {
         select_blind();
       else if (button_pressed(PSP_CTRL_TRIANGLE))
         skip_blind();
+      else if (button_pressed(PSP_CTRL_SELECT))
+        trigger_reroll_boss_voucher();
       break;
 
     case STAGE_SHOP:

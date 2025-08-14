@@ -162,7 +162,7 @@ uint8_t get_nav_section_size(NavigationSection section) {
     case NAVIGATION_SELECT_STAKE:
       return 8;
     case NAVIGATION_SELECT_BLIND:
-      return 2;
+      return state.game.current_blind->type <= BLIND_BIG ? 2 : 1;
     case NAVIGATION_HAND:
       return cvector_size(state.game.hand.cards);
     case NAVIGATION_SHOP_ITEMS:

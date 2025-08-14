@@ -184,6 +184,15 @@ void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
 }
 
 void render_card(Card *card, Rect *dst) {
+  if (card->status & CARD_STATUS_FACE_DOWN) {
+    render_card_atlas_sprite(&(Vector2){3, 7}, dst);
+    return;
+  }
+  if (card->status & CARD_STATUS_DEBUFFED) {
+    render_card_atlas_sprite(&(Vector2){3, 1}, dst);
+    return;
+  }
+
   Vector2 background = {.x = 9, .y = 7};
   if (card->enhancement != ENHANCEMENT_NONE) {
     uint8_t enhancement_offset = card->enhancement - 1;
@@ -203,6 +212,15 @@ void render_card(Card *card, Rect *dst) {
 }
 
 void render_joker(Joker *joker, Rect *dst) {
+  if (joker->status & CARD_STATUS_FACE_DOWN) {
+    render_card_atlas_sprite(&(Vector2){3, 7}, dst);
+    return;
+  }
+  if (joker->status & CARD_STATUS_DEBUFFED) {
+    render_card_atlas_sprite(&(Vector2){3, 1}, dst);
+    return;
+  }
+
   Vector2 src = {.x = 9, .y = 1};
   if (joker->id == 6) src.y += 2;
 
@@ -278,7 +296,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
     x_offset += SECTION_PADDING;
 
     float y_offset = 0;
-    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected == 1) y_offset = -40;
+    if (section == NAVIGATION_HAND && state.game.hand.cards[i].selected > 0) y_offset = -40;
 
     uint8_t is_hovered = state.navigation.hovered == i && get_current_section() == section;
 
@@ -298,6 +316,10 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             }}) {
         uint8_t is_shop = section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
                           section == NAVIGATION_SHOP_VOUCHER;
+        if (element->type == CUSTOM_ELEMENT_CARD && element->card.status & CARD_STATUS_FACE_DOWN ||
+            element->type == CUSTOM_ELEMENT_JOKER && element->joker.status & CARD_STATUS_FACE_DOWN)
+          continue;
+
         if (is_hovered) {
           Clay_String name;
           Clay_String description;
@@ -501,7 +523,9 @@ void render_sidebar() {
       if (state.game.selected_hand.count != 0)
         append_clay_string(&hand, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
                            get_poker_hand_stats(state.game.selected_hand.hand_union)->level + 1);
-      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
+      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ")
+                : is_poker_hand_unknown()           ? CLAY_STRING("???")
+                                                    : hand,
                 CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
 
       CLAY({.id = CLAY_ID_LOCAL("Score"),
@@ -516,7 +540,10 @@ void render_sidebar() {
           Clay_String chips;
           append_clay_string(&chips, "%d", state.game.selected_hand.score_pair.chips);
 
-          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips, WHITE_TEXT_CONFIG);
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ")
+                    : is_poker_hand_unknown()           ? CLAY_STRING("?")
+                                                        : chips,
+                    WHITE_TEXT_CONFIG);
         }
 
         CLAY_TEXT(CLAY_STRING("x"), WHITE_TEXT_CONFIG);
@@ -529,7 +556,10 @@ void render_sidebar() {
           Clay_String mult;
           append_clay_string(&mult, "%0.lf", state.game.selected_hand.score_pair.mult);
 
-          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult, WHITE_TEXT_CONFIG);
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ")
+                    : is_poker_hand_unknown()           ? CLAY_STRING("?")
+                                                        : mult,
+                    WHITE_TEXT_CONFIG);
         }
       }
     }
@@ -718,17 +748,30 @@ void render_blind_element(uint8_t blind_index) {
                    .childGap = 4,
                    .padding = CLAY_PADDING_ALL(8)},
         .backgroundColor = COLOR_CARD_BG}) {
+    uint8_t is_select_button_hovered = is_current_section && state.navigation.hovered == 0;
+
     CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0)},
                      .padding = {.top = 4, .bottom = 4},
                      .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER}},
-          .backgroundColor = is_current_blind
-                                 ? is_current_section && state.navigation.hovered == 0 ? COLOR_CHIPS : COLOR_MONEY
-                                 : COLOR_CARD_LIGHT_BG}) {
+          .backgroundColor =
+              is_current_blind ? is_select_button_hovered ? COLOR_CHIPS : COLOR_MONEY : COLOR_CARD_LIGHT_BG}) {
       CLAY_TEXT(is_current_blind                   ? CLAY_STRING("Select")
                 : !blind->is_active                ? CLAY_STRING("Skipped")
                 : blind < state.game.current_blind ? CLAY_STRING("Defeated")
                                                    : CLAY_STRING("Upcoming"),
                 WHITE_TEXT_CONFIG);
+
+      if (is_current_blind && is_select_button_hovered && state.game.current_blind->type > BLIND_BIG) {
+        Clay_String blind_name;
+        append_clay_string(&blind_name, "%s", get_blind_name(state.game.current_blind->type));
+
+        Clay_String blind_description;
+        append_clay_string(&blind_description, "%s", get_blind_description(state.game.current_blind->type));
+
+        render_tooltip(&blind_name, &blind_description, -4,
+                       &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
+                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
+      }
     }
 
     Clay_String blind_name;

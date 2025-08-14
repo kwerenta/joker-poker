@@ -153,7 +153,9 @@ void tarot_change_enhancement(Card **selected_cards, uint8_t selected_count, Enh
     cvector_for_each(state.game.full_deck, Card, card) {
       if (compare_cards(selected_cards[i], card)) {
         card->enhancement = new_enhancement;
+        card->was_played = 0;
         selected_cards[i]->enhancement = new_enhancement;
+        selected_cards[i]->was_played = 0;
         break;
       }
     }
@@ -165,7 +167,9 @@ void tarot_change_suit(Card **selected_cards, uint8_t selected_count, Suit new_s
     cvector_for_each(state.game.full_deck, Card, card) {
       if (compare_cards(selected_cards[i], card)) {
         card->suit = new_suit;
+        card->was_played = 0;
         selected_cards[i]->suit = new_suit;
+        selected_cards[i]->was_played = 0;
         break;
       }
     }
@@ -236,7 +240,9 @@ uint8_t use_tarot_card(Tarot tarot) {
     case TAROT_DEATH:
       cvector_for_each(state.game.full_deck, Card, card) {
         if (compare_cards(selected_cards[0], card)) {
+          uint8_t is_force_selected = selected_cards[0]->selected == 2;
           *(selected_cards[0]) = *(selected_cards[1]);
+          if (is_force_selected) selected_cards[0]->selected = 2;
           *card = *(selected_cards[1]);
           card->selected = 0;
           break;
@@ -309,5 +315,9 @@ uint8_t use_tarot_card(Tarot tarot) {
   }
 
   if (max_selected_count != 0) deselect_all_cards();
+  if (state.stage == STAGE_GAME && state.game.current_blind->type > BLIND_BIG) {
+    disable_boss_blind();
+    enable_boss_blind();
+  }
   return 1;
 }
