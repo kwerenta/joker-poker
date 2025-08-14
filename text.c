@@ -505,8 +505,7 @@ char *get_tag_name(Tag tag) {
     case TAG_VOUCHER:
       return "Voucher";
     case TAG_BOSS:
-      // TODO Implement when boss blinds will be added
-      return "Boss NOT IMPLEMENTED";
+      return "Boss";
     case TAG_STANDARD:
       return "Standard";
     case TAG_CHARM:

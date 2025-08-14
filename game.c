@@ -1505,6 +1505,9 @@ void trigger_immediate_tags() {
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     uint8_t should_stop = 0;
     switch (state.game.tags[i]) {
+      case TAG_BOSS:
+        roll_boss_blind();
+        break;
       case TAG_STANDARD:
         open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_STANDARD, BOOSTER_PACK_MEGA});
         should_stop = 1;
