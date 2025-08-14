@@ -539,6 +539,13 @@ uint8_t is_suit(Card *card, Suit suit) {
   return card->suit == suit;
 }
 
+uint8_t is_poker_hand_unknown() {
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->selected > 0 && card->status & CARD_STATUS_FACE_DOWN) return 1;
+  }
+  return 0;
+}
+
 void shuffle_deck() {
   for (uint8_t i = cvector_size(state.game.deck) - 1; i > 0; i--) {
     uint8_t j = rand() % (i + 1);

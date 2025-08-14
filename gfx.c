@@ -316,6 +316,10 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             }}) {
         uint8_t is_shop = section == NAVIGATION_SHOP_ITEMS || section == NAVIGATION_SHOP_BOOSTER_PACKS ||
                           section == NAVIGATION_SHOP_VOUCHER;
+        if (element->type == CUSTOM_ELEMENT_CARD && element->card.status & CARD_STATUS_FACE_DOWN ||
+            element->type == CUSTOM_ELEMENT_JOKER && element->joker.status & CARD_STATUS_FACE_DOWN)
+          continue;
+
         if (is_hovered) {
           Clay_String name;
           Clay_String description;
@@ -519,7 +523,9 @@ void render_sidebar() {
       if (state.game.selected_hand.count != 0)
         append_clay_string(&hand, "%s (%d)", get_poker_hand_name(state.game.selected_hand.hand_union),
                            get_poker_hand_stats(state.game.selected_hand.hand_union)->level + 1);
-      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : hand,
+      CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ")
+                : is_poker_hand_unknown()           ? CLAY_STRING("???")
+                                                    : hand,
                 CLAY_TEXT_CONFIG({.textColor = COLOR_WHITE, .wrapMode = CLAY_TEXT_WRAP_NONE}));
 
       CLAY({.id = CLAY_ID_LOCAL("Score"),
@@ -534,7 +540,10 @@ void render_sidebar() {
           Clay_String chips;
           append_clay_string(&chips, "%d", state.game.selected_hand.score_pair.chips);
 
-          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : chips, WHITE_TEXT_CONFIG);
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ")
+                    : is_poker_hand_unknown()           ? CLAY_STRING("?")
+                                                        : chips,
+                    WHITE_TEXT_CONFIG);
         }
 
         CLAY_TEXT(CLAY_STRING("x"), WHITE_TEXT_CONFIG);
@@ -547,7 +556,10 @@ void render_sidebar() {
           Clay_String mult;
           append_clay_string(&mult, "%0.lf", state.game.selected_hand.score_pair.mult);
 
-          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ") : mult, WHITE_TEXT_CONFIG);
+          CLAY_TEXT(state.game.selected_hand.count == 0 ? CLAY_STRING(" ")
+                    : is_poker_hand_unknown()           ? CLAY_STRING("?")
+                                                        : mult,
+                    WHITE_TEXT_CONFIG);
         }
       }
     }
