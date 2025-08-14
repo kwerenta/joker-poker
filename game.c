@@ -1584,7 +1584,19 @@ void enable_boss_blind() {
 
 void disable_boss_blind() {
   state.game.current_blind->is_active = 0;
-  if (state.game.current_blind->type == BLIND_MANACLE) state.game.hand.size++;
+  switch (state.game.current_blind->type) {
+    case BLIND_WATER:
+      state.game.discards.remaining = state.game.discards.total;
+      break;
+    case BLIND_MANACLE:
+      state.game.hand.size++;
+      break;
+    case BLIND_NEEDLE:
+      state.game.hands.remaining = state.game.hands.total;
+      break;
+    default:
+      break;
+  }
 
   cvector_for_each(state.game.hand.cards, Card, card) card->status = CARD_STATUS_NORMAL;
   cvector_for_each(state.game.deck, Card, card) card->status = CARD_STATUS_NORMAL;
