@@ -49,6 +49,7 @@ void game_init(Deck deck, Stake stake) {
 
   state.game.fool_last_used.was_used = 0;
   state.game.played_poker_hands = 0;
+  state.game.defeated_boss_blinds = 0b11;
   state.game.has_rerolled_boss = 0;
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
 
@@ -418,6 +419,7 @@ void cash_out() {
   if (state.game.current_blind->type > BLIND_BIG) {
     disable_boss_blind();
     cvector_for_each(state.game.full_deck, Card, card) card->was_played = 0;
+    state.game.defeated_boss_blinds |= 1 << state.game.current_blind->type;
 
     state.game.ante++;
     state.game.has_rerolled_boss = 0;
@@ -1629,19 +1631,34 @@ uint8_t get_blind_min_ante(BlindType blind) {
 }
 
 void roll_boss_blind() {
+  uint8_t available_boss_blinds = 0;
+
   if (state.game.ante > 0 && state.game.ante % 8 == 0) {
-    state.game.blinds[2].type = rand() % (BLIND_CERULEAN_BELL - BLIND_AMBER_ACORN + 1) + BLIND_AMBER_ACORN;
-    return;
+    for (uint8_t i = BLIND_AMBER_ACORN; i <= BLIND_CERULEAN_BELL; i++) {
+      if (!(state.game.defeated_boss_blinds & 1 << i)) available_boss_blinds++;
+    }
+
+    uint8_t blind_index = rand() % available_boss_blinds + 1;
+    for (uint8_t i = BLIND_AMBER_ACORN; i <= BLIND_CERULEAN_BELL; i++) {
+      if (!(state.game.defeated_boss_blinds & 1 << i)) blind_index--;
+      if (blind_index == 0) {
+        state.game.blinds[2].type = i;
+        return;
+      }
+    }
   }
 
-  uint8_t available_boss_blinds = 0;
   for (uint8_t i = BLIND_BIG + 1; i < BLIND_AMBER_ACORN; i++) {
-    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i)) available_boss_blinds++;
+    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i) &&
+        !(state.game.defeated_boss_blinds & 1 << i))
+      available_boss_blinds++;
   }
 
   uint8_t blind_index = rand() % available_boss_blinds + 1;
   for (uint8_t i = BLIND_BIG + 1; i < BLIND_AMBER_ACORN; i++) {
-    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i)) blind_index--;
+    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i) &&
+        !(state.game.defeated_boss_blinds & 1 << i))
+      blind_index--;
     if (blind_index == 0) {
       state.game.blinds[2].type = i;
       return;

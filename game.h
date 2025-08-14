@@ -396,6 +396,7 @@ typedef struct {
 
   FoolLastUsed fool_last_used;
   uint32_t played_poker_hands;
+  uint32_t defeated_boss_blinds;
   uint8_t has_rerolled_boss;
 
   SortingMode sorting_mode;
