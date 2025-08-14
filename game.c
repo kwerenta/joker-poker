@@ -49,6 +49,7 @@ void game_init(Deck deck, Stake stake) {
 
   state.game.fool_last_used.was_used = 0;
   state.game.played_poker_hands = 0;
+  state.game.has_rerolled_boss = 0;
   memset(state.game.poker_hands, 0, 12 * sizeof(PokerHandStats));
 
   cvector_reserve(state.game.shop.booster_packs, 2);
@@ -419,6 +420,7 @@ void cash_out() {
     cvector_for_each(state.game.full_deck, Card, card) card->was_played = 0;
 
     state.game.ante++;
+    state.game.has_rerolled_boss = 0;
 
     for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
       if (state.game.tags[i] == TAG_INVESTMENT) {
@@ -1645,6 +1647,18 @@ void roll_boss_blind() {
       return;
     }
   }
+}
+
+void trigger_reroll_boss_voucher() {
+  if (!(state.game.vouchers & VOUCHER_DIRECTORS_CUT)) return;
+  if (!(state.game.vouchers & VOUCHER_RETCON) && state.game.has_rerolled_boss) return;
+
+  if (state.game.money >= 10) {
+    state.game.money -= 10;
+    roll_boss_blind();
+  }
+
+  state.game.has_rerolled_boss = 1;
 }
 
 #define DEBUFF_CARDS_IF(COND)                                                                           \

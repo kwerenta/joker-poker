@@ -396,6 +396,7 @@ typedef struct {
 
   FoolLastUsed fool_last_used;
   uint32_t played_poker_hands;
+  uint8_t has_rerolled_boss;
 
   SortingMode sorting_mode;
   Stats stats;
@@ -471,6 +472,7 @@ PokerHand get_most_played_poker_hand();
 
 uint8_t get_blind_min_ante(BlindType blind);
 void roll_boss_blind();
+void trigger_reroll_boss_voucher();
 void enable_boss_blind();
 void disable_boss_blind();
 

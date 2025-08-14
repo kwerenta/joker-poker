@@ -192,7 +192,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_HIEROGLYPH:
       return "Hieroglyph";
     case VOUCHER_DIRECTORS_CUT:
-      return "Director's Cut NOT IMPLEMENTED";
+      return "Director's Cut";
     case VOUCHER_PAINT_BRUSH:
       return "Paint Brush";
 
@@ -225,7 +225,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_PTEROGLYPH:
       return "Pteroglyph";
     case VOUCHER_RETCON:
-      return "Retcon NOT IMPLEMENTED";
+      return "Retcon";
     case VOUCHER_PALETTE:
       return "Palette";
   }
