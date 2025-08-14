@@ -240,7 +240,9 @@ uint8_t use_tarot_card(Tarot tarot) {
     case TAROT_DEATH:
       cvector_for_each(state.game.full_deck, Card, card) {
         if (compare_cards(selected_cards[0], card)) {
+          uint8_t is_force_selected = selected_cards[0]->selected == 2;
           *(selected_cards[0]) = *(selected_cards[1]);
+          if (is_force_selected) selected_cards[0]->selected = 2;
           *card = *(selected_cards[1]);
           card->selected = 0;
           break;
