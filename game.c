@@ -1542,34 +1542,37 @@ PokerHand get_most_played_poker_hand() {
   return max_hand;
 }
 
+#define DEBUFF_CARDS_IF(COND)                                                                           \
+  do {                                                                                                  \
+    cvector_for_each(state.game.deck, Card, card) if (COND) card->status |= CARD_STATUS_DEBUFFED;       \
+    cvector_for_each(state.game.hand.cards, Card, card) if (COND) card->status |= CARD_STATUS_DEBUFFED; \
+  } while (0)
+
 void enable_boss_blind() {
   switch (state.game.current_blind->type) {
     case BLIND_CLUB:
-      cvector_for_each(state.game.deck, Card, card) if (is_suit(card, SUIT_CLUBS)) card->status |= CARD_STATUS_DEBUFFED;
+      DEBUFF_CARDS_IF(is_suit(card, SUIT_CLUBS));
       break;
     case BLIND_GOAD:
-      cvector_for_each(state.game.deck, Card, card) if (is_suit(card, SUIT_SPADES)) card->status |=
-          CARD_STATUS_DEBUFFED;
+      DEBUFF_CARDS_IF(is_suit(card, SUIT_SPADES));
       break;
     case BLIND_WATER:
       state.game.discards.remaining = 0;
       break;
     case BLIND_WINDOW:
-      cvector_for_each(state.game.deck, Card, card) if (is_suit(card, SUIT_DIAMONDS)) card->status |=
-          CARD_STATUS_DEBUFFED;
+      DEBUFF_CARDS_IF(is_suit(card, SUIT_DIAMONDS));
       break;
     case BLIND_MANACLE:
       state.game.hand.size--;
       break;
     case BLIND_PLANT:
-      cvector_for_each(state.game.deck, Card, card) if (is_face_card(card)) card->status |= CARD_STATUS_DEBUFFED;
+      DEBUFF_CARDS_IF(is_face_card(card));
       break;
     case BLIND_HEAD:
-      cvector_for_each(state.game.deck, Card, card) if (is_suit(card, SUIT_HEARTS)) card->status |=
-          CARD_STATUS_DEBUFFED;
+      DEBUFF_CARDS_IF(is_suit(card, SUIT_HEARTS));
       break;
     case BLIND_PILLAR:
-      cvector_for_each(state.game.deck, Card, card) if (card->was_played) card->status |= CARD_STATUS_DEBUFFED;
+      DEBUFF_CARDS_IF(card->was_played);
       break;
     case BLIND_NEEDLE:
       state.game.hands.remaining = 1;

@@ -178,7 +178,9 @@ uint8_t use_spectral_card(Spectral spectral) {
         cvector_for_each(state.game.full_deck, Card, card) {
           if (compare_cards(hand_card, card)) {
             card->suit = new_suit;
+            card->was_played = 0;
             hand_card->suit = new_suit;
+            hand_card->was_played = 0;
             break;
           }
         }
@@ -195,7 +197,9 @@ uint8_t use_spectral_card(Spectral spectral) {
         cvector_for_each(state.game.full_deck, Card, card) {
           if (compare_cards(hand_card, card)) {
             card->rank = new_rank;
+            card->was_played = 0;
             hand_card->rank = new_rank;
+            hand_card->was_played = 0;
             break;
           }
         }
@@ -262,5 +266,9 @@ uint8_t use_spectral_card(Spectral spectral) {
   }
 
   if (max_selected_count != 0) deselect_all_cards();
+  if (state.stage == STAGE_GAME && state.game.current_blind->type > BLIND_BIG) {
+    disable_boss_blind();
+    enable_boss_blind();
+  }
   return 1;
 }
