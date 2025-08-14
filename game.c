@@ -384,12 +384,16 @@ void play_hand() {
       for (int8_t i = cards_played; i > 0; i--)
         state.game.hand.cards[cvector_size(state.game.hand.cards) - i].status |= CARD_STATUS_FACE_DOWN;
 
-    if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_CRIMSON_HEART) {
+    sort_hand();
+
+    if (!state.game.current_blind->is_active) return;
+
+    if (state.game.current_blind->type == BLIND_CRIMSON_HEART) {
       disable_boss_blind();
       enable_boss_blind();
+    } else if (state.game.current_blind->type == BLIND_CERULEAN_BELL) {
+      force_card_select(rand() % cvector_size(state.game.hand.cards));
     }
-
-    sort_hand();
   }
 }
 
@@ -484,12 +488,15 @@ void discard_hand() {
   else
     fill_hand();
   sort_hand();
+
+  if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_CERULEAN_BELL)
+    force_card_select(rand() % cvector_size(state.game.hand.cards));
 }
 
 void remove_selected_cards() {
   uint8_t i = 0;
   while (i < cvector_size(state.game.hand.cards)) {
-    if (state.game.hand.cards[i].selected == 1) {
+    if (state.game.hand.cards[i].selected > 0) {
       cvector_erase(state.game.hand.cards, i);
       continue;
     }
@@ -544,6 +551,8 @@ void shuffle_deck() {
 void toggle_card_select(uint8_t index) {
   Hand *hand = &state.game.hand;
 
+  if (hand->cards[index].selected == 2) return;
+
   if (hand->cards[index].selected == 1) {
     hand->cards[index].selected = 0;
     state.game.selected_hand.count--;
@@ -568,8 +577,15 @@ void toggle_card_select(uint8_t index) {
   update_scoring_hand();
 }
 
+void force_card_select(uint8_t index) {
+  toggle_card_select(index);
+  state.game.hand.cards[index].selected = 2;
+}
+
 void deselect_all_cards() {
-  cvector_for_each(state.game.hand.cards, Card, card) { card->selected = 0; }
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->selected == 1) card->selected = 0;
+  }
   state.game.selected_hand.count = 0;
 }
 
@@ -1458,6 +1474,8 @@ void select_blind() {
 
   if (state.game.current_blind->type == BLIND_HOUSE)
     cvector_for_each(state.game.hand.cards, Card, card) card->status |= CARD_STATUS_FACE_DOWN;
+  else if (state.game.current_blind->type == BLIND_CERULEAN_BELL)
+    force_card_select(rand() % cvector_size(state.game.hand.cards));
 
   change_stage(STAGE_GAME);
 }
