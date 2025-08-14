@@ -21,7 +21,9 @@ void game_init(Deck deck, Stake stake) {
 
   state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = rand() % 24, .is_active = 1};
   state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = rand() % 24, .is_active = 1};
-  state.game.blinds[2] = (Blind){.type = rand() % (BLIND_MARK - BLIND_HOOK + 1) + BLIND_HOOK, .is_active = 1};
+  state.game.blinds[2] = (Blind){.is_active = 1};
+  roll_boss_blind();
+
   state.game.current_blind = &state.game.blinds[0];
 
   state.game.money = 4;
@@ -433,10 +435,7 @@ void cash_out() {
       if (i != 2) state.game.blinds[i].tag = rand() % 24;
     }
 
-    if (state.game.ante > 0 && state.game.ante % 8 == 0)
-      state.game.blinds[2].type = rand() % (BLIND_CERULEAN_BELL - BLIND_AMBER_ACORN + 1) + BLIND_AMBER_ACORN;
-    else
-      state.game.blinds[2].type = rand() % (BLIND_MARK - BLIND_HOOK + 1) + BLIND_HOOK;
+    roll_boss_blind();
   } else {
     state.game.current_blind++;
   }
@@ -1574,6 +1573,75 @@ PokerHand get_most_played_poker_hand() {
   }
 
   return max_hand;
+}
+
+uint8_t get_blind_min_ante(BlindType blind) {
+  switch (blind) {
+    case BLIND_SMALL:
+    case BLIND_BIG:
+    case BLIND_HOOK:
+    case BLIND_CLUB:
+    case BLIND_PSYCHIC:
+    case BLIND_GOAD:
+    case BLIND_WINDOW:
+    case BLIND_MANACLE:
+    case BLIND_PILLAR:
+    case BLIND_HEAD:
+      return 1;
+
+    case BLIND_HOUSE:
+    case BLIND_WALL:
+    case BLIND_WHEEL:
+    case BLIND_ARM:
+    case BLIND_FISH:
+    case BLIND_WATER:
+    case BLIND_MOUTH:
+    case BLIND_NEEDLE:
+    case BLIND_FLINT:
+    case BLIND_MARK:
+      return 2;
+
+    case BLIND_EYE:
+    case BLIND_TOOTH:
+      return 3;
+
+    case BLIND_PLANT:
+      return 4;
+
+    case BLIND_SERPENT:
+      return 5;
+
+    case BLIND_OX:
+      return 6;
+
+    case BLIND_AMBER_ACORN:
+    case BLIND_VERDANT_LEAF:
+    case BLIND_VIOLET_VESSEL:
+    case BLIND_CRIMSON_HEART:
+    case BLIND_CERULEAN_BELL:
+      return 8;
+  }
+}
+
+void roll_boss_blind() {
+  if (state.game.ante > 0 && state.game.ante % 8 == 0) {
+    state.game.blinds[2].type = rand() % (BLIND_CERULEAN_BELL - BLIND_AMBER_ACORN + 1) + BLIND_AMBER_ACORN;
+    return;
+  }
+
+  uint8_t available_boss_blinds = 0;
+  for (uint8_t i = BLIND_BIG + 1; i < BLIND_AMBER_ACORN; i++) {
+    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i)) available_boss_blinds++;
+  }
+
+  uint8_t blind_index = rand() % available_boss_blinds + 1;
+  for (uint8_t i = BLIND_BIG + 1; i < BLIND_AMBER_ACORN; i++) {
+    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i)) blind_index--;
+    if (blind_index == 0) {
+      state.game.blinds[2].type = i;
+      return;
+    }
+  }
 }
 
 #define DEBUFF_CARDS_IF(COND)                                                                           \
