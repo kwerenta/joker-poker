@@ -1587,6 +1587,15 @@ void enable_boss_blind() {
       state.game.hands.remaining = 1;
       break;
 
+    case BLIND_AMBER_ACORN:
+      for (uint8_t i = cvector_size(state.game.jokers.cards) - 1; i > 0; i--) {
+        uint8_t j = rand() % (i + 1);
+        Joker temp = state.game.jokers.cards[i];
+        state.game.jokers.cards[i] = state.game.jokers.cards[j];
+        state.game.jokers.cards[j] = temp;
+      }
+      cvector_for_each(state.game.jokers.cards, Joker, joker) joker->status |= CARD_STATUS_FACE_DOWN;
+      break;
     case BLIND_VERDANT_LEAF:
       DEBUFF_CARDS_IF(1);
       break;
