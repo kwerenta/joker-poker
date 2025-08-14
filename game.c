@@ -384,6 +384,11 @@ void play_hand() {
       for (int8_t i = cards_played; i > 0; i--)
         state.game.hand.cards[cvector_size(state.game.hand.cards) - i].status |= CARD_STATUS_FACE_DOWN;
 
+    if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_CRIMSON_HEART) {
+      disable_boss_blind();
+      enable_boss_blind();
+    }
+
     sort_hand();
   }
 }
@@ -1208,6 +1213,10 @@ void sell_shop_item() {
     item.type = SHOP_ITEM_JOKER;
     item.joker = state.game.jokers.cards[item_index];
     cvector_erase(state.game.jokers.cards, item_index);
+
+    if (state.stage == STAGE_GAME && state.game.current_blind->is_active &&
+        state.game.current_blind->type == BLIND_VERDANT_LEAF)
+      disable_boss_blind();
   }
 
   state.game.money += get_shop_item_sell_price(&item);
@@ -1576,6 +1585,14 @@ void enable_boss_blind() {
       break;
     case BLIND_NEEDLE:
       state.game.hands.remaining = 1;
+      break;
+
+    case BLIND_VERDANT_LEAF:
+      DEBUFF_CARDS_IF(1);
+      break;
+    case BLIND_CRIMSON_HEART:
+      if (cvector_size(state.game.jokers.cards) > 0)
+        state.game.jokers.cards[rand() % cvector_size(state.game.jokers.cards)].status |= CARD_STATUS_DEBUFFED;
       break;
     default:
       break;
