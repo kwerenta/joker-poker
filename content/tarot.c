@@ -276,7 +276,7 @@ uint8_t use_tarot_card(Tarot tarot) {
     }
     case TAROT_JUDGEMENT:
       if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) break;
-      cvector_push_back(state.game.jokers.cards, JOKERS[random_max_value(JOKER_COUNT)]);
+      cvector_push_back(state.game.jokers.cards, random_available_joker());
       break;
 
     case TAROT_HIGH_PRIESTESS:
