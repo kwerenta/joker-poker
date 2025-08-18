@@ -29,7 +29,7 @@ int16_t random_filtered_vector_pick(cvector_vector_type(void) vec, RangeFilter f
   return random_filtered_range_pick(0, cvector_size(vec) - 1, filter);
 }
 
-int16_t random_weighted(uint8_t *weights, uint8_t count) {
+int16_t random_weighted(uint16_t *weights, uint8_t count) {
   if (weights == NULL || count == 0) return -1;
 
   float total_weight = 0.0f;
@@ -63,8 +63,8 @@ uint8_t random_in_range(uint8_t min_value, uint8_t max_value) {
   return min_value + rand() / (RAND_MAX / (max_value - min_value + 1) + 1);
 }
 
-Joker random_weighted_joker(uint8_t rarity_weights[4]) {
-  uint8_t weights[JOKER_COUNT];
+Joker random_weighted_joker(uint16_t rarity_weights[4]) {
+  uint16_t weights[JOKER_COUNT];
   bool has_any_weights = false;
 
   for (uint8_t i = 0; i < JOKER_COUNT; i++) {
@@ -85,23 +85,70 @@ Joker random_weighted_joker(uint8_t rarity_weights[4]) {
     has_any_weights = true;
   };
 
+  // TODO According to Wiki "Joker" is returned when there are no more Jokers available and this should be changed when
+  // more jokers will be added
   // Allow duplicates if there are no more jokers available
   if (!has_any_weights)
     for (uint8_t i = 0; i < JOKER_COUNT; i++) weights[i] = rarity_weights[JOKERS[i].rarity];
 
-  return JOKERS[random_weighted(weights, JOKER_COUNT)];
+  Joker joker = JOKERS[random_weighted(weights, JOKER_COUNT)];
+
+  // Base, Foil, Holographic, Polychrome, Negative
+  uint16_t edition_weights[5] = {960, 20, 14, 3, 3};
+  for (uint8_t i = 1; i < 4; i++) {
+    uint8_t multiplier = 1;
+    if (state.game.vouchers & VOUCHER_GLOW_UP)
+      multiplier = i == 3 ? 7 : 4;
+    else if (state.game.vouchers & VOUCHER_HONE)
+      multiplier = i == 3 ? 3 : 2;
+
+    edition_weights[0] -= (multiplier - 1) * edition_weights[i];
+    edition_weights[i] *= multiplier;
+  }
+  joker.edition = random_weighted(edition_weights, 5);
+
+  return joker;
 }
 
 Joker random_available_joker() {
   // Common, Uncommon, Rare, Legendary
-  uint8_t rarity_weights[] = {70, 25, 5, 0};
+  uint16_t rarity_weights[] = {70, 25, 5, 0};
   return random_weighted_joker(rarity_weights);
 }
 
 Joker random_available_joker_by_rarity(Rarity rarity) {
   // Common, Uncommon, Rare, Legendary
-  uint8_t base_rarity_weights[] = {70, 25, 5, 0};
-  uint8_t rarity_weights[4] = {0};
+  uint16_t base_rarity_weights[] = {70, 25, 5, 0};
+  uint16_t rarity_weights[4] = {0};
   rarity_weights[rarity] = base_rarity_weights[rarity];
   return random_weighted_joker(rarity_weights);
+}
+
+Card random_card() {
+  uint16_t edition_weights[5] = {920, 12, 28, 40, 0};
+  for (uint8_t i = 1; i < 4; i++) {
+    uint8_t multiplier = (state.game.vouchers & VOUCHER_GLOW_UP) ? 4 : (state.game.vouchers & VOUCHER_HONE) ? 2 : 1;
+    edition_weights[0] -= (multiplier - 1) * edition_weights[i];
+    edition_weights[i] *= multiplier;
+  }
+  Edition edition = random_weighted(edition_weights, 5);
+  Enhancement enhancement = ENHANCEMENT_NONE;
+  Seal seal = SEAL_NONE;
+
+  if (random_chance(4, 10)) enhancement = random_in_range(ENHANCEMENT_BONUS, ENHANCEMENT_LUCKY);
+  if (random_chance(2, 10)) seal = random_in_range(SEAL_GOLD, SEAL_PURPLE);
+
+  return create_card(random_max_value(3), random_max_value(12), edition, enhancement, seal);
+}
+
+Card random_shop_card() {
+  if (!(state.game.vouchers & VOUCHER_ILLUSION))
+    return create_card(random_max_value(3), random_max_value(12), EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE);
+
+  Card card = random_card();
+  card.edition = EDITION_BASE;
+
+  if (random_chance(2, 10)) card.edition = random_in_range(EDITION_FOIL, EDITION_POLYCHROME);
+
+  return card;
 }

@@ -215,7 +215,7 @@ uint8_t use_tarot_card(Tarot tarot) {
       if (!random_chance(1, 4)) break;
 
       // Foil, Holographic, Polychrome
-      uint8_t edition_weights[] = {50, 35, 15};
+      uint16_t edition_weights[] = {50, 35, 15};
       state.game.jokers.cards[joker_index].edition = random_weighted(edition_weights, 3) + 1;
       break;
     }
