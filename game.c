@@ -1344,7 +1344,7 @@ void fill_shop_items() {
       case 0:
         item = (ShopItem){
             .type = SHOP_ITEM_CARD,
-            .card = create_card(random_max_value(4), random_max_value(12), EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE)};
+            .card = create_card(random_max_value(3), random_max_value(12), EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE)};
         break;
       case 1:
         item = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
