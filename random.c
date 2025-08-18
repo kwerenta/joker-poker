@@ -6,7 +6,7 @@
 void rng_init() { srand(time((NULL))); }
 
 int16_t random_filtered_range_pick(uint8_t start, uint8_t end, RangeFilter filter) {
-  if (start > end || end == 0) return -1;
+  if (start >= end) return -1;
 
   uint8_t candidates[end - start + 1];
   uint8_t count = 0;
