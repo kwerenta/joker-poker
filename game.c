@@ -1633,40 +1633,21 @@ uint8_t get_blind_min_ante(BlindType blind) {
   }
 }
 
+bool filter_defeated_boss_blinds(uint8_t i) { return !(state.game.defeated_boss_blinds & 1 << i); }
+bool filter_available_boss_blinds(uint8_t i) {
+  return (state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i) && filter_defeated_boss_blinds(i);
+}
+
 void roll_boss_blind() {
   uint8_t available_boss_blinds = 0;
 
   if (state.game.ante > 0 && state.game.ante % 8 == 0) {
-    for (uint8_t i = BLIND_AMBER_ACORN; i <= BLIND_CERULEAN_BELL; i++) {
-      if (!(state.game.defeated_boss_blinds & 1 << i)) available_boss_blinds++;
-    }
-
-    uint8_t blind_index = rand() % available_boss_blinds + 1;
-    for (uint8_t i = BLIND_AMBER_ACORN; i <= BLIND_CERULEAN_BELL; i++) {
-      if (!(state.game.defeated_boss_blinds & 1 << i)) blind_index--;
-      if (blind_index == 0) {
-        state.game.blinds[2].type = i;
-        return;
-      }
-    }
+    state.game.blinds[2].type =
+        random_filtered_range_pick(BLIND_AMBER_ACORN, BLIND_CERULEAN_BELL, filter_defeated_boss_blinds);
+    return;
   }
 
-  for (uint8_t i = BLIND_BIG + 1; i < BLIND_AMBER_ACORN; i++) {
-    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i) &&
-        !(state.game.defeated_boss_blinds & 1 << i))
-      available_boss_blinds++;
-  }
-
-  uint8_t blind_index = rand() % available_boss_blinds + 1;
-  for (uint8_t i = BLIND_BIG + 1; i < BLIND_AMBER_ACORN; i++) {
-    if ((state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i) &&
-        !(state.game.defeated_boss_blinds & 1 << i))
-      blind_index--;
-    if (blind_index == 0) {
-      state.game.blinds[2].type = i;
-      return;
-    }
-  }
+  state.game.blinds[2].type = random_filtered_range_pick(BLIND_HOOK, BLIND_MARK, filter_available_boss_blinds);
 }
 
 void trigger_reroll_boss_voucher() {
