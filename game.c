@@ -1251,6 +1251,23 @@ void sell_shop_item() {
   set_nav_hovered(item_index);
 }
 
+bool filter_available_tarot_cards_booster_pack(uint8_t i) {
+  cvector_for_each(state.game.booster_pack.content, BoosterPackContent,
+                   item) if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA && item->tarot == i) return false;
+  return true;
+}
+bool filter_available_planet_cards_booster_pack(uint8_t i) {
+  cvector_for_each(
+      state.game.booster_pack.content, BoosterPackContent,
+      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL && item->planet == i) return false;
+  return true;
+}
+bool filter_available_spectral_cards_booster_pack(uint8_t i) {
+  cvector_for_each(
+      state.game.booster_pack.content, BoosterPackContent,
+      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA && item->spectral == i) return false;
+  return true;
+}
 void open_booster_pack(BoosterPackItem *booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = *booster_pack;
@@ -1277,14 +1294,14 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
           PokerHand most_played = get_most_played_poker_hand();
           content.planet = ffs(most_played) - 1;
         } else {
-          content.planet = random_max_value(11);
+          content.planet = random_filtered_range_pick(0, 11, filter_available_planet_cards_booster_pack);
         }
         break;
       case BOOSTER_PACK_ARCANA:
-        content.tarot = random_max_value(21);
+        content.tarot = random_filtered_range_pick(0, 21, filter_available_tarot_cards_booster_pack);
         break;
       case BOOSTER_PACK_SPECTRAL:
-        content.spectral = random_max_value(15);
+        content.spectral = random_filtered_range_pick(0, 15, filter_available_spectral_cards_booster_pack);
         if (random_chance(3, 100))
           content.spectral = SPECTRAL_SOUL;
         else if (random_chance(3, 100))
