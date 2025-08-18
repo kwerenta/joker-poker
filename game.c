@@ -18,12 +18,12 @@ void game_init(Deck deck, Stake stake) {
 
   generate_deck();
 
-  state.game.score = 10000;
+  state.game.score = 0;
   state.game.ante = 1;
   state.game.round = 0;
 
-  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = TAG_DOUBLE, .is_active = 1};
-  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = TAG_VOUCHER, .is_active = 1};
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = rand() % 24, .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = rand() % 24, .is_active = 1};
   state.game.blinds[2] = (Blind){.is_active = 1};
   roll_boss_blind();
 
