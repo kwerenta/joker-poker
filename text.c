@@ -596,8 +596,7 @@ char *get_tag_name(Tag tag) {
       // TODO Implement when shop re-rolls will be added
       return "D6 NOT IMPLEMENTED";
     case TAG_TOPUP:
-      // TODO Implement properly when rng utilities will be added
-      return "Top-up PARTIALLY IMPLEMENTED";
+      return "Top-up";
     case TAG_SPEED:
       return "Speed";
     case TAG_ORBITAL:

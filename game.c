@@ -1518,9 +1518,9 @@ void trigger_immediate_tags() {
         should_stop = 1;
         break;
       case TAG_TOPUP:
-        // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
         for (uint8_t i = 0; i < 2; i++)
-          add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[random_max_value(JOKER_COUNT)]});
+          add_item_to_player(
+              &(ShopItem){.type = SHOP_ITEM_JOKER, .joker = random_available_joker_by_rarity(RARITY_COMMON)});
         break;
       case TAG_SPEED: {
         uint8_t total_rounds = (state.game.ante - 1) * 3 + (state.game.current_blind->type == BLIND_BIG ? 1 : 2);
