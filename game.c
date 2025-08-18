@@ -551,6 +551,8 @@ uint8_t is_poker_hand_unknown() {
   return 0;
 }
 
+bool is_planet_card_locked(Planet planet) { return planet <= PLANET_X && state.game.poker_hands[planet].played == 0; }
+
 void shuffle_deck() {
   for (uint8_t i = cvector_size(state.game.deck) - 1; i > 0; i--) {
     uint8_t j = rand() % (i + 1);
@@ -1260,8 +1262,7 @@ void sell_shop_item() {
   } while (0);
 bool filter_available_tarot_booster_pack(uint8_t tarot) { FILTER_AVAILABLE_BOOSTER_PACK(BOOSTER_PACK_ARCANA, tarot); }
 bool filter_available_planet_booster_pack(uint8_t planet) {
-  for (uint8_t i = 0; i < 3; i++)
-    if (planet == i && state.game.poker_hands[i].played == 0) return false;
+  if (is_planet_card_locked(planet)) return false;
   FILTER_AVAILABLE_BOOSTER_PACK(BOOSTER_PACK_CELESTIAL, planet);
 }
 bool filter_available_spectral_booster_pack(uint8_t spectral) {
@@ -1362,8 +1363,7 @@ void skip_booster_pack() { close_booster_pack(); }
   } while (0);
 bool filter_available_tarot_shop(uint8_t tarot) { FILTER_AVAILABLE_SHOP(SHOP_ITEM_TAROT, tarot); }
 bool filter_available_planet_shop(uint8_t planet) {
-  for (uint8_t i = 0; i < 3; i++)
-    if (planet == i && state.game.poker_hands[i].played == 0) return false;
+  if (is_planet_card_locked(planet)) return false;
   FILTER_AVAILABLE_SHOP(SHOP_ITEM_PLANET, planet);
 }
 bool filter_available_spectral_shop(uint8_t spectral) { FILTER_AVAILABLE_SHOP(SHOP_ITEM_SPECTRAL, spectral); }

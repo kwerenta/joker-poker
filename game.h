@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <cvector.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "content/spectral.h"
@@ -423,9 +424,11 @@ void deselect_all_cards();
 void remove_selected_cards();
 void replace_selected_cards();
 void discard_card(uint8_t index);
+
 uint8_t is_face_card(Card *card);
 uint8_t is_suit(Card *card, Suit suit);
 uint8_t is_poker_hand_unknown();
+bool is_planet_card_locked(Planet planet);
 
 uint16_t evaluate_hand();
 uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);

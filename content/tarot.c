@@ -136,11 +136,7 @@ uint8_t get_tarot_max_selected(Tarot tarot) {
   }
 }
 
-bool filter_available_planet_cards_consumable(uint8_t planet) {
-  for (uint8_t i = 0; i < 3; i++)
-    if (planet == i && state.game.poker_hands[i].played == 0) return false;
-  return true;
-}
+bool filter_available_planet_cards_consumable(uint8_t planet) { return !is_planet_card_locked(planet); }
 
 void tarot_create_consumable(ConsumableType type) {
   uint8_t available_space = state.game.consumables.size - cvector_size(state.game.consumables.items);
