@@ -1251,21 +1251,26 @@ void sell_shop_item() {
   set_nav_hovered(item_index);
 }
 
-bool filter_available_tarot_cards_booster_pack(uint8_t i) {
-  cvector_for_each(state.game.booster_pack.content, BoosterPackContent,
-                   item) if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA && item->tarot == i) return false;
-  return true;
-}
-bool filter_available_planet_cards_booster_pack(uint8_t i) {
+bool filter_available_tarot_cards_booster_pack(uint8_t tarot) {
   cvector_for_each(
       state.game.booster_pack.content, BoosterPackContent,
-      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL && item->planet == i) return false;
+      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA && item->tarot == tarot) return false;
   return true;
 }
-bool filter_available_spectral_cards_booster_pack(uint8_t i) {
+bool filter_available_planet_cards_booster_pack(uint8_t planet) {
+  for (uint8_t i = 0; i < 3; i++)
+    if (planet == i && state.game.poker_hands[i].played == 0) return false;
+
   cvector_for_each(
       state.game.booster_pack.content, BoosterPackContent,
-      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA && item->spectral == i) return false;
+      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_CELESTIAL && item->planet == planet) return false;
+
+  return true;
+}
+bool filter_available_spectral_cards_booster_pack(uint8_t spectral) {
+  cvector_for_each(
+      state.game.booster_pack.content, BoosterPackContent,
+      item) if (state.game.booster_pack.item.type == BOOSTER_PACK_ARCANA && item->spectral == spectral) return false;
   return true;
 }
 void open_booster_pack(BoosterPackItem *booster_pack) {
@@ -1355,19 +1360,23 @@ void select_booster_pack_item() {
 
 void skip_booster_pack() { close_booster_pack(); }
 
-bool filter_available_tarot_cards(uint8_t i) {
+bool filter_available_tarot_cards(uint8_t tarot) {
   cvector_for_each(state.game.shop.items, ShopItem,
-                   item) if (item->type == SHOP_ITEM_TAROT && item->tarot == i) return false;
+                   item) if (item->type == SHOP_ITEM_TAROT && item->tarot == tarot) return false;
   return true;
 }
-bool filter_available_planet_cards(uint8_t i) {
+bool filter_available_planet_cards(uint8_t planet) {
+  for (uint8_t i = 0; i < 3; i++)
+    if (planet == i && state.game.poker_hands[i].played == 0) return false;
+
   cvector_for_each(state.game.shop.items, ShopItem,
-                   item) if (item->type == SHOP_ITEM_PLANET && item->planet == i) return false;
+                   item) if (item->type == SHOP_ITEM_PLANET && item->planet == planet) return false;
+
   return true;
 }
-bool filter_available_spectral_cards(uint8_t i) {
+bool filter_available_spectral_cards(uint8_t spectral) {
   cvector_for_each(state.game.shop.items, ShopItem,
-                   item) if (item->type == SHOP_ITEM_SPECTRAL && item->spectral == i) return false;
+                   item) if (item->type == SHOP_ITEM_SPECTRAL && item->spectral == spectral) return false;
   return true;
 }
 
