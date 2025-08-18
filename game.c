@@ -220,7 +220,7 @@ void trigger_scoring_card(Card *card) {
     case ENHANCEMENT_GLASS:
       state.game.selected_hand.score_pair.mult *= 2;
 
-      if (rand() % 4 == 0) {
+      if (random_chance(1, 4)) {
         for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
           Card *other = &state.game.full_deck[i];
           if (compare_cards(card, other)) {
@@ -236,8 +236,8 @@ void trigger_scoring_card(Card *card) {
       break;
 
     case ENHANCEMENT_LUCKY:
-      if (rand() % 5 == 0) state.game.selected_hand.score_pair.mult += 20;
-      if (rand() % 15 == 0) state.game.money += 20;
+      if (random_chance(1, 5)) state.game.selected_hand.score_pair.mult += 20;
+      if (random_chance(1, 15)) state.game.money += 20;
       break;
   }
 
