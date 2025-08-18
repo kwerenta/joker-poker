@@ -210,8 +210,7 @@ uint8_t use_tarot_card(Tarot tarot) {
       if (state.game.money > 0) state.game.money += state.game.money > 20 ? 20 : state.game.money;
       break;
     case TAROT_WHEEL_OF_FORTUNE: {
-      int16_t joker_index =
-          random_filtered_range_pick(0, cvector_size(state.game.jokers.cards), filter_non_edition_jokers);
+      int16_t joker_index = random_filtered_vector_pick(state.game.jokers.cards, filter_non_edition_jokers);
       if (joker_index == -1) return 0;
       if (!random_chance(1, 4)) break;
 

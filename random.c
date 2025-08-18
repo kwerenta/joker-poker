@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "cvector.h"
 #include "game.h"
 #include "state.h"
 
 void rng_init() { srand(time((NULL))); }
 
 int16_t random_filtered_range_pick(uint8_t start, uint8_t end, RangeFilter filter) {
-  if (start >= end) return -1;
+  if (start > end) return -1;
 
   uint8_t candidates[end - start + 1];
   uint8_t count = 0;
@@ -20,7 +21,12 @@ int16_t random_filtered_range_pick(uint8_t start, uint8_t end, RangeFilter filte
 
   if (count == 0) return -1;
 
-  return candidates[random_max_value(count)];
+  return candidates[random_max_value(count - 1)];
+}
+
+int16_t random_filtered_vector_pick(cvector_vector_type(void) vec, RangeFilter filter) {
+  if (cvector_size(vec) <= 0) return -1;
+  return random_filtered_range_pick(0, cvector_size(vec) - 1, filter);
 }
 
 int16_t random_weighted(uint8_t *weights, uint8_t count) {
