@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "state.h"
+
 void rng_init() { srand(time((NULL))); }
 
 int16_t random_filtered_range_pick(uint8_t start, uint8_t end, RangeFilter filter) {
@@ -52,3 +54,33 @@ bool random_chance(uint8_t numerator, uint8_t denominator) {
 uint8_t random_max_value(uint8_t max_value) { return rand() % max_value; }
 
 uint8_t random_in_range(uint8_t min_value, uint8_t max_value) { return random_max_value(max_value) + min_value; }
+
+Joker random_weighted_joker(uint8_t rarity_weights[4]) {
+  uint8_t weights[JOKER_COUNT];
+  for (uint8_t i = 0; i < JOKER_COUNT; i++) {
+    weights[i] = rarity_weights[JOKERS[i].rarity];
+
+    cvector_for_each(state.game.jokers.cards, Joker, joker) {
+      if (joker->id == JOKERS[i].id) {
+        weights[i] = 0;
+        break;
+      }
+    }
+  };
+
+  return JOKERS[random_weighted(weights, JOKER_COUNT)];
+}
+
+Joker random_available_joker() {
+  // Common, Uncommon, Rare, Legendary
+  uint8_t rarity_weights[] = {70, 25, 5, 0};
+  return random_weighted_joker(rarity_weights);
+}
+
+Joker random_available_joker_by_rarity(Rarity rarity) {
+  // Common, Uncommon, Rare, Legendary
+  uint8_t base_rarity_weights[] = {70, 25, 5, 0};
+  uint8_t rarity_weights[4] = {0};
+  rarity_weights[rarity] = base_rarity_weights[rarity];
+  return random_weighted_joker(rarity_weights);
+}

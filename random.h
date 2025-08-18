@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "game.h"
+
 typedef bool (*RangeFilter)(uint8_t index);
 
 void rng_init();
@@ -13,5 +15,8 @@ int16_t random_weighted(uint8_t *weights, uint8_t count);
 bool random_chance(uint8_t numerator, uint8_t denominator);
 uint8_t random_max_value(uint8_t max_value);
 uint8_t random_in_range(uint8_t min_value, uint8_t max_value);
+
+Joker random_available_joker();
+Joker random_available_joker_by_rarity(Rarity rarity);
 
 #endif
