@@ -1390,12 +1390,17 @@ void restock_shop() {
 
   fill_shop_items();
 
+  // First visit to the Shop in a run guarantees one normal Buffoon Pack
+  if (state.game.round == 1) {
+    BoosterPackItem booster_pack = {.type = BOOSTER_PACK_BUFFON, .size = BOOSTER_PACK_NORMAL};
+    cvector_push_back(state.game.shop.booster_packs, booster_pack);
+  }
+
   // Standard, Arcana, Celestial, Buffoon, Spectral
   // Normal, Jumbo, Mega
   // Standard Normal, Standard Jumbo, Standard Mega, Arcana Normal,...
   uint16_t booster_pack_weights[5 * 3] = {400, 200, 50, 400, 200, 50, 400, 200, 50, 120, 60, 15, 60, 30, 7};
-
-  for (uint8_t i = 0; i < 2; i++) {
+  for (uint8_t i = 0; i < (state.game.round == 1 ? 1 : 2); i++) {
     uint8_t random_value = random_weighted(booster_pack_weights, 15);
     BoosterPackItem booster_pack = {.type = random_value / 3, .size = random_value % 3};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
