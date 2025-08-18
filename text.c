@@ -180,15 +180,15 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_WASTEFUL:
       return "Wasteful";
     case VOUCHER_TAROT_MERCHANT:
-      return "Tarot Merchant NOT IMPLEMENTED";
+      return "Tarot Merchant";
     case VOUCHER_PLANET_MERCHANT:
-      return "Planet Merchant NOT IMPLEMENTED";
+      return "Planet Merchant";
     case VOUCHER_SEED_MONEY:
       return "Seed Money";
     case VOUCHER_BLANK:
       return "Blank";
     case VOUCHER_MAGIC_TRICK:
-      return "Magic Trick NOT IMPLEMENTED";
+      return "Magic Trick";
     case VOUCHER_HIEROGLYPH:
       return "Hieroglyph";
     case VOUCHER_DIRECTORS_CUT:
@@ -213,15 +213,15 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_RECYCLOMANCY:
       return "Recyclomancy";
     case VOUCHER_TAROT_TYCOON:
-      return "Tarot Tycoon NOT IMPLEMENTED";
+      return "Tarot Tycoon";
     case VOUCHER_PLANET_TYCOON:
-      return "Planet Tycoon NOT IMPLEMENTED";
+      return "Planet Tycoon";
     case VOUCHER_MONEY_TREE:
       return "Money Tree";
     case VOUCHER_ANTIMATTER:
       return "Antimatter";
     case VOUCHER_ILLUSION:
-      return "Illusion NOT IMPLEMENTED";
+      return "Illusion";
     case VOUCHER_PTEROGLYPH:
       return "Pteroglyph";
     case VOUCHER_RETCON:
@@ -318,7 +318,7 @@ char *get_deck_name(Deck deck) {
     case DECK_NEBULA:
       return "Nebula Deck";
     case DECK_GHOST:
-      return "Ghost Deck PARTIALLY IMPLEMENTED";
+      return "Ghost Deck";
     case DECK_ABANDONED:
       return "Abandoned Deck";
     case DECK_CHECKERED:

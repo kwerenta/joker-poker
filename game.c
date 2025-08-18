@@ -130,7 +130,6 @@ void apply_deck_settings() {
       state.game.consumables.size--;
       break;
     case DECK_GHOST:
-      // TODO Add spectral cards to the shop when it will have proper shop item weights
       add_item_to_player(&(ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_HEX});
       break;
     case DECK_ABANDONED:
@@ -1336,21 +1335,42 @@ void select_booster_pack_item() {
 void skip_booster_pack() { close_booster_pack(); }
 
 void fill_shop_items() {
-  ShopItem item = {0};
+  // Card, Tarot, Planet, Joker, Spectral
+  uint16_t shop_item_weights[5] = {0, 40, 40, 200, 0};
+
+  if (state.game.vouchers & VOUCHER_MAGIC_TRICK) shop_item_weights[0] = 40;
+
+  if (state.game.vouchers & VOUCHER_TAROT_TYCOON)
+    shop_item_weights[1] = 320;
+  else if (state.game.vouchers & VOUCHER_TAROT_MERCHANT)
+    shop_item_weights[1] = 96;
+
+  if (state.game.vouchers & VOUCHER_PLANET_TYCOON)
+    shop_item_weights[2] = 320;
+  else if (state.game.vouchers & VOUCHER_PLANET_MERCHANT)
+    shop_item_weights[2] = 96;
+
+  if (state.game.deck_type == DECK_GHOST) shop_item_weights[4] = 20;
 
   while (cvector_size(state.game.shop.items) < state.game.shop.size) {
-    switch (rand() % 4) {
-      case 0:
-        item = (ShopItem){.type = SHOP_ITEM_CARD, .card = random_shop_card()};
+    ShopItemType type = random_weighted(shop_item_weights, 5);
+    ShopItem item = {.type = type};
+
+    switch (type) {
+      case SHOP_ITEM_CARD:
+        item.card = random_shop_card();
         break;
-      case 1:
-        item = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
+      case SHOP_ITEM_TAROT:
+        item.tarot = random_max_value(21);
         break;
-      case 2:
-        item = (ShopItem){.type = SHOP_ITEM_PLANET, .planet = random_max_value(11)};
+      case SHOP_ITEM_PLANET:
+        item.planet = random_max_value(11);
         break;
-      case 3:
-        item = (ShopItem){.type = SHOP_ITEM_TAROT, .tarot = random_max_value(21)};
+      case SHOP_ITEM_JOKER:
+        item.joker = JOKERS[random_max_value(JOKER_COUNT - 1)];
+        break;
+      case SHOP_ITEM_SPECTRAL:
+        item.spectral = random_max_value(17);
         break;
     }
 

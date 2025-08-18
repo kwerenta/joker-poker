@@ -262,7 +262,7 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum { SHOP_ITEM_JOKER, SHOP_ITEM_CARD, SHOP_ITEM_PLANET, SHOP_ITEM_TAROT, SHOP_ITEM_SPECTRAL } ShopItemType;
+typedef enum { SHOP_ITEM_CARD, SHOP_ITEM_TAROT, SHOP_ITEM_PLANET, SHOP_ITEM_JOKER, SHOP_ITEM_SPECTRAL } ShopItemType;
 
 typedef enum {
   BOOSTER_PACK_STANDARD,
