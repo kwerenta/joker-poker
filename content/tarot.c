@@ -27,7 +27,7 @@ const char *get_tarot_card_name(Tarot tarot) {
     case TAROT_HERMIT:
       return "The Hermit (IX)";
     case TAROT_WHEEL_OF_FORTUNE:
-      return "The Wheel of Fortune (X) NOT IMPLEMENTED";
+      return "The Wheel of Fortune (X)";
     case TAROT_STRENGTH:
       return "Strength (XI)";
     case TAROT_HANGED_MAN:
@@ -177,6 +177,8 @@ void tarot_change_suit(Card **selected_cards, uint8_t selected_count, Suit new_s
   }
 }
 
+bool filter_non_edition_jokers(uint8_t i) { return state.game.jokers.cards[i].edition == EDITION_BASE; }
+
 uint8_t use_tarot_card(Tarot tarot) {
   Card *selected_cards[3] = {0};
   uint8_t selected_count = 0;
@@ -207,9 +209,17 @@ uint8_t use_tarot_card(Tarot tarot) {
     case TAROT_HERMIT:
       if (state.game.money > 0) state.game.money += state.game.money > 20 ? 20 : state.game.money;
       break;
-    case TAROT_WHEEL_OF_FORTUNE:
-      // TODO Add this when RNG utilities will be added
+    case TAROT_WHEEL_OF_FORTUNE: {
+      int16_t joker_index =
+          random_filtered_range_pick(0, cvector_size(state.game.jokers.cards), filter_non_edition_jokers);
+      if (joker_index == -1) return 0;
+      if (!random_chance(1, 4)) break;
+
+      // Foil, Holographic, Polychrome
+      uint8_t edition_weights[] = {50, 35, 15};
+      state.game.jokers.cards[joker_index].edition = random_weighted(edition_weights, 3) + 1;
       break;
+    }
     case TAROT_STRENGTH:
       for (uint8_t i = 0; i < selected_count; i++) {
         cvector_for_each(state.game.full_deck, Card, card) {
