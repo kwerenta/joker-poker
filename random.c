@@ -20,7 +20,7 @@ int16_t random_filtered_range_pick(uint8_t start, uint8_t end, RangeFilter filte
 
   if (count == 0) return -1;
 
-  return candidates[rand() % count];
+  return candidates[random_max_value(count)];
 }
 
 int16_t random_weighted(uint8_t *weights, uint8_t count) {
@@ -48,13 +48,14 @@ bool random_chance(uint8_t numerator, uint8_t denominator) {
   if (numerator <= 0 || denominator <= 0) return 0;
   if (numerator >= denominator) return 1;
 
-  uint8_t result = rand() % denominator;
-  return result < numerator;
+  return random_max_value(denominator) < numerator;
 }
 
-uint8_t random_max_value(uint8_t max_value) { return rand() % max_value; }
+uint8_t random_max_value(uint8_t max_value) { return random_in_range(0, max_value); }
 
-uint8_t random_in_range(uint8_t min_value, uint8_t max_value) { return random_max_value(max_value) + min_value; }
+uint8_t random_in_range(uint8_t min_value, uint8_t max_value) {
+  return min_value + rand() / (RAND_MAX / (max_value - min_value + 1) + 1);
+}
 
 Joker random_weighted_joker(uint8_t rarity_weights[4]) {
   uint8_t weights[JOKER_COUNT];

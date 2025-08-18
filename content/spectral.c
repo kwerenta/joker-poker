@@ -106,7 +106,7 @@ uint8_t get_spectral_max_selected(Spectral spectral) {
 void destroy_random_card() {
   if (cvector_size(state.game.hand.cards) == 0) return;
 
-  uint8_t destroy_index = random_max_value(cvector_size(state.game.hand.cards));
+  uint8_t destroy_index = random_max_value(cvector_size(state.game.hand.cards) - 1);
 
   for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
     if (compare_cards(&state.game.full_deck[i], &state.game.hand.cards[destroy_index])) {
@@ -143,21 +143,21 @@ uint8_t use_spectral_card(Spectral spectral) {
       if (state.game.hand.size == 1) return 0;
       destroy_random_card();
       for (uint8_t i = 0; i < 3; i++)
-        add_card_to_deck(random_max_value(4), random_in_range(10, 13), EDITION_BASE, random_in_range(1, 8), SEAL_NONE);
+        add_card_to_deck(random_max_value(3), random_in_range(10, 12), EDITION_BASE, random_in_range(1, 8), SEAL_NONE);
       break;
 
     case SPECTRAL_GRIM:
       if (state.game.hand.size == 1) return 0;
       destroy_random_card();
       for (uint8_t i = 0; i < 2; i++)
-        add_card_to_deck(random_max_value(4), RANK_ACE, EDITION_BASE, random_in_range(1, 8), SEAL_NONE);
+        add_card_to_deck(random_max_value(3), RANK_ACE, EDITION_BASE, random_in_range(1, 8), SEAL_NONE);
       break;
 
     case SPECTRAL_INCANTATION:
       if (state.game.hand.size == 1) return 0;
       destroy_random_card();
       for (uint8_t i = 0; i < 4; i++)
-        add_card_to_deck(random_max_value(4), random_in_range(1, 9), EDITION_BASE, random_in_range(1, 8), SEAL_NONE);
+        add_card_to_deck(random_max_value(3), random_in_range(1, 9), EDITION_BASE, random_in_range(1, 8), SEAL_NONE);
       break;
 
     case SPECTRAL_TALISMAN:
@@ -174,7 +174,7 @@ uint8_t use_spectral_card(Spectral spectral) {
 
     case SPECTRAL_SIGIL: {
       if (state.game.hand.size == 1) return 0;
-      Suit new_suit = random_max_value(4);
+      Suit new_suit = random_max_value(3);
 
       cvector_for_each(state.game.hand.cards, Card, hand_card) {
         cvector_for_each(state.game.full_deck, Card, card) {
@@ -192,7 +192,7 @@ uint8_t use_spectral_card(Spectral spectral) {
 
     case SPECTRAL_OUIJA: {
       if (state.game.hand.size == 1) return 0;
-      Rank new_rank = random_max_value(13);
+      Rank new_rank = random_max_value(12);
       state.game.hand.size--;
 
       cvector_for_each(state.game.hand.cards, Card, hand_card) {
@@ -220,7 +220,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_ANKH: {
-      uint8_t joker_to_copy = random_max_value(cvector_size(state.game.jokers.cards));
+      uint8_t joker_to_copy = random_max_value(cvector_size(state.game.jokers.cards) - 1);
       Joker joker = state.game.jokers.cards[joker_to_copy];
       // TODO Don't remove eternal jokers when they will be added
       cvector_clear(state.game.jokers.cards);
@@ -234,7 +234,7 @@ uint8_t use_spectral_card(Spectral spectral) {
 
     case SPECTRAL_HEX: {
       // TODO Ignore jokers with editions
-      uint8_t joker_to_upgrade = random_max_value(cvector_size(state.game.jokers.cards));
+      uint8_t joker_to_upgrade = random_max_value(cvector_size(state.game.jokers.cards) - 1);
       Joker joker = state.game.jokers.cards[joker_to_upgrade];
       // TODO Don't remove eternal jokers when they will be added
       cvector_clear(state.game.jokers.cards);

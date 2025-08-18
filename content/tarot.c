@@ -141,9 +141,9 @@ void tarot_create_consumable(ConsumableType type) {
   for (uint8_t i = 0; i < available_space; i++) {
     Consumable consumable = {.type = type};
     if (type == CONSUMABLE_PLANET)
-      consumable.planet = random_max_value(12);
+      consumable.planet = random_max_value(11);
     else if (type == CONSUMABLE_TAROT)
-      consumable.tarot = random_max_value(22);
+      consumable.tarot = random_max_value(21);
 
     cvector_push_back(state.game.consumables.items, consumable);
   }
