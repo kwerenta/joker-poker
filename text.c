@@ -168,7 +168,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_CLEARANCE_SALE:
       return "Clearance Sale";
     case VOUCHER_HONE:
-      return "Hone NOT IMPLEMENTED";
+      return "Hone";
     case VOUCHER_REROLL_SURPLUS:
       return "Reroll Surplus NOT IMPLEMENTED";
     case VOUCHER_CRYSTALL_BALL:
@@ -201,7 +201,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_LIQUIDATION:
       return "Liquidation";
     case VOUCHER_GLOW_UP:
-      return "Glow Up NOT IMPLEMENTED";
+      return "Glow Up";
     case VOUCHER_REROLL_GLUT:
       return "Reroll Glut NOT IMPLEMENTED";
     case VOUCHER_OMEN_GLOBE:
