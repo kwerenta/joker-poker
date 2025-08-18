@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "game.h"
 #include "state.h"
 
 void rng_init() { srand(time((NULL))); }
@@ -57,16 +58,29 @@ uint8_t random_in_range(uint8_t min_value, uint8_t max_value) { return random_ma
 
 Joker random_weighted_joker(uint8_t rarity_weights[4]) {
   uint8_t weights[JOKER_COUNT];
-  for (uint8_t i = 0; i < JOKER_COUNT; i++) {
-    weights[i] = rarity_weights[JOKERS[i].rarity];
+  bool has_any_weights = false;
 
+  for (uint8_t i = 0; i < JOKER_COUNT; i++) {
+    bool has_this_joker = false;
     cvector_for_each(state.game.jokers.cards, Joker, joker) {
       if (joker->id == JOKERS[i].id) {
-        weights[i] = 0;
+        has_this_joker = true;
         break;
       }
     }
+
+    if (has_this_joker) {
+      weights[i] = 0;
+      continue;
+    }
+
+    weights[i] = rarity_weights[JOKERS[i].rarity];
+    has_any_weights = true;
   };
+
+  // Allow duplicates if there are no more jokers available
+  if (!has_any_weights)
+    for (uint8_t i = 0; i < JOKER_COUNT; i++) weights[i] = rarity_weights[JOKERS[i].rarity];
 
   return JOKERS[random_weighted(weights, JOKER_COUNT)];
 }
