@@ -1285,6 +1285,10 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         break;
       case BOOSTER_PACK_SPECTRAL:
         content.spectral = random_max_value(15);
+        if (random_chance(3, 100))
+          content.spectral = SPECTRAL_SOUL;
+        else if (random_chance(3, 100))
+          content.spectral = SPECTRAL_BLACK_HOLE;
         break;
     }
 
