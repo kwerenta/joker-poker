@@ -125,7 +125,7 @@ Joker random_available_joker_by_rarity(Rarity rarity) {
 }
 
 Card random_card() {
-  uint16_t edition_weights[5] = {1000, 12, 28, 40, 0};
+  uint16_t edition_weights[5] = {920, 12, 28, 40, 0};
   for (uint8_t i = 1; i < 4; i++) {
     uint8_t multiplier = (state.game.vouchers & VOUCHER_GLOW_UP) ? 4 : (state.game.vouchers & VOUCHER_HONE) ? 2 : 1;
     edition_weights[0] -= (multiplier - 1) * edition_weights[i];
