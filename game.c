@@ -18,12 +18,12 @@ void game_init(Deck deck, Stake stake) {
 
   generate_deck();
 
-  state.game.score = 0;
+  state.game.score = 10000;
   state.game.ante = 1;
   state.game.round = 0;
 
-  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = rand() % 24, .is_active = 1};
-  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = rand() % 24, .is_active = 1};
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = TAG_DOUBLE, .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = TAG_VOUCHER, .is_active = 1};
   state.game.blinds[2] = (Blind){.is_active = 1};
   roll_boss_blind();
 
@@ -1359,6 +1359,14 @@ void fill_shop_items() {
   }
 }
 
+bool filter_available_vouchers(uint8_t i) {
+  if (state.game.vouchers & (1 << i)) return false;
+  cvector_for_each(state.game.shop.vouchers, Voucher, voucher) if (*voucher == 1 << i) return false;
+  if (i < 16 || state.game.vouchers & (1 << (i - 16))) return true;
+
+  return false;
+}
+
 void restock_shop() {
   cvector_clear(state.game.shop.items);
   cvector_clear(state.game.shop.booster_packs);
@@ -1388,35 +1396,9 @@ void restock_shop() {
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
-  uint8_t available_vouchers_count = 0;
-  for (uint8_t i = 0; i < 32; i++) {
-    if (state.game.vouchers & (1 << i)) continue;
-
-    if (i < 16) {
-      available_vouchers_count++;
-      continue;
-    }
-    if (state.game.vouchers & (1 << (i - 16))) available_vouchers_count++;
-  }
-  uint32_t combined_vouchers = state.game.vouchers;
-
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     if (state.game.tags[i] == TAG_VOUCHER) {
-      uint8_t voucher_index = rand() % available_vouchers_count;
-
-      for (uint8_t i = 0; i < 32; i++) {
-        Voucher voucher = 1 << i;
-        if (combined_vouchers & voucher) continue;
-
-        if (voucher_index == 0) {
-          cvector_insert(state.game.shop.vouchers, 0, voucher);
-          combined_vouchers |= voucher;
-          available_vouchers_count--;
-          break;
-        }
-        voucher_index--;
-      }
-
+      cvector_insert(state.game.shop.vouchers, 0, 1 << random_filtered_range_pick(0, 31, filter_available_vouchers));
       cvector_erase(state.game.tags, i);
       i--;
     }
@@ -1449,16 +1431,8 @@ void restock_shop() {
     }
   }
 
-  if (is_ante_first_shop || state.game.round == 1) {
-    uint8_t voucher_index = rand() % available_vouchers_count;
-
-    for (uint8_t i = 0; i < 32; i++) {
-      if (combined_vouchers & (1 << i)) continue;
-
-      if (voucher_index == 0) cvector_back(state.game.shop.vouchers) = 1 << i;
-      voucher_index--;
-    }
-  }
+  if (is_ante_first_shop || state.game.round == 1)
+    cvector_back(state.game.shop.vouchers) = 1 << random_filtered_range_pick(0, 31, filter_available_vouchers);
 }
 
 void exit_shop() {
