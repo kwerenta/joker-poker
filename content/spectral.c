@@ -106,7 +106,7 @@ uint8_t get_spectral_max_selected(Spectral spectral) {
 void destroy_random_card() {
   if (cvector_size(state.game.hand.cards) == 0) return;
 
-  uint8_t destroy_index = random_max_value(cvector_size(state.game.hand.cards) - 1);
+  uint8_t destroy_index = random_vector_index(state.game.hand.cards);
 
   for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
     if (compare_cards(&state.game.full_deck[i], &state.game.hand.cards[destroy_index])) {
@@ -220,7 +220,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_ANKH: {
-      uint8_t joker_to_copy = random_max_value(cvector_size(state.game.jokers.cards) - 1);
+      uint8_t joker_to_copy = random_vector_index(state.game.jokers.cards);
       Joker joker = state.game.jokers.cards[joker_to_copy];
       // TODO Don't remove eternal jokers when they will be added
       cvector_clear(state.game.jokers.cards);
@@ -234,7 +234,7 @@ uint8_t use_spectral_card(Spectral spectral) {
 
     case SPECTRAL_HEX: {
       // TODO Ignore jokers with editions
-      uint8_t joker_to_upgrade = random_max_value(cvector_size(state.game.jokers.cards) - 1);
+      uint8_t joker_to_upgrade = random_vector_index(state.game.jokers.cards);
       Joker joker = state.game.jokers.cards[joker_to_upgrade];
       // TODO Don't remove eternal jokers when they will be added
       cvector_clear(state.game.jokers.cards);

@@ -334,7 +334,7 @@ void play_hand() {
   state.game.hands.remaining--;
 
   if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_HOOK) {
-    for (uint8_t i = 0; i < 2; i++) discard_card(random_max_value(cvector_size(state.game.hand.cards) - 1));
+    for (uint8_t i = 0; i < 2; i++) discard_card(random_vector_index(state.game.hand.cards));
   }
 
   cvector_for_each(state.game.hand.cards, Card, card) {
@@ -399,7 +399,7 @@ void play_hand() {
       disable_boss_blind();
       enable_boss_blind();
     } else if (state.game.current_blind->type == BLIND_CERULEAN_BELL) {
-      force_card_select(random_max_value(cvector_size(state.game.hand.cards) - 1));
+      force_card_select(random_vector_index(state.game.hand.cards));
     }
   }
 }
@@ -496,7 +496,7 @@ void discard_hand() {
   sort_hand();
 
   if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_CERULEAN_BELL)
-    force_card_select(random_max_value(cvector_size(state.game.hand.cards) - 1));
+    force_card_select(random_vector_index(state.game.hand.cards));
 }
 
 void remove_selected_cards() {
@@ -1464,7 +1464,7 @@ void select_blind() {
   if (state.game.current_blind->type == BLIND_HOUSE)
     cvector_for_each(state.game.hand.cards, Card, card) card->status |= CARD_STATUS_FACE_DOWN;
   else if (state.game.current_blind->type == BLIND_CERULEAN_BELL)
-    force_card_select(random_max_value(cvector_size(state.game.hand.cards) - 1));
+    force_card_select(random_vector_index(state.game.hand.cards));
 
   change_stage(STAGE_GAME);
 }
@@ -1688,8 +1688,7 @@ void enable_boss_blind() {
       break;
     case BLIND_CRIMSON_HEART:
       if (cvector_size(state.game.jokers.cards) > 0)
-        state.game.jokers.cards[random_max_value(cvector_size(state.game.jokers.cards) - 1)].status |=
-            CARD_STATUS_DEBUFFED;
+        random_vector_item(state.game.jokers.cards).status |= CARD_STATUS_DEBUFFED;
       break;
     default:
       break;

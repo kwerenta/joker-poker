@@ -4,7 +4,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "cvector.h"
 #include "game.h"
+
+#define random_vector_index(vec) random_max_value(cvector_size(vec) - 1)
+#define random_vector_item(vec) vec[random_vector_index(vec)]
 
 typedef bool (*RangeFilter)(uint8_t index);
 
