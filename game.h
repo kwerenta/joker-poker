@@ -429,6 +429,7 @@ uint8_t is_face_card(Card *card);
 uint8_t is_suit(Card *card, Suit suit);
 uint8_t is_poker_hand_unknown();
 bool is_planet_card_locked(Planet planet);
+bool filter_locked_planet_cards(uint8_t planet);
 
 uint16_t evaluate_hand();
 uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);

@@ -136,14 +136,12 @@ uint8_t get_tarot_max_selected(Tarot tarot) {
   }
 }
 
-bool filter_available_planet_cards_consumable(uint8_t planet) { return !is_planet_card_locked(planet); }
-
 void tarot_create_consumable(ConsumableType type) {
   uint8_t available_space = state.game.consumables.size - cvector_size(state.game.consumables.items);
   for (uint8_t i = 0; i < available_space; i++) {
     Consumable consumable = {.type = type};
     if (type == CONSUMABLE_PLANET)
-      consumable.planet = random_filtered_range_pick(0, 11, filter_available_planet_cards_consumable);
+      consumable.planet = random_filtered_range_pick(0, 11, filter_locked_planet_cards);
     else if (type == CONSUMABLE_TAROT)
       consumable.tarot = random_max_value(21);
 

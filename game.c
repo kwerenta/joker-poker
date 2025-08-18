@@ -552,6 +552,7 @@ uint8_t is_poker_hand_unknown() {
 }
 
 bool is_planet_card_locked(Planet planet) { return planet <= PLANET_X && state.game.poker_hands[planet].played == 0; }
+bool filter_locked_planet_cards(uint8_t planet) { return !is_planet_card_locked(planet); }
 
 void shuffle_deck() {
   for (uint8_t i = cvector_size(state.game.deck) - 1; i > 0; i--) {
@@ -1592,7 +1593,7 @@ void trigger_immediate_tags() {
         break;
       }
       case TAG_ORBITAL:
-        state.game.poker_hands[random_max_value(11)].level += 3;
+        state.game.poker_hands[random_filtered_range_pick(0, 11, filter_locked_planet_cards)].level += 3;
         break;
       case TAG_ECONOMY:
         if (state.game.money > 0) state.game.money += state.game.money > 40 ? 40 : state.game.money;
