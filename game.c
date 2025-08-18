@@ -1284,7 +1284,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         content.tarot = random_max_value(21);
         break;
       case BOOSTER_PACK_SPECTRAL:
-        content.spectral = random_max_value(17);
+        content.spectral = random_max_value(15);
         break;
     }
 
@@ -1370,7 +1370,7 @@ void fill_shop_items() {
         item.joker = JOKERS[random_max_value(JOKER_COUNT - 1)];
         break;
       case SHOP_ITEM_SPECTRAL:
-        item.spectral = random_max_value(17);
+        item.spectral = random_max_value(15);
         break;
     }
 
