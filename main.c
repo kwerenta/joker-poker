@@ -23,8 +23,6 @@ State state;
 void init() {
   log_init();
 
-  srand(time(NULL));
-
   setup_callbacks();
 
   init_gu(list);

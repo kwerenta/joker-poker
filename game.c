@@ -7,9 +7,12 @@
 #include "content/spectral.h"
 #include "content/tarot.h"
 #include "debug.h"
+#include "random.h"
 #include "state.h"
 
 void game_init(Deck deck, Stake stake) {
+  rng_init();
+
   state.game.deck_type = deck;
   state.game.stake = stake;
 

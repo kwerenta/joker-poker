@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 
 project(joker-poker)
 
-add_executable(${PROJECT_NAME} main.c gfx.c game.c system.c state.c text.c renderer.c debug.c utils.c content/joker.c content/tarot.c content/spectral.c)
+add_executable(${PROJECT_NAME} main.c gfx.c game.c system.c state.c text.c renderer.c debug.c random.c utils.c content/joker.c content/tarot.c content/spectral.c)
 target_include_directories(${PROJECT_NAME} PRIVATE lib)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
