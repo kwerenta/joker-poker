@@ -11,5 +11,7 @@ void rng_init();
 int16_t random_filtered_range_pick(uint8_t start, uint8_t end, RangeFilter filter);
 int16_t random_weighted(uint8_t *weights, uint8_t count);
 bool random_chance(uint8_t numerator, uint8_t denominator);
+uint8_t random_max_value(uint8_t max_value);
+uint8_t random_in_range(uint8_t min_value, uint8_t max_value);
 
 #endif

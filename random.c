@@ -48,3 +48,7 @@ bool random_chance(uint8_t numerator, uint8_t denominator) {
   uint8_t result = rand() % denominator;
   return result < numerator;
 }
+
+uint8_t random_max_value(uint8_t max_value) { return rand() % max_value; }
+
+uint8_t random_in_range(uint8_t min_value, uint8_t max_value) { return random_max_value(max_value) + min_value; }

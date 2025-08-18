@@ -1,5 +1,6 @@
 #include "tarot.h"
 
+#include "../random.h"
 #include "../state.h"
 #include "cvector.h"
 
@@ -140,9 +141,9 @@ void tarot_create_consumable(ConsumableType type) {
   for (uint8_t i = 0; i < available_space; i++) {
     Consumable consumable = {.type = type};
     if (type == CONSUMABLE_PLANET)
-      consumable.planet = rand() % 12;
+      consumable.planet = random_max_value(12);
     else if (type == CONSUMABLE_TAROT)
-      consumable.tarot = rand() % 22;
+      consumable.tarot = random_max_value(22);
 
     cvector_push_back(state.game.consumables.items, consumable);
   }
@@ -265,7 +266,7 @@ uint8_t use_tarot_card(Tarot tarot) {
     }
     case TAROT_JUDGEMENT:
       if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) break;
-      cvector_push_back(state.game.jokers.cards, JOKERS[rand() % JOKER_COUNT]);
+      cvector_push_back(state.game.jokers.cards, JOKERS[random_max_value(JOKER_COUNT)]);
       break;
 
     case TAROT_HIGH_PRIESTESS:
