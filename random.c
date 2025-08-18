@@ -48,7 +48,7 @@ bool random_chance(uint8_t numerator, uint8_t denominator) {
   if (numerator <= 0 || denominator <= 0) return 0;
   if (numerator >= denominator) return 1;
 
-  return random_max_value(denominator) < numerator;
+  return random_max_value(denominator - 1) < numerator;
 }
 
 uint8_t random_max_value(uint8_t max_value) { return random_in_range(0, max_value); }
