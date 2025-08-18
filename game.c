@@ -1270,7 +1270,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         content.card = random_card();
         break;
       case BOOSTER_PACK_BUFFON:
-        content.joker = JOKERS[random_max_value(JOKER_COUNT - 1)];
+        content.joker = random_available_joker();
         break;
       case BOOSTER_PACK_CELESTIAL:
         if (state.game.vouchers & VOUCHER_TELESCOPE && i == 0) {
@@ -1371,7 +1371,7 @@ void fill_shop_items() {
         item.planet = random_max_value(11);
         break;
       case SHOP_ITEM_JOKER:
-        item.joker = JOKERS[random_max_value(JOKER_COUNT - 1)];
+        item.joker = random_available_joker();
         break;
       case SHOP_ITEM_SPECTRAL:
         item.spectral = random_max_value(15);

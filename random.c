@@ -85,6 +85,8 @@ Joker random_weighted_joker(uint16_t rarity_weights[4]) {
     has_any_weights = true;
   };
 
+  // TODO According to Wiki "Joker" is returned when there are no more Jokers available and this should be changed when
+  // more jokers will be added
   // Allow duplicates if there are no more jokers available
   if (!has_any_weights)
     for (uint8_t i = 0; i < JOKER_COUNT; i++) weights[i] = rarity_weights[JOKERS[i].rarity];
