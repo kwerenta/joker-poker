@@ -165,7 +165,7 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_AURA:
-      selected_cards[0]->edition = random_in_range(1, 3);
+      selected_cards[0]->edition = random_weighted((uint16_t[3]){50, 35, 15}, 3) + 1;
       break;
 
     case SPECTRAL_WRAITH:
