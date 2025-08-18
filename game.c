@@ -1338,6 +1338,22 @@ void select_booster_pack_item() {
 
 void skip_booster_pack() { close_booster_pack(); }
 
+bool filter_available_tarot_cards(uint8_t i) {
+  cvector_for_each(state.game.shop.items, ShopItem,
+                   item) if (item->type == SHOP_ITEM_TAROT && item->tarot == i) return false;
+  return true;
+}
+bool filter_available_planet_cards(uint8_t i) {
+  cvector_for_each(state.game.shop.items, ShopItem,
+                   item) if (item->type == SHOP_ITEM_PLANET && item->planet == i) return false;
+  return true;
+}
+bool filter_available_spectral_cards(uint8_t i) {
+  cvector_for_each(state.game.shop.items, ShopItem,
+                   item) if (item->type == SHOP_ITEM_SPECTRAL && item->spectral == i) return false;
+  return true;
+}
+
 void fill_shop_items() {
   // Card, Tarot, Planet, Joker, Spectral
   uint16_t shop_item_weights[5] = {0, 40, 40, 200, 0};
@@ -1365,16 +1381,16 @@ void fill_shop_items() {
         item.card = random_shop_card();
         break;
       case SHOP_ITEM_TAROT:
-        item.tarot = random_max_value(21);
+        item.tarot = random_filtered_range_pick(0, 21, filter_available_tarot_cards);
         break;
       case SHOP_ITEM_PLANET:
-        item.planet = random_max_value(11);
+        item.planet = random_filtered_range_pick(0, 11, filter_available_planet_cards);
         break;
       case SHOP_ITEM_JOKER:
         item.joker = random_available_joker();
         break;
       case SHOP_ITEM_SPECTRAL:
-        item.spectral = random_max_value(15);
+        item.spectral = random_filtered_range_pick(0, 15, filter_available_spectral_cards);
         break;
     }
 
