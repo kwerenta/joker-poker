@@ -1268,8 +1268,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
 
     switch (booster_pack->type) {
       case BOOSTER_PACK_STANDARD:
-        content.card =
-            create_card(random_max_value(3), random_max_value(12), EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE);
+        content.card = random_card();
         break;
       case BOOSTER_PACK_BUFFON:
         content.joker = JOKERS[random_max_value(JOKER_COUNT - 1)];
@@ -1342,9 +1341,7 @@ void fill_shop_items() {
   while (cvector_size(state.game.shop.items) < state.game.shop.size) {
     switch (rand() % 4) {
       case 0:
-        item = (ShopItem){
-            .type = SHOP_ITEM_CARD,
-            .card = create_card(random_max_value(3), random_max_value(12), EDITION_BASE, ENHANCEMENT_NONE, SEAL_NONE)};
+        item = (ShopItem){.type = SHOP_ITEM_CARD, .card = random_shop_card()};
         break;
       case 1:
         item = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
