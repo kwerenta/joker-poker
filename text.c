@@ -593,8 +593,7 @@ char *get_tag_name(Tag tag) {
     case TAG_JUGGLE:
       return "Juggle";
     case TAG_D6:
-      // TODO Implement when shop re-rolls will be added
-      return "D6 NOT IMPLEMENTED";
+      return "D6";
     case TAG_TOPUP:
       return "Top-up";
     case TAG_SPEED:

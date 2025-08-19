@@ -1413,7 +1413,10 @@ void fill_shop_items() {
   }
 }
 
-uint8_t get_reroll_price() { return 5 + state.game.shop.reroll_count; }
+uint8_t get_reroll_price() {
+  cvector_for_each(state.game.tags, Tag, tag) if (*tag == TAG_D6) return state.game.shop.reroll_count;
+  return 5 + state.game.shop.reroll_count;
+}
 
 void reroll_shop_items() {
   uint8_t price = get_reroll_price();
@@ -1513,13 +1516,18 @@ void restock_shop() {
     cvector_back(state.game.shop.vouchers) = 1 << random_filtered_range_pick(0, 31, filter_available_vouchers);
 }
 
-void exit_shop() {
+void erase_first_tag_occurance(Tag tag) {
   for (uint8_t i = 0; i < cvector_size(state.game.tags); i++) {
-    if (state.game.tags[i] == TAG_COUPON) {
+    if (state.game.tags[i] == tag) {
       cvector_erase(state.game.tags, i);
-      break;
+      return;
     }
   }
+}
+
+void exit_shop() {
+  erase_first_tag_occurance(TAG_COUPON);
+  erase_first_tag_occurance(TAG_D6);
 
   state.game.shop.reroll_count = 0;
 
