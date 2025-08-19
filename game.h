@@ -461,7 +461,7 @@ void add_voucher_to_player(Voucher voucher);
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack);
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack);
 uint8_t get_shop_item_sell_price(ShopItem *item);
-void buy_shop_item(bool should_use);
+void buy_item(bool should_use);
 void sell_shop_item();
 void open_booster_pack(BoosterPackItem *booster_pack);
 void select_booster_pack_item();

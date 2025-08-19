@@ -1179,62 +1179,93 @@ uint8_t get_shop_item_sell_price(ShopItem *item) {
   return sell_price;
 }
 
-void buy_shop_item(bool should_use) {
-  uint8_t item_index = state.navigation.hovered;
-  NavigationSection section = get_current_section();
-  uint8_t is_booster_pack = section == NAVIGATION_SHOP_BOOSTER_PACKS;
-  uint8_t is_voucher = section == NAVIGATION_SHOP_VOUCHER;
+static uint8_t get_item_price(NavigationSection section, uint8_t index) {
+  switch (section) {
+    case NAVIGATION_SHOP_ITEMS:
+      return get_shop_item_price(&state.game.shop.items[index]);
+    case NAVIGATION_SHOP_BOOSTER_PACKS:
+      return get_booster_pack_price(&state.game.shop.booster_packs[index]);
+    case NAVIGATION_SHOP_VOUCHER:
+      return get_voucher_price(state.game.shop.vouchers[index]);
+    default:
+      return UINT8_MAX;
+  }
+}
 
-  // Prevent buying items if navigation cursor is outside buyable items section
-  if (!is_booster_pack && !is_voucher && section != NAVIGATION_SHOP_ITEMS) return;
+static bool buy_booster_pack(uint8_t index) {
+  open_booster_pack(&state.game.shop.booster_packs[index]);
+  cvector_erase(state.game.shop.booster_packs, index);
+  return true;
+}
 
-  uint8_t price = is_booster_pack ? get_booster_pack_price(&state.game.shop.booster_packs[item_index])
-                  : is_voucher    ? get_voucher_price(state.game.shop.vouchers[item_index])
-                                  : get_shop_item_price(&state.game.shop.items[item_index]);
+static bool buy_voucher(uint8_t index) {
+  if (index == cvector_size(state.game.shop.vouchers) - 1)
+    state.game.shop.vouchers[index] = 0;
+  else
+    cvector_erase(state.game.shop.vouchers, index);
+  return true;
+}
 
-  if (state.game.money < price) return;
-  state.game.money -= price;
+static bool buy_shop_item(uint8_t index, bool should_use) {
+  ShopItem *item = &state.game.shop.items[index];
 
-  if (is_booster_pack) {
-    open_booster_pack(&state.game.shop.booster_packs[item_index]);
-    cvector_erase(state.game.shop.booster_packs, item_index);
-  } else if (is_voucher) {
-    add_voucher_to_player(state.game.shop.vouchers[item_index]);
-    if (item_index == cvector_size(state.game.shop.vouchers) - 1)
-      state.game.shop.vouchers[item_index] = 0;
-    else
-      cvector_erase(state.game.shop.vouchers, item_index);
-  } else {
-    ShopItem *item = &state.game.shop.items[item_index];
-    if (should_use) {
-      Consumable consumable;
-      switch (item->type) {
-        case SHOP_ITEM_TAROT:
-          consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot};
-          break;
-        case SHOP_ITEM_PLANET:
-          consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet};
-          break;
-        case SHOP_ITEM_SPECTRAL:
-          consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral};
-          break;
-        default:
-          state.game.money += price;
-          return;
-      }
-      if (!use_consumable(&consumable)) {
-        state.game.money += price;
-        return;
-      }
-    } else {
-      if (!add_item_to_player(item)) {
-        state.game.money += price;
-        return;
-      }
+  if (should_use) {
+    Consumable c;
+    switch (item->type) {
+      case SHOP_ITEM_TAROT:
+        c = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot};
+        break;
+      case SHOP_ITEM_PLANET:
+        c = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet};
+        break;
+      case SHOP_ITEM_SPECTRAL:
+        c = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral};
+        break;
+      default:
+        return false;
     }
-    cvector_erase(state.game.shop.items, item_index);
+    if (!use_consumable(&c)) return false;
+  } else {
+    if (!add_item_to_player(item)) return false;
   }
 
+  cvector_erase(state.game.shop.items, index);
+  return true;
+}
+
+void buy_item(bool should_use) {
+  uint8_t item_index = state.navigation.hovered;
+  NavigationSection section = get_current_section();
+
+  // Prevent buying items if navigation cursor is outside buyable items section
+  if (section != NAVIGATION_SHOP_VOUCHER && section != NAVIGATION_SHOP_BOOSTER_PACKS &&
+      section != NAVIGATION_SHOP_ITEMS)
+    return;
+
+  uint8_t price = get_item_price(section, item_index);
+  if (state.game.money < price) return;
+
+  state.game.money -= price;
+  bool was_bought = true;
+
+  switch (section) {
+    case NAVIGATION_SHOP_ITEMS:
+      was_bought = buy_shop_item(item_index, should_use);
+      break;
+    case NAVIGATION_SHOP_BOOSTER_PACKS:
+      was_bought = buy_booster_pack(item_index);
+      break;
+    case NAVIGATION_SHOP_VOUCHER:
+      was_bought = buy_voucher(item_index);
+      break;
+    default:
+      break;
+  }
+
+  if (!was_bought) {
+    state.game.money += price;
+    return;
+  }
   if (state.stage == STAGE_SHOP) set_nav_hovered(state.navigation.hovered);
 }
 
