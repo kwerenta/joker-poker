@@ -84,5 +84,7 @@ There are currently no in-game control hints.
   - SQUARE - select current blind
   - TRIANGLE - skip current blind
   - SELECT - reroll boss blind if has the necessary voucher
+- Shop
+  - SELECT - reroll shop
 - Booster Pack
   - CIRCLE - skip booster pack

@@ -1413,6 +1413,26 @@ void fill_shop_items() {
   }
 }
 
+uint8_t get_reroll_price() {
+  cvector_for_each(state.game.tags, Tag, tag) if (*tag == TAG_D6) return state.game.shop.reroll_count;
+
+  uint8_t base_price = (state.game.vouchers & VOUCHER_REROLL_GLUT)      ? 1
+                       : (state.game.vouchers & VOUCHER_REROLL_SURPLUS) ? 3
+                                                                        : 5;
+  return base_price + state.game.shop.reroll_count;
+}
+
+void reroll_shop_items() {
+  uint8_t price = get_reroll_price();
+  if (state.game.money < price) return;
+
+  state.game.shop.reroll_count++;
+  state.game.money -= price;
+
+  cvector_clear(state.game.shop.items);
+  fill_shop_items();
+}
+
 bool filter_available_vouchers(uint8_t i) {
   if (state.game.vouchers & (1 << i)) return false;
   cvector_for_each(state.game.shop.vouchers, Voucher, voucher) if (*voucher == 1 << i) return false;
@@ -1500,13 +1520,20 @@ void restock_shop() {
     cvector_back(state.game.shop.vouchers) = 1 << random_filtered_range_pick(0, 31, filter_available_vouchers);
 }
 
-void exit_shop() {
+void erase_first_tag_occurance(Tag tag) {
   for (uint8_t i = 0; i < cvector_size(state.game.tags); i++) {
-    if (state.game.tags[i] == TAG_COUPON) {
+    if (state.game.tags[i] == tag) {
       cvector_erase(state.game.tags, i);
-      break;
+      return;
     }
   }
+}
+
+void exit_shop() {
+  erase_first_tag_occurance(TAG_COUPON);
+  erase_first_tag_occurance(TAG_D6);
+
+  state.game.shop.reroll_count = 0;
 
   change_stage(STAGE_SELECT_BLIND);
 }
