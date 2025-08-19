@@ -170,7 +170,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_HONE:
       return "Hone";
     case VOUCHER_REROLL_SURPLUS:
-      return "Reroll Surplus NOT IMPLEMENTED";
+      return "Reroll Surplus";
     case VOUCHER_CRYSTALL_BALL:
       return "Crystall Ball";
     case VOUCHER_TELESCOPE:
@@ -203,7 +203,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_GLOW_UP:
       return "Glow Up";
     case VOUCHER_REROLL_GLUT:
-      return "Reroll Glut NOT IMPLEMENTED";
+      return "Reroll Glut";
     case VOUCHER_OMEN_GLOBE:
       return "Omen Globe NOT IMPLEMENTED";
     case VOUCHER_OBSERVATORY:

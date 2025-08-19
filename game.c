@@ -1415,7 +1415,11 @@ void fill_shop_items() {
 
 uint8_t get_reroll_price() {
   cvector_for_each(state.game.tags, Tag, tag) if (*tag == TAG_D6) return state.game.shop.reroll_count;
-  return 5 + state.game.shop.reroll_count;
+
+  uint8_t base_price = (state.game.vouchers & VOUCHER_REROLL_GLUT)      ? 1
+                       : (state.game.vouchers & VOUCHER_REROLL_SURPLUS) ? 3
+                                                                        : 5;
+  return base_price + state.game.shop.reroll_count;
 }
 
 void reroll_shop_items() {
