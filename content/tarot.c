@@ -141,7 +141,7 @@ void tarot_create_consumable(ConsumableType type) {
   for (uint8_t i = 0; i < available_space; i++) {
     Consumable consumable = {.type = type};
     if (type == CONSUMABLE_PLANET)
-      consumable.planet = random_max_value(11);
+      consumable.planet = random_filtered_range_pick(0, 11, filter_locked_planet_cards);
     else if (type == CONSUMABLE_TAROT)
       consumable.tarot = random_max_value(21);
 
