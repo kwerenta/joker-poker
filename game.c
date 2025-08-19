@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "random.h"
 #include "state.h"
+#include "utils.h"
 
 void game_init(Deck deck, Stake stake) {
   rng_init();
@@ -1177,19 +1178,6 @@ uint8_t get_shop_item_sell_price(ShopItem *item) {
 
   if (sell_price < 1) return 1;
   return sell_price;
-}
-
-static uint8_t get_item_price(NavigationSection section, uint8_t index) {
-  switch (section) {
-    case NAVIGATION_SHOP_ITEMS:
-      return get_shop_item_price(&state.game.shop.items[index]);
-    case NAVIGATION_SHOP_BOOSTER_PACKS:
-      return get_booster_pack_price(&state.game.shop.booster_packs[index]);
-    case NAVIGATION_SHOP_VOUCHER:
-      return get_voucher_price(state.game.shop.vouchers[index]);
-    default:
-      return UINT8_MAX;
-  }
 }
 
 static bool buy_booster_pack(uint8_t index) {
