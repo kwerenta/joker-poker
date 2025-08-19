@@ -1179,7 +1179,7 @@ uint8_t get_shop_item_sell_price(ShopItem *item) {
   return sell_price;
 }
 
-void buy_shop_item() {
+void buy_shop_item(bool should_use) {
   uint8_t item_index = state.navigation.hovered;
   NavigationSection section = get_current_section();
   uint8_t is_booster_pack = section == NAVIGATION_SHOP_BOOSTER_PACKS;
@@ -1204,7 +1204,26 @@ void buy_shop_item() {
     else
       cvector_erase(state.game.shop.vouchers, item_index);
   } else {
-    if (add_item_to_player(&state.game.shop.items[item_index]) == 0) return;
+    ShopItem *item = &state.game.shop.items[item_index];
+    if (should_use) {
+      Consumable consumable;
+      switch (item->type) {
+        case SHOP_ITEM_TAROT:
+          consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot};
+          break;
+        case SHOP_ITEM_PLANET:
+          consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet};
+          break;
+        case SHOP_ITEM_SPECTRAL:
+          consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral};
+          break;
+        default:
+          return;
+      }
+      if (!use_consumable(&consumable)) return;
+    } else {
+      if (!add_item_to_player(item)) return;
+    }
     cvector_erase(state.game.shop.items, item_index);
   }
 
