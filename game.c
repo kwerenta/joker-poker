@@ -1413,7 +1413,15 @@ void fill_shop_items() {
   }
 }
 
+uint8_t get_reroll_price() { return 5 + state.game.shop.reroll_count; }
+
 void reroll_shop_items() {
+  uint8_t price = get_reroll_price();
+  if (state.game.money < price) return;
+
+  state.game.shop.reroll_count++;
+  state.game.money -= price;
+
   cvector_clear(state.game.shop.items);
   fill_shop_items();
 }
@@ -1512,6 +1520,8 @@ void exit_shop() {
       break;
     }
   }
+
+  state.game.shop.reroll_count = 0;
 
   change_stage(STAGE_SELECT_BLIND);
 }

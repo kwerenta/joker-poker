@@ -345,6 +345,7 @@ typedef struct {
 
 typedef struct {
   uint8_t size;
+  uint8_t reroll_count;
   cvector_vector_type(Voucher) vouchers;
   cvector_vector_type(ShopItem) items;
   cvector_vector_type(BoosterPackItem) booster_packs;
