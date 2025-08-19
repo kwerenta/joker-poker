@@ -1193,6 +1193,7 @@ void buy_shop_item(bool should_use) {
                                   : get_shop_item_price(&state.game.shop.items[item_index]);
 
   if (state.game.money < price) return;
+  state.game.money -= price;
 
   if (is_booster_pack) {
     open_booster_pack(&state.game.shop.booster_packs[item_index]);
@@ -1220,14 +1221,18 @@ void buy_shop_item(bool should_use) {
         default:
           return;
       }
-      if (!use_consumable(&consumable)) return;
+      if (!use_consumable(&consumable)) {
+        state.game.money += price;
+        return;
+      }
     } else {
-      if (!add_item_to_player(item)) return;
+      if (!add_item_to_player(item)) {
+        state.game.money += price;
+        return;
+      }
     }
     cvector_erase(state.game.shop.items, item_index);
   }
-
-  state.game.money -= price;
 
   if (state.stage == STAGE_SHOP) set_nav_hovered(state.navigation.hovered);
 }
