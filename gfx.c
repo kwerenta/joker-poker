@@ -352,11 +352,7 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
                     .padding = CLAY_PADDING_ALL(4),
                 }}) {
             Clay_String price;
-            append_clay_string(&price, "$%d",
-                               section == NAVIGATION_SHOP_BOOSTER_PACKS
-                                   ? get_booster_pack_price(&state.game.shop.booster_packs[i])
-                               : section == NAVIGATION_SHOP_VOUCHER ? get_voucher_price(state.game.shop.vouchers[i])
-                                                                    : get_shop_item_price(&state.game.shop.items[i]));
+            append_clay_string(&price, "$%d", get_item_price(section, i));
             CLAY_TEXT(price, WHITE_TEXT_CONFIG);
           }
         }

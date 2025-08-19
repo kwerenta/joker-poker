@@ -203,3 +203,16 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
     }
   }
 }
+
+uint8_t get_item_price(NavigationSection section, uint8_t i) {
+  switch (section) {
+    case NAVIGATION_SHOP_ITEMS:
+      return get_shop_item_price(&state.game.shop.items[i]);
+    case NAVIGATION_SHOP_BOOSTER_PACKS:
+      return get_booster_pack_price(&state.game.shop.booster_packs[i]);
+    case NAVIGATION_SHOP_VOUCHER:
+      return get_voucher_price(state.game.shop.vouchers[i]);
+    default:
+      return UINT8_MAX;
+  }
+}

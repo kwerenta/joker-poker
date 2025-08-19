@@ -86,5 +86,6 @@ There are currently no in-game control hints.
   - SELECT - reroll boss blind if has the necessary voucher
 - Shop
   - SELECT - reroll shop
+  - SQUARE - buy&use currently hovered item if possible
 - Booster Pack
   - CIRCLE - skip booster pack

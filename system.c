@@ -347,7 +347,9 @@ void handle_controls() {
       if (button_pressed(PSP_CTRL_CIRCLE))
         exit_shop();
       else if (button_pressed(PSP_CTRL_CROSS))
-        buy_shop_item();
+        buy_item(false);
+      else if (button_pressed(PSP_CTRL_SQUARE))
+        buy_item(true);
       else if (button_pressed(PSP_CTRL_SELECT))
         reroll_shop_items();
       break;
