@@ -1219,6 +1219,7 @@ void buy_shop_item(bool should_use) {
           consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral};
           break;
         default:
+          state.game.money += price;
           return;
       }
       if (!use_consumable(&consumable)) {
