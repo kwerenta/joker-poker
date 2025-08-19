@@ -1413,6 +1413,11 @@ void fill_shop_items() {
   }
 }
 
+void reroll_shop_items() {
+  cvector_clear(state.game.shop.items);
+  fill_shop_items();
+}
+
 bool filter_available_vouchers(uint8_t i) {
   if (state.game.vouchers & (1 << i)) return false;
   cvector_for_each(state.game.shop.vouchers, Voucher, voucher) if (*voucher == 1 << i) return false;

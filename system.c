@@ -344,11 +344,12 @@ void handle_controls() {
       break;
 
     case STAGE_SHOP:
-      if (button_pressed(PSP_CTRL_CIRCLE)) {
+      if (button_pressed(PSP_CTRL_CIRCLE))
         exit_shop();
-      } else if (button_pressed(PSP_CTRL_CROSS)) {
+      else if (button_pressed(PSP_CTRL_CROSS))
         buy_shop_item();
-      }
+      else if (button_pressed(PSP_CTRL_SELECT))
+        reroll_shop_items();
       break;
 
     case STAGE_BOOSTER_PACK:
