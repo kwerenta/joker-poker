@@ -467,6 +467,7 @@ void open_booster_pack(BoosterPackItem *booster_pack);
 void select_booster_pack_item();
 void skip_booster_pack();
 void fill_shop_items();
+uint8_t get_reroll_price();
 void reroll_shop_items();
 void restock_shop();
 void exit_shop();

@@ -628,8 +628,26 @@ Clay_ElementDeclaration card_content_config() {
 void render_shop() {
   CLAY(card_element_config(CLAY_ID("Shop"))) {
     CLAY(card_content_config()) {
-      CLAY({.id = CLAY_ID("ShopItems"), .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
-      render_spread_items(NAVIGATION_SHOP_ITEMS, CLAY_STRING("ShopItems"));
+      CLAY({.id = CLAY_ID("ShopTop"),
+            .layout = {
+                .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)},
+                .childAlignment = {CLAY_ALIGN_X_CENTER, CLAY_ALIGN_Y_CENTER},
+                .childGap = 8,
+            }}) {
+        CLAY({
+            .id = CLAY_ID("RerollButton"),
+            .backgroundColor = COLOR_MONEY,
+            .layout = {.padding = CLAY_PADDING_ALL(4)},
+        }) {
+          Clay_String reroll_text;
+          append_clay_string(&reroll_text, "Reroll $%d", get_reroll_price());
+          CLAY_TEXT(reroll_text, WHITE_TEXT_CONFIG);
+        }
+
+        CLAY({.id = CLAY_ID("ShopItems"),
+              .layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(CARD_HEIGHT)}}}) {}
+        render_spread_items(NAVIGATION_SHOP_ITEMS, CLAY_STRING("ShopItems"));
+      }
 
       CLAY({.layout = {.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}}}) {}
 
