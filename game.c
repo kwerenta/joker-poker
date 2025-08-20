@@ -1303,21 +1303,25 @@ void sell_shop_item() {
   set_nav_hovered(item_index);
 }
 
-#define FILTER_AVAILABLE_BOOSTER_PACK(expected_type, item_type)                                                     \
-  do {                                                                                                              \
-    cvector_for_each(                                                                                               \
-        state.game.booster_pack.content, BoosterPackContent,                                                        \
-        item) if (state.game.booster_pack.item.type == expected_type && item->item_type == item_type) return false; \
-    return true;                                                                                                    \
+#define FILTER_AVAILABLE_ITEMS(vec, expected_type, item_type)                        \
+  do {                                                                               \
+    cvector_for_each(vec, ShopItem, item) {                                          \
+      if (item->type == expected_type && item->item_type == item_type) return false; \
+    }                                                                                \
+    return true;                                                                     \
   } while (0);
-bool filter_available_tarot_booster_pack(uint8_t tarot) { FILTER_AVAILABLE_BOOSTER_PACK(BOOSTER_PACK_ARCANA, tarot); }
-bool filter_available_planet_booster_pack(uint8_t planet) {
+
+static bool filter_available_tarot_booster_pack(uint8_t tarot) {
+  FILTER_AVAILABLE_ITEMS(state.game.booster_pack.content, SHOP_ITEM_TAROT, tarot);
+}
+static bool filter_available_planet_booster_pack(uint8_t planet) {
   if (is_planet_card_locked(planet)) return false;
-  FILTER_AVAILABLE_BOOSTER_PACK(BOOSTER_PACK_CELESTIAL, planet);
+  FILTER_AVAILABLE_ITEMS(state.game.booster_pack.content, SHOP_ITEM_PLANET, planet);
 }
-bool filter_available_spectral_booster_pack(uint8_t spectral) {
-  FILTER_AVAILABLE_BOOSTER_PACK(BOOSTER_PACK_SPECTRAL, spectral);
+static bool filter_available_spectral_booster_pack(uint8_t spectral) {
+  FILTER_AVAILABLE_ITEMS(state.game.booster_pack.content, SHOP_ITEM_SPECTRAL, spectral);
 }
+
 void open_booster_pack(BoosterPackItem *booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = *booster_pack;
@@ -1330,16 +1334,17 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
   sort_hand();
 
   for (uint8_t i = 0; i < get_booster_pack_items_count(booster_pack); i++) {
-    BoosterPackContent content = {0};
+    ShopItem content = {0};
 
     switch (booster_pack->type) {
       case BOOSTER_PACK_STANDARD:
-        content.card = random_card();
+        content = (ShopItem){.type = SHOP_ITEM_CARD, .card = random_card()};
         break;
       case BOOSTER_PACK_BUFFON:
-        content.joker = random_available_joker();
+        content = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = random_available_joker()};
         break;
       case BOOSTER_PACK_CELESTIAL:
+        content.type = SHOP_ITEM_PLANET;
         if (state.game.vouchers & VOUCHER_TELESCOPE && i == 0) {
           PokerHand most_played = get_most_played_poker_hand();
           content.planet = ffs(most_played) - 1;
@@ -1348,16 +1353,23 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
         }
         break;
       case BOOSTER_PACK_ARCANA:
-        content.tarot = random_filtered_range_pick(0, 21, filter_available_tarot_booster_pack);
+        content = (ShopItem){.type = SHOP_ITEM_TAROT,
+                             .tarot = random_filtered_range_pick(0, 21, filter_available_tarot_booster_pack)};
+
+        if (state.game.vouchers & VOUCHER_OMEN_GLOBE && random_percent(0.2))
+          content = (ShopItem){.type = SHOP_ITEM_SPECTRAL,
+                               .spectral = random_filtered_range_pick(0, 15, filter_available_spectral_booster_pack)};
         break;
       case BOOSTER_PACK_SPECTRAL:
-        content.spectral = random_filtered_range_pick(0, 15, filter_available_spectral_booster_pack);
-        if (random_chance(3, 100))
-          content.spectral = SPECTRAL_SOUL;
-        else if (random_chance(3, 100))
-          content.spectral = SPECTRAL_BLACK_HOLE;
+        content = (ShopItem){.type = SHOP_ITEM_SPECTRAL,
+                             .spectral = random_filtered_range_pick(0, 15, filter_available_spectral_booster_pack)};
         break;
     }
+
+    if ((content.type == SHOP_ITEM_SPECTRAL || content.type == SHOP_ITEM_TAROT) && random_percent(0.03))
+      content = (ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_SOUL};
+    else if ((content.type == SHOP_ITEM_SPECTRAL || content.type == SHOP_ITEM_PLANET) && random_percent(0.03))
+      content = (ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_BLACK_HOLE};
 
     cvector_push_back(state.game.booster_pack.content, content);
   }
@@ -1372,25 +1384,22 @@ void close_booster_pack() {
 }
 
 void select_booster_pack_item() {
-  BoosterPackContent *content = &state.game.booster_pack.content[state.navigation.hovered];
+  ShopItem *item = &state.game.booster_pack.content[state.navigation.hovered];
 
   uint8_t was_used = 1;
-  switch (state.game.booster_pack.item.type) {
-    case BOOSTER_PACK_STANDARD:
-      was_used = add_item_to_player(&(ShopItem){.type = SHOP_ITEM_CARD, .card = content->card});
+  switch (item->type) {
+    case SHOP_ITEM_CARD:
+    case SHOP_ITEM_JOKER:
+      was_used = add_item_to_player(item);
       break;
-    case BOOSTER_PACK_BUFFON:
-      was_used = add_item_to_player(&(ShopItem){.type = SHOP_ITEM_JOKER, .joker = content->joker});
+    case SHOP_ITEM_PLANET:
+      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet});
       break;
-
-    case BOOSTER_PACK_CELESTIAL:
-      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = content->planet});
+    case SHOP_ITEM_TAROT:
+      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot});
       break;
-    case BOOSTER_PACK_ARCANA:
-      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = content->tarot});
-      break;
-    case BOOSTER_PACK_SPECTRAL:
-      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = content->spectral});
+    case SHOP_ITEM_SPECTRAL:
+      was_used = use_consumable(&(Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral});
       break;
   }
 
@@ -1405,18 +1414,16 @@ void select_booster_pack_item() {
 
 void skip_booster_pack() { close_booster_pack(); }
 
-#define FILTER_AVAILABLE_SHOP(expected_type, item_type)                                                   \
-  do {                                                                                                    \
-    cvector_for_each(state.game.shop.items, ShopItem,                                                     \
-                     item) if (item->type == expected_type && item->item_type == item_type) return false; \
-    return true;                                                                                          \
-  } while (0);
-bool filter_available_tarot_shop(uint8_t tarot) { FILTER_AVAILABLE_SHOP(SHOP_ITEM_TAROT, tarot); }
-bool filter_available_planet_shop(uint8_t planet) {
-  if (is_planet_card_locked(planet)) return false;
-  FILTER_AVAILABLE_SHOP(SHOP_ITEM_PLANET, planet);
+static bool filter_available_tarot_shop(uint8_t tarot) {
+  FILTER_AVAILABLE_ITEMS(state.game.shop.items, SHOP_ITEM_TAROT, tarot);
 }
-bool filter_available_spectral_shop(uint8_t spectral) { FILTER_AVAILABLE_SHOP(SHOP_ITEM_SPECTRAL, spectral); }
+static bool filter_available_planet_shop(uint8_t planet) {
+  if (is_planet_card_locked(planet)) return false;
+  FILTER_AVAILABLE_ITEMS(state.game.shop.items, SHOP_ITEM_PLANET, planet);
+}
+static bool filter_available_spectral_shop(uint8_t spectral) {
+  FILTER_AVAILABLE_ITEMS(state.game.shop.items, SHOP_ITEM_SPECTRAL, spectral);
+}
 
 void fill_shop_items() {
   // Card, Tarot, Planet, Joker, Spectral

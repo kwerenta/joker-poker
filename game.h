@@ -263,38 +263,6 @@ typedef struct {
   Card *scoring_cards[5];
 } SelectedHand;
 
-typedef enum { SHOP_ITEM_CARD, SHOP_ITEM_TAROT, SHOP_ITEM_PLANET, SHOP_ITEM_JOKER, SHOP_ITEM_SPECTRAL } ShopItemType;
-
-typedef enum {
-  BOOSTER_PACK_STANDARD,
-  BOOSTER_PACK_ARCANA,
-  BOOSTER_PACK_CELESTIAL,
-  BOOSTER_PACK_BUFFON,
-  BOOSTER_PACK_SPECTRAL
-} BoosterPackType;
-
-typedef enum { BOOSTER_PACK_NORMAL, BOOSTER_PACK_JUMBO, BOOSTER_PACK_MEGA } BoosterPackSize;
-
-typedef struct {
-  BoosterPackType type;
-  BoosterPackSize size;
-  bool is_free;
-} BoosterPackItem;
-
-typedef union {
-  Card card;
-  Joker joker;
-  Planet planet;
-  Tarot tarot;
-  Spectral spectral;
-} BoosterPackContent;
-
-typedef struct {
-  uint8_t uses;
-  BoosterPackItem item;
-  cvector_vector_type(BoosterPackContent) content;
-} BoosterPack;
-
 typedef enum {
   // Base vouchers
   VOUCHER_OVERSTOCK = 1u << 0,
@@ -333,6 +301,8 @@ typedef enum {
   VOUCHER_PALETTE = 1u << (15 + 16),
 } Voucher;
 
+typedef enum { SHOP_ITEM_CARD, SHOP_ITEM_TAROT, SHOP_ITEM_PLANET, SHOP_ITEM_JOKER, SHOP_ITEM_SPECTRAL } ShopItemType;
+
 typedef struct {
   ShopItemType type;
   bool is_free;
@@ -344,6 +314,28 @@ typedef struct {
     Spectral spectral;
   };
 } ShopItem;
+
+typedef enum {
+  BOOSTER_PACK_STANDARD,
+  BOOSTER_PACK_ARCANA,
+  BOOSTER_PACK_CELESTIAL,
+  BOOSTER_PACK_BUFFON,
+  BOOSTER_PACK_SPECTRAL
+} BoosterPackType;
+
+typedef enum { BOOSTER_PACK_NORMAL, BOOSTER_PACK_JUMBO, BOOSTER_PACK_MEGA } BoosterPackSize;
+
+typedef struct {
+  BoosterPackType type;
+  BoosterPackSize size;
+  bool is_free;
+} BoosterPackItem;
+
+typedef struct {
+  uint8_t uses;
+  BoosterPackItem item;
+  cvector_vector_type(ShopItem) content;
+} BoosterPack;
 
 typedef struct {
   uint8_t size;
