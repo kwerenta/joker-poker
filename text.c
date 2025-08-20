@@ -205,7 +205,7 @@ char *get_voucher_name(Voucher voucher) {
     case VOUCHER_REROLL_GLUT:
       return "Reroll Glut";
     case VOUCHER_OMEN_GLOBE:
-      return "Omen Globe NOT IMPLEMENTED";
+      return "Omen Globe";
     case VOUCHER_OBSERVATORY:
       return "Observatory";
     case VOUCHER_NACHO_TONG:

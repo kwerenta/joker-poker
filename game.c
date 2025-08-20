@@ -1350,23 +1350,26 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
           content.planet = ffs(most_played) - 1;
         } else {
           content.planet = random_filtered_range_pick(0, 11, filter_available_planet_booster_pack);
-          if (random_percent(0.03)) content = (ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_BLACK_HOLE};
         }
         break;
       case BOOSTER_PACK_ARCANA:
         content = (ShopItem){.type = SHOP_ITEM_TAROT,
                              .tarot = random_filtered_range_pick(0, 21, filter_available_tarot_booster_pack)};
-        if (random_percent(0.03)) content = (ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_SOUL};
+
+        if (state.game.vouchers & VOUCHER_OMEN_GLOBE && random_percent(0.2))
+          content = (ShopItem){.type = SHOP_ITEM_SPECTRAL,
+                               .spectral = random_filtered_range_pick(0, 15, filter_available_spectral_booster_pack)};
         break;
       case BOOSTER_PACK_SPECTRAL:
-        content.type = SHOP_ITEM_SPECTRAL;
-        content.spectral = random_filtered_range_pick(0, 15, filter_available_spectral_booster_pack);
-        if (random_percent(0.03))
-          content.spectral = SPECTRAL_SOUL;
-        else if (random_percent(0.03))
-          content.spectral = SPECTRAL_BLACK_HOLE;
+        content = (ShopItem){.type = SHOP_ITEM_SPECTRAL,
+                             .spectral = random_filtered_range_pick(0, 15, filter_available_spectral_booster_pack)};
         break;
     }
+
+    if ((content.type == SHOP_ITEM_SPECTRAL || content.type == SHOP_ITEM_TAROT) && random_percent(0.03))
+      content = (ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_SOUL};
+    else if ((content.type == SHOP_ITEM_SPECTRAL || content.type == SHOP_ITEM_PLANET) && random_percent(0.03))
+      content = (ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = SPECTRAL_BLACK_HOLE};
 
     cvector_push_back(state.game.booster_pack.content, content);
   }
