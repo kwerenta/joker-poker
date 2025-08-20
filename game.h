@@ -278,6 +278,7 @@ typedef enum { BOOSTER_PACK_NORMAL, BOOSTER_PACK_JUMBO, BOOSTER_PACK_MEGA } Boos
 typedef struct {
   BoosterPackType type;
   BoosterPackSize size;
+  bool is_free;
 } BoosterPackItem;
 
 typedef union {

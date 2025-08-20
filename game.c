@@ -1098,9 +1098,6 @@ static uint8_t get_edition_cost(Edition edition) {
 }
 
 uint8_t get_shop_item_price(ShopItem *item) {
-  if (state.game.shop.reroll_count == 0) {
-    cvector_for_each(state.game.tags, Tag, tag) if (*tag == TAG_COUPON) return 0;
-  }
   if (item->is_free) return 0;
 
   uint8_t price = 0;
@@ -1179,10 +1176,7 @@ void add_voucher_to_player(Voucher voucher) {
 }
 
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) {
-  cvector_for_each(state.game.tags, Tag, tag) {
-    if (*tag == TAG_COUPON) return 0;
-  }
-
+  if (booster_pack->is_free) return 0;
   return apply_sale(4 + booster_pack->size * 2);
 }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
@@ -1544,10 +1538,14 @@ void restock_shop() {
   }
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    bool has_used_tag = false;
     if (state.game.tags[i] == TAG_VOUCHER) {
       cvector_insert(state.game.shop.vouchers, 0, 1 << random_filtered_range_pick(0, 31, filter_available_vouchers));
-      cvector_erase(state.game.tags, i);
-      i--;
+      has_used_tag = true;
+    } else if (state.game.tags[i] == TAG_COUPON) {
+      cvector_for_each(state.game.shop.items, ShopItem, item) item->is_free = true;
+      cvector_for_each(state.game.shop.booster_packs, BoosterPackItem, item) item->is_free = true;
+      has_used_tag = true;
     }
 
     cvector_for_each(state.game.shop.items, ShopItem, shop_item) {
@@ -1569,8 +1567,12 @@ void restock_shop() {
         default:
           continue;
       }
-
       shop_item->is_free = true;
+      has_used_tag = true;
+      break;
+    }
+
+    if (has_used_tag) {
       cvector_erase(state.game.tags, i);
       i--;
     }
@@ -1580,7 +1582,7 @@ void restock_shop() {
     cvector_back(state.game.shop.vouchers) = 1 << random_filtered_range_pick(0, 31, filter_available_vouchers);
 }
 
-void erase_first_tag_occurance(Tag tag) {
+static void erase_first_tag_occurance(Tag tag) {
   for (uint8_t i = 0; i < cvector_size(state.game.tags); i++) {
     if (state.game.tags[i] == tag) {
       cvector_erase(state.game.tags, i);
@@ -1590,7 +1592,6 @@ void erase_first_tag_occurance(Tag tag) {
 }
 
 void exit_shop() {
-  erase_first_tag_occurance(TAG_COUPON);
   erase_first_tag_occurance(TAG_D6);
 
   state.game.shop.reroll_count = 0;
