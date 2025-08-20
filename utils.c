@@ -54,7 +54,7 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
 
     case NAVIGATION_BOOSTER_PACK: {
       BoosterPack *booster_pack = &state.game.booster_pack;
-      BoosterPackContent *item = &booster_pack->content[i];
+      ShopItem *item = &booster_pack->content[i];
 
       switch (booster_pack->item.type) {
         case BOOSTER_PACK_STANDARD:
@@ -178,29 +178,9 @@ void get_nav_item_tooltip_content(Clay_String *name, Clay_String *description, N
       break;
     }
 
-    case NAVIGATION_BOOSTER_PACK: {
-      BoosterPackContent *item = &state.game.booster_pack.content[state.navigation.hovered];
-      switch (state.game.booster_pack.item.type) {
-        case BOOSTER_PACK_STANDARD:
-          get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_CARD, .card = item->card});
-          break;
-        case BOOSTER_PACK_CELESTIAL:
-          get_shop_item_tooltip_content(name, description,
-                                        &(ShopItem){.type = SHOP_ITEM_PLANET, .planet = item->planet});
-          break;
-        case BOOSTER_PACK_BUFFON:
-          get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_JOKER, .joker = item->joker});
-          break;
-        case BOOSTER_PACK_ARCANA:
-          get_shop_item_tooltip_content(name, description, &(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = item->tarot});
-          break;
-        case BOOSTER_PACK_SPECTRAL:
-          get_shop_item_tooltip_content(name, description,
-                                        &(ShopItem){.type = SHOP_ITEM_SPECTRAL, .spectral = item->spectral});
-          break;
-      }
+    case NAVIGATION_BOOSTER_PACK:
+      get_shop_item_tooltip_content(name, description, &state.game.booster_pack.content[state.navigation.hovered]);
       break;
-    }
   }
 }
 
