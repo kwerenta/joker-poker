@@ -1303,20 +1303,25 @@ void sell_shop_item() {
   set_nav_hovered(item_index);
 }
 
-#define FILTER_AVAILABLE_BOOSTER_PACK(expected_type, item_type)                                           \
-  do {                                                                                                    \
-    cvector_for_each(state.game.booster_pack.content, ShopItem,                                           \
-                     item) if (item->type == expected_type && item->item_type == item_type) return false; \
-    return true;                                                                                          \
+#define FILTER_AVAILABLE_ITEMS(vec, expected_type, item_type)                        \
+  do {                                                                               \
+    cvector_for_each(vec, ShopItem, item) {                                          \
+      if (item->type == expected_type && item->item_type == item_type) return false; \
+    }                                                                                \
+    return true;                                                                     \
   } while (0);
-bool filter_available_tarot_booster_pack(uint8_t tarot) { FILTER_AVAILABLE_BOOSTER_PACK(SHOP_ITEM_TAROT, tarot); }
-bool filter_available_planet_booster_pack(uint8_t planet) {
+
+static bool filter_available_tarot_booster_pack(uint8_t tarot) {
+  FILTER_AVAILABLE_ITEMS(state.game.booster_pack.content, SHOP_ITEM_TAROT, tarot);
+}
+static bool filter_available_planet_booster_pack(uint8_t planet) {
   if (is_planet_card_locked(planet)) return false;
-  FILTER_AVAILABLE_BOOSTER_PACK(SHOP_ITEM_PLANET, planet);
+  FILTER_AVAILABLE_ITEMS(state.game.booster_pack.content, SHOP_ITEM_PLANET, planet);
 }
-bool filter_available_spectral_booster_pack(uint8_t spectral) {
-  FILTER_AVAILABLE_BOOSTER_PACK(SHOP_ITEM_SPECTRAL, spectral);
+static bool filter_available_spectral_booster_pack(uint8_t spectral) {
+  FILTER_AVAILABLE_ITEMS(state.game.booster_pack.content, SHOP_ITEM_SPECTRAL, spectral);
 }
+
 void open_booster_pack(BoosterPackItem *booster_pack) {
   cvector_clear(state.game.booster_pack.content);
   state.game.booster_pack.item = *booster_pack;
@@ -1404,18 +1409,16 @@ void select_booster_pack_item() {
 
 void skip_booster_pack() { close_booster_pack(); }
 
-#define FILTER_AVAILABLE_SHOP(expected_type, item_type)                                                   \
-  do {                                                                                                    \
-    cvector_for_each(state.game.shop.items, ShopItem,                                                     \
-                     item) if (item->type == expected_type && item->item_type == item_type) return false; \
-    return true;                                                                                          \
-  } while (0);
-bool filter_available_tarot_shop(uint8_t tarot) { FILTER_AVAILABLE_SHOP(SHOP_ITEM_TAROT, tarot); }
-bool filter_available_planet_shop(uint8_t planet) {
-  if (is_planet_card_locked(planet)) return false;
-  FILTER_AVAILABLE_SHOP(SHOP_ITEM_PLANET, planet);
+static bool filter_available_tarot_shop(uint8_t tarot) {
+  FILTER_AVAILABLE_ITEMS(state.game.shop.items, SHOP_ITEM_TAROT, tarot);
 }
-bool filter_available_spectral_shop(uint8_t spectral) { FILTER_AVAILABLE_SHOP(SHOP_ITEM_SPECTRAL, spectral); }
+static bool filter_available_planet_shop(uint8_t planet) {
+  if (is_planet_card_locked(planet)) return false;
+  FILTER_AVAILABLE_ITEMS(state.game.shop.items, SHOP_ITEM_PLANET, planet);
+}
+static bool filter_available_spectral_shop(uint8_t spectral) {
+  FILTER_AVAILABLE_ITEMS(state.game.shop.items, SHOP_ITEM_SPECTRAL, spectral);
+}
 
 void fill_shop_items() {
   // Card, Tarot, Planet, Joker, Spectral
