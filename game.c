@@ -1069,7 +1069,7 @@ uint8_t add_item_to_player(ShopItem *item) {
   return 1;
 }
 
-uint8_t apply_sale(uint8_t price) {
+static uint8_t apply_sale(uint8_t price) {
   float sale = 0.0f;
 
   if (state.game.vouchers & VOUCHER_LIQUIDATION)
@@ -1077,18 +1077,33 @@ uint8_t apply_sale(uint8_t price) {
   else if (state.game.vouchers & VOUCHER_CLEARANCE_SALE)
     sale = 0.25f;
 
-  return (uint8_t)ceilf((1 - sale) * price - 0.5f);
+  uint8_t buy_price = (uint8_t)ceilf((1 - sale) * price - 0.5f);
+
+  if (buy_price < 1) return 1;
+  return buy_price;
+}
+
+static uint8_t get_edition_cost(Edition edition) {
+  switch (edition) {
+    case EDITION_BASE:
+      return 0;
+    case EDITION_FOIL:
+      return 2;
+    case EDITION_HOLOGRAPHIC:
+      return 3;
+    case EDITION_POLYCHROME:
+    case EDITION_NEGATIVE:
+      return 5;
+  }
 }
 
 uint8_t get_shop_item_price(ShopItem *item) {
-  cvector_for_each(state.game.tags, Tag, tag) {
-    if (*tag == TAG_COUPON) return 0;
-  }
+  if (item->is_free) return 0;
 
   uint8_t price = 0;
   switch (item->type) {
     case SHOP_ITEM_CARD:
-      price = 1;
+      price = 1 + get_edition_cost(item->card.edition);
       break;
     case SHOP_ITEM_PLANET:
     case SHOP_ITEM_TAROT:
@@ -1098,7 +1113,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
       price = 4;
       break;
     case SHOP_ITEM_JOKER:
-      price = item->joker.base_price;
+      price = item->joker.base_price + get_edition_cost(item->joker.edition);
       break;
   }
 
@@ -1161,10 +1176,7 @@ void add_voucher_to_player(Voucher voucher) {
 }
 
 uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) {
-  cvector_for_each(state.game.tags, Tag, tag) {
-    if (*tag == TAG_COUPON) return 0;
-  }
-
+  if (booster_pack->is_free) return 0;
   return apply_sale(4 + booster_pack->size * 2);
 }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
@@ -1174,7 +1186,7 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
 }
 
 uint8_t get_shop_item_sell_price(ShopItem *item) {
-  int8_t sell_price = (uint8_t)floorf(get_shop_item_price(item) / 2.0);
+  uint8_t sell_price = (uint8_t)floorf(get_shop_item_price(item) / 2.0);
 
   if (sell_price < 1) return 1;
   return sell_price;
@@ -1500,7 +1512,7 @@ void restock_shop() {
     if (tag != TAG_UNCOMMON && tag != TAG_RARE) continue;
 
     // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
-    ShopItem joker = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
+    ShopItem joker = {.type = SHOP_ITEM_JOKER, .is_free = true, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
     cvector_push_back(state.game.shop.items, joker);
 
     cvector_erase(state.game.tags, i);
@@ -1526,10 +1538,14 @@ void restock_shop() {
   }
 
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
+    bool has_used_tag = false;
     if (state.game.tags[i] == TAG_VOUCHER) {
       cvector_insert(state.game.shop.vouchers, 0, 1 << random_filtered_range_pick(0, 31, filter_available_vouchers));
-      cvector_erase(state.game.tags, i);
-      i--;
+      has_used_tag = true;
+    } else if (state.game.tags[i] == TAG_COUPON) {
+      cvector_for_each(state.game.shop.items, ShopItem, item) item->is_free = true;
+      cvector_for_each(state.game.shop.booster_packs, BoosterPackItem, item) item->is_free = true;
+      has_used_tag = true;
     }
 
     cvector_for_each(state.game.shop.items, ShopItem, shop_item) {
@@ -1551,10 +1567,12 @@ void restock_shop() {
         default:
           continue;
       }
+      shop_item->is_free = true;
+      has_used_tag = true;
+      break;
+    }
 
-      // TODO Fix modifying base price as it modifies sell price as well, probably adding sell price property to shop
-      // items will be a way to go
-      shop_item->joker.base_price = 0;
+    if (has_used_tag) {
       cvector_erase(state.game.tags, i);
       i--;
     }
@@ -1564,7 +1582,7 @@ void restock_shop() {
     cvector_back(state.game.shop.vouchers) = 1 << random_filtered_range_pick(0, 31, filter_available_vouchers);
 }
 
-void erase_first_tag_occurance(Tag tag) {
+static void erase_first_tag_occurance(Tag tag) {
   for (uint8_t i = 0; i < cvector_size(state.game.tags); i++) {
     if (state.game.tags[i] == tag) {
       cvector_erase(state.game.tags, i);
@@ -1574,7 +1592,6 @@ void erase_first_tag_occurance(Tag tag) {
 }
 
 void exit_shop() {
-  erase_first_tag_occurance(TAG_COUPON);
   erase_first_tag_occurance(TAG_D6);
 
   state.game.shop.reroll_count = 0;
