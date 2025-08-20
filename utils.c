@@ -7,6 +7,24 @@
 #include "state.h"
 #include "text.h"
 
+static CustomElementData create_shop_item_custom_element(ShopItem *item) {
+  switch (item->type) {
+    case SHOP_ITEM_CARD:
+      return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
+    case SHOP_ITEM_JOKER:
+      return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
+    case SHOP_ITEM_PLANET:
+      return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                 .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
+    case SHOP_ITEM_TAROT:
+      return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                 .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
+    case SHOP_ITEM_SPECTRAL:
+      return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
+                                 .consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral}};
+  }
+}
+
 CustomElementData create_spread_item_element(NavigationSection section, uint8_t i) {
   switch (section) {
     case NAVIGATION_NONE:
@@ -26,25 +44,8 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
     case NAVIGATION_JOKERS:
       return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = state.game.jokers.cards[i]};
 
-    case NAVIGATION_SHOP_ITEMS: {
-      ShopItem *item = &state.game.shop.items[i];
-      switch (item->type) {
-        case SHOP_ITEM_CARD:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
-        case SHOP_ITEM_JOKER:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
-        case SHOP_ITEM_PLANET:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
-                                     .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
-        case SHOP_ITEM_TAROT:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
-                                     .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
-        case SHOP_ITEM_SPECTRAL:
-          return (CustomElementData){
-              .type = CUSTOM_ELEMENT_CONSUMABLE,
-              .consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral}};
-      }
-    }
+    case NAVIGATION_SHOP_ITEMS:
+      return create_shop_item_custom_element(&state.game.shop.items[i]);
 
     case NAVIGATION_SHOP_VOUCHER:
       return (CustomElementData){.type = CUSTOM_ELEMENT_VOUCHER, .voucher = state.game.shop.vouchers[i]};
@@ -52,28 +53,8 @@ CustomElementData create_spread_item_element(NavigationSection section, uint8_t 
     case NAVIGATION_SHOP_BOOSTER_PACKS:
       return (CustomElementData){.type = CUSTOM_ELEMENT_BOOSTER_PACK, .booster_pack = state.game.shop.booster_packs[i]};
 
-    case NAVIGATION_BOOSTER_PACK: {
-      BoosterPack *booster_pack = &state.game.booster_pack;
-      ShopItem *item = &booster_pack->content[i];
-
-      switch (booster_pack->item.type) {
-        case BOOSTER_PACK_STANDARD:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_CARD, .card = item->card};
-        case BOOSTER_PACK_BUFFON:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_JOKER, .joker = item->joker};
-        case BOOSTER_PACK_CELESTIAL:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
-                                     .consumable = (Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet}};
-        case BOOSTER_PACK_ARCANA:
-          return (CustomElementData){.type = CUSTOM_ELEMENT_CONSUMABLE,
-                                     .consumable = (Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot}};
-        case BOOSTER_PACK_SPECTRAL:
-          return (CustomElementData){
-              .type = CUSTOM_ELEMENT_CONSUMABLE,
-              .consumable = (Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral}};
-      }
-      break;
-    }
+    case NAVIGATION_BOOSTER_PACK:
+      return create_shop_item_custom_element(&state.game.booster_pack.content[i]);
   }
 }
 
