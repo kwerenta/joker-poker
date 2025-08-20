@@ -1387,18 +1387,18 @@ void select_booster_pack_item() {
   ShopItem *item = &state.game.booster_pack.content[state.navigation.hovered];
 
   uint8_t was_used = 1;
-  switch (state.game.booster_pack.item.type) {
-    case BOOSTER_PACK_STANDARD:
-    case BOOSTER_PACK_BUFFON:
+  switch (item->type) {
+    case SHOP_ITEM_CARD:
+    case SHOP_ITEM_JOKER:
       was_used = add_item_to_player(item);
       break;
-    case BOOSTER_PACK_CELESTIAL:
+    case SHOP_ITEM_PLANET:
       was_used = use_consumable(&(Consumable){.type = CONSUMABLE_PLANET, .planet = item->planet});
       break;
-    case BOOSTER_PACK_ARCANA:
+    case SHOP_ITEM_TAROT:
       was_used = use_consumable(&(Consumable){.type = CONSUMABLE_TAROT, .tarot = item->tarot});
       break;
-    case BOOSTER_PACK_SPECTRAL:
+    case SHOP_ITEM_SPECTRAL:
       was_used = use_consumable(&(Consumable){.type = CONSUMABLE_SPECTRAL, .spectral = item->spectral});
       break;
   }
