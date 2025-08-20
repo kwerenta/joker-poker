@@ -1101,6 +1101,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
   if (state.game.shop.reroll_count == 0) {
     cvector_for_each(state.game.tags, Tag, tag) if (*tag == TAG_COUPON) return 0;
   }
+  if (item->is_free) return 0;
 
   uint8_t price = 0;
   switch (item->type) {
@@ -1517,7 +1518,7 @@ void restock_shop() {
     if (tag != TAG_UNCOMMON && tag != TAG_RARE) continue;
 
     // TODO Fix adding duplicates and wrong rarity jokers when rng utilities will be added
-    ShopItem joker = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
+    ShopItem joker = {.type = SHOP_ITEM_JOKER, .is_free = true, .joker = JOKERS[random_max_value(JOKER_COUNT - 1)]};
     cvector_push_back(state.game.shop.items, joker);
 
     cvector_erase(state.game.tags, i);
@@ -1569,9 +1570,7 @@ void restock_shop() {
           continue;
       }
 
-      // TODO Fix modifying base price as it modifies sell price as well, probably adding sell price property to shop
-      // items will be a way to go
-      shop_item->joker.base_price = 0;
+      shop_item->is_free = true;
       cvector_erase(state.game.tags, i);
       i--;
     }

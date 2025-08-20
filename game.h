@@ -334,6 +334,7 @@ typedef enum {
 
 typedef struct {
   ShopItemType type;
+  bool is_free;
   union {
     Joker joker;
     Card card;
