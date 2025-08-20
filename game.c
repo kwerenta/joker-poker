@@ -1200,6 +1200,7 @@ static bool buy_booster_pack(uint8_t index) {
 }
 
 static bool buy_voucher(uint8_t index) {
+  add_voucher_to_player(state.game.shop.vouchers[index]);
   if (index == cvector_size(state.game.shop.vouchers) - 1)
     state.game.shop.vouchers[index] = 0;
   else
