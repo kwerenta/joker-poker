@@ -29,6 +29,7 @@ void game_init(Deck deck, Stake stake) {
   roll_boss_blind();
 
   state.game.current_blind = &state.game.blinds[0];
+  state.game.vouchers = 0;
 
   state.game.money = 4;
 
@@ -1121,7 +1122,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
 }
 
 uint8_t get_voucher_price(Voucher voucher) {
-  if (voucher <= 1 << 16) return 10;
+  if (voucher <= VOUCHER_PAINT_BRUSH) return 10;
   return 20;
 }
 void add_voucher_to_player(Voucher voucher) {
@@ -1129,45 +1130,36 @@ void add_voucher_to_player(Voucher voucher) {
 
   switch (voucher) {
     case VOUCHER_OVERSTOCK:
-      state.game.shop.size = 3;
+    case VOUCHER_OVERSTOCK_PLUS:
+      state.game.shop.size++;
       fill_shop_items();
       break;
     case VOUCHER_CRYSTALL_BALL:
       state.game.consumables.size++;
       break;
     case VOUCHER_GRABBER:
-      state.game.hands.total++;
+    case VOUCHER_NACHO_TONG:
+      state.game.hands.remaining = ++state.game.hands.total;
       break;
     case VOUCHER_WASTEFUL:
-      state.game.discards.total++;
+    case VOUCHER_RECYCLOMANCY:
+      state.game.discards.remaining = ++state.game.discards.total;
       break;
     case VOUCHER_HIEROGLYPH:
       state.game.ante--;
-      state.game.hands.total--;
+      state.game.hands.remaining = --state.game.hands.total;
       break;
     case VOUCHER_PAINT_BRUSH:
+    case VOUCHER_PALETTE:
       state.game.hand.size++;
       break;
 
-    case VOUCHER_OVERSTOCK_PLUS:
-      state.game.shop.size = 4;
-      fill_shop_items();
-      break;
-    case VOUCHER_NACHO_TONG:
-      state.game.hands.total++;
-      break;
-    case VOUCHER_RECYCLOMANCY:
-      state.game.discards.total++;
-      break;
     case VOUCHER_ANTIMATTER:
       state.game.jokers.size++;
       break;
     case VOUCHER_PTEROGLYPH:
       state.game.ante--;
-      state.game.discards.total--;
-      break;
-    case VOUCHER_PALETTE:
-      state.game.hand.size++;
+      state.game.discards.remaining = --state.game.discards.total;
       break;
 
     default:
@@ -1199,6 +1191,7 @@ static bool buy_booster_pack(uint8_t index) {
 }
 
 static bool buy_voucher(uint8_t index) {
+  add_voucher_to_player(state.game.shop.vouchers[index]);
   if (index == cvector_size(state.game.shop.vouchers) - 1)
     state.game.shop.vouchers[index] = 0;
   else
