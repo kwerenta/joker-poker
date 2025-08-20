@@ -1069,7 +1069,7 @@ uint8_t add_item_to_player(ShopItem *item) {
   return 1;
 }
 
-uint8_t apply_sale(uint8_t price) {
+static uint8_t apply_sale(uint8_t price) {
   float sale = 0.0f;
 
   if (state.game.vouchers & VOUCHER_LIQUIDATION)
@@ -1080,6 +1080,20 @@ uint8_t apply_sale(uint8_t price) {
   return (uint8_t)ceilf((1 - sale) * price - 0.5f);
 }
 
+static uint8_t get_edition_cost(Edition edition) {
+  switch (edition) {
+    case EDITION_BASE:
+      return 0;
+    case EDITION_FOIL:
+      return 2;
+    case EDITION_HOLOGRAPHIC:
+      return 3;
+    case EDITION_POLYCHROME:
+    case EDITION_NEGATIVE:
+      return 5;
+  }
+}
+
 uint8_t get_shop_item_price(ShopItem *item) {
   cvector_for_each(state.game.tags, Tag, tag) {
     if (*tag == TAG_COUPON) return 0;
@@ -1088,7 +1102,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
   uint8_t price = 0;
   switch (item->type) {
     case SHOP_ITEM_CARD:
-      price = 1;
+      price = 1 + get_edition_cost(item->card.edition);
       break;
     case SHOP_ITEM_PLANET:
     case SHOP_ITEM_TAROT:
@@ -1098,7 +1112,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
       price = 4;
       break;
     case SHOP_ITEM_JOKER:
-      price = item->joker.base_price;
+      price = item->joker.base_price + get_edition_cost(item->joker.edition);
       break;
   }
 
