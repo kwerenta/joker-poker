@@ -1098,8 +1098,8 @@ static uint8_t get_edition_cost(Edition edition) {
 }
 
 uint8_t get_shop_item_price(ShopItem *item) {
-  cvector_for_each(state.game.tags, Tag, tag) {
-    if (*tag == TAG_COUPON) return 0;
+  if (state.game.shop.reroll_count == 0) {
+    cvector_for_each(state.game.tags, Tag, tag) if (*tag == TAG_COUPON) return 0;
   }
 
   uint8_t price = 0;
