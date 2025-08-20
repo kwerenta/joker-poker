@@ -1121,7 +1121,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
 }
 
 uint8_t get_voucher_price(Voucher voucher) {
-  if (voucher <= 1 << 16) return 10;
+  if (voucher < 1 << 16) return 10;
   return 20;
 }
 void add_voucher_to_player(Voucher voucher) {
