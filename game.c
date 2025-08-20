@@ -29,6 +29,7 @@ void game_init(Deck deck, Stake stake) {
   roll_boss_blind();
 
   state.game.current_blind = &state.game.blinds[0];
+  state.game.vouchers = 0;
 
   state.game.money = 4;
 
