@@ -1139,18 +1139,15 @@ void add_voucher_to_player(Voucher voucher) {
       break;
     case VOUCHER_GRABBER:
     case VOUCHER_NACHO_TONG:
-      state.game.hands.total += 1;
-      state.game.hands.remaining = state.game.hands.total;
+      state.game.hands.remaining = ++state.game.hands.total;
       break;
     case VOUCHER_WASTEFUL:
     case VOUCHER_RECYCLOMANCY:
-      state.game.discards.total++;
-      state.game.discards.remaining = state.game.discards.total;
+      state.game.discards.remaining = ++state.game.discards.total;
       break;
     case VOUCHER_HIEROGLYPH:
       state.game.ante--;
-      state.game.hands.total--;
-      state.game.hands.remaining = state.game.hands.total;
+      state.game.hands.remaining = --state.game.hands.total;
       break;
     case VOUCHER_PAINT_BRUSH:
     case VOUCHER_PALETTE:
@@ -1162,8 +1159,7 @@ void add_voucher_to_player(Voucher voucher) {
       break;
     case VOUCHER_PTEROGLYPH:
       state.game.ante--;
-      state.game.discards.total--;
-      state.game.discards.remaining = state.game.discards.total;
+      state.game.discards.remaining = --state.game.discards.total;
       break;
 
     default:
