@@ -50,6 +50,14 @@ int16_t random_weighted(uint16_t *weights, uint8_t count) {
   return -1;
 }
 
+bool random_percent(float probability) {
+  if (probability <= 0.0) return false;
+  if (probability >= 1.0) return true;
+
+  float random_value = rand() / (float)RAND_MAX;
+  return random_value < probability;
+}
+
 bool random_chance(uint8_t numerator, uint8_t denominator) {
   if (numerator <= 0 || denominator <= 0) return 0;
   if (numerator >= denominator) return 1;
