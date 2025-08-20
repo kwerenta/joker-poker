@@ -1130,45 +1130,40 @@ void add_voucher_to_player(Voucher voucher) {
 
   switch (voucher) {
     case VOUCHER_OVERSTOCK:
-      state.game.shop.size = 3;
+    case VOUCHER_OVERSTOCK_PLUS:
+      state.game.shop.size++;
       fill_shop_items();
       break;
     case VOUCHER_CRYSTALL_BALL:
       state.game.consumables.size++;
       break;
     case VOUCHER_GRABBER:
-      state.game.hands.total++;
+    case VOUCHER_NACHO_TONG:
+      state.game.hands.total += 1;
+      state.game.hands.remaining = state.game.hands.total;
       break;
     case VOUCHER_WASTEFUL:
+    case VOUCHER_RECYCLOMANCY:
       state.game.discards.total++;
+      state.game.discards.remaining = state.game.discards.total;
       break;
     case VOUCHER_HIEROGLYPH:
       state.game.ante--;
       state.game.hands.total--;
+      state.game.hands.remaining = state.game.hands.total;
       break;
     case VOUCHER_PAINT_BRUSH:
+    case VOUCHER_PALETTE:
       state.game.hand.size++;
       break;
 
-    case VOUCHER_OVERSTOCK_PLUS:
-      state.game.shop.size = 4;
-      fill_shop_items();
-      break;
-    case VOUCHER_NACHO_TONG:
-      state.game.hands.total++;
-      break;
-    case VOUCHER_RECYCLOMANCY:
-      state.game.discards.total++;
-      break;
     case VOUCHER_ANTIMATTER:
       state.game.jokers.size++;
       break;
     case VOUCHER_PTEROGLYPH:
       state.game.ante--;
       state.game.discards.total--;
-      break;
-    case VOUCHER_PALETTE:
-      state.game.hand.size++;
+      state.game.discards.remaining = state.game.discards.total;
       break;
 
     default:
