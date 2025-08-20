@@ -1077,7 +1077,10 @@ static uint8_t apply_sale(uint8_t price) {
   else if (state.game.vouchers & VOUCHER_CLEARANCE_SALE)
     sale = 0.25f;
 
-  return (uint8_t)ceilf((1 - sale) * price - 0.5f);
+  uint8_t buy_price = (uint8_t)ceilf((1 - sale) * price - 0.5f);
+
+  if (buy_price < 1) return 1;
+  return buy_price;
 }
 
 static uint8_t get_edition_cost(Edition edition) {
@@ -1188,7 +1191,7 @@ uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
 }
 
 uint8_t get_shop_item_sell_price(ShopItem *item) {
-  int8_t sell_price = (uint8_t)floorf(get_shop_item_price(item) / 2.0);
+  uint8_t sell_price = (uint8_t)floorf(get_shop_item_price(item) / 2.0);
 
   if (sell_price < 1) return 1;
   return sell_price;
