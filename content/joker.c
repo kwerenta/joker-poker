@@ -15,15 +15,13 @@ const Joker JOKERS[] = {
      .description = "+4 mult when scored",
      .base_price = 3,
      .rarity = RARITY_COMMON,
-     .activation_type = ACTIVATION_INDEPENDENT,
-     .activate = activate_joker_joker},
+     .activate_independent = activate_joker_joker},
     {.id = JOKER_JOLLY,
      .name = "Jolly Joker",
      .description = "+8 mult when scored hand contains pair",
      .base_price = 5,
      .rarity = RARITY_COMMON,
-     .activation_type = ACTIVATION_INDEPENDENT,
-     .activate = activate_joker_jolly},
+     .activate_independent = activate_joker_jolly},
 };
 
 const uint8_t JOKER_COUNT = sizeof(JOKERS) / sizeof(Joker);
