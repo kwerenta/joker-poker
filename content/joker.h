@@ -35,6 +35,7 @@ typedef struct Joker {
   Rarity rarity;
   Edition edition;
   CardStatus status;
+  bool is_non_copyable;
 
   void (*activate_on_played)(struct Joker *self);
   void (*activate_on_scored)(struct Joker *self, struct Card *card);
