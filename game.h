@@ -182,7 +182,7 @@ typedef struct {
   Tag tag;
 } Blind;
 
-typedef struct {
+struct Card {
   Suit suit;
   Rank rank;
 
@@ -195,7 +195,8 @@ typedef struct {
 
   uint8_t was_played;
   CardStatus status;
-} Card;
+};
+typedef struct Card Card;
 
 typedef struct {
   // Max number of cards in structure that can be obtained naturally
