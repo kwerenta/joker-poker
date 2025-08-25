@@ -201,8 +201,6 @@ void fill_hand() {
 void trigger_scoring_card(Card *card) {
   if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
 
-  update_scoring_edition(card->edition);
-
   switch (card->enhancement) {
     case ENHANCEMENT_NONE:
     case ENHANCEMENT_GOLD:
@@ -243,6 +241,8 @@ void trigger_scoring_card(Card *card) {
   }
 
   if (card->seal == SEAL_GOLD) state.game.money += 3;
+
+  update_scoring_edition(card->edition);
 }
 
 void trigger_in_hand_card(Card *card) {
