@@ -291,18 +291,6 @@ void play_hand() {
     apply_scoring_edition(joker->edition);
   }
 
-  if (state.game.current_blind->type <= BLIND_BIG) {
-    cvector_for_each(state.game.hand.cards, Card, card) {
-      cvector_for_each(state.game.full_deck, Card, deck_card) {
-        if (card->selected > 0 && compare_cards(card, deck_card)) {
-          deck_card->was_played = 1;
-          card->was_played = 1;
-          break;
-        }
-      }
-    }
-  }
-
   cvector_for_each(state.game.hand.cards, Card, card) {
     if (card->status & CARD_STATUS_DEBUFFED) continue;
 
@@ -333,6 +321,17 @@ void play_hand() {
         Card *other = &state.game.full_deck[i];
         if (compare_cards(card, other)) {
           cvector_erase(state.game.full_deck, i);
+          break;
+        }
+      }
+    }
+  }
+
+  if (state.game.current_blind->type <= BLIND_BIG) {
+    cvector_for_each(state.game.hand.cards, Card, card) {
+      cvector_for_each(state.game.full_deck, Card, deck_card) {
+        if (card->selected > 0 && compare_cards(card, deck_card)) {
+          deck_card->was_played = 1;
           break;
         }
       }
