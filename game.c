@@ -206,38 +206,11 @@ static bool filter_selected_cards(uint8_t i) {
 void trigger_scoring_card(Card *card) {
   if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
 
-  switch (card->enhancement) {
-    case ENHANCEMENT_NONE:
-    case ENHANCEMENT_GOLD:
-    case ENHANCEMENT_WILD:
-    case ENHANCEMENT_STEEL:
-      break;
-
-    case ENHANCEMENT_BONUS:
-      state.game.selected_hand.score_pair.chips += 30;
-      break;
-
-    case ENHANCEMENT_MULT:
-      state.game.selected_hand.score_pair.mult += 4;
-      break;
-
-    case ENHANCEMENT_GLASS:
-      state.game.selected_hand.score_pair.mult *= 2;
-      break;
-
-    case ENHANCEMENT_STONE:
-      state.game.selected_hand.score_pair.chips += 50;
-      break;
-
-    case ENHANCEMENT_LUCKY:
-      if (random_chance(1, 5)) state.game.selected_hand.score_pair.mult += 20;
-      if (random_chance(1, 15)) state.game.money += 20;
-      break;
-  }
+  apply_scoring_enhancement(card->enhancement);
 
   if (card->seal == SEAL_GOLD) state.game.money += 3;
 
-  update_scoring_edition(card->edition);
+  apply_scoring_edition(card->edition);
 }
 
 void trigger_in_hand_card(Card *card) {
@@ -311,7 +284,7 @@ void play_hand() {
     if (joker->status & CARD_STATUS_DEBUFFED) continue;
 
     if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
-    update_scoring_edition(joker->edition);
+    apply_scoring_edition(joker->edition);
   }
 
   if (state.game.current_blind->type <= BLIND_BIG) {
@@ -470,7 +443,34 @@ void cash_out() {
   restock_shop();
 }
 
-void update_scoring_edition(Edition edition) {
+static void apply_scoring_enhancement(Enhancement enhancement) {
+  switch (enhancement) {
+    case ENHANCEMENT_NONE:
+    case ENHANCEMENT_GOLD:
+    case ENHANCEMENT_WILD:
+    case ENHANCEMENT_STEEL:
+      break;
+
+    case ENHANCEMENT_BONUS:
+      state.game.selected_hand.score_pair.chips += 30;
+      break;
+    case ENHANCEMENT_MULT:
+      state.game.selected_hand.score_pair.mult += 4;
+      break;
+    case ENHANCEMENT_GLASS:
+      state.game.selected_hand.score_pair.mult *= 2;
+      break;
+    case ENHANCEMENT_STONE:
+      state.game.selected_hand.score_pair.chips += 50;
+      break;
+    case ENHANCEMENT_LUCKY:
+      if (random_chance(1, 5)) state.game.selected_hand.score_pair.mult += 20;
+      if (random_chance(1, 15)) state.game.money += 20;
+      break;
+  }
+}
+
+static void apply_scoring_edition(Edition edition) {
   switch (edition) {
     case EDITION_BASE:
       break;
