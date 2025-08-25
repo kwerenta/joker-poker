@@ -198,6 +198,11 @@ void fill_hand() {
   while (cvector_size(state.game.hand.cards) < state.game.hand.size) draw_card();
 }
 
+static bool filter_selected_cards(uint8_t i) {
+  if (state.game.hand.cards[i].selected > 0) return false;
+  return true;
+}
+
 void trigger_scoring_card(Card *card) {
   if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
 
@@ -218,16 +223,6 @@ void trigger_scoring_card(Card *card) {
 
     case ENHANCEMENT_GLASS:
       state.game.selected_hand.score_pair.mult *= 2;
-
-      if (random_chance(1, 4)) {
-        for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
-          Card *other = &state.game.full_deck[i];
-          if (compare_cards(card, other)) {
-            cvector_erase(state.game.full_deck, i);
-            break;
-          }
-        }
-      }
       break;
 
     case ENHANCEMENT_STONE:
@@ -324,18 +319,16 @@ void play_hand() {
       cvector_for_each(state.game.full_deck, Card, deck_card) {
         if (card->selected > 0 && compare_cards(card, deck_card)) {
           deck_card->was_played = 1;
+          card->was_played = 1;
           break;
         }
       }
     }
   }
 
-  uint8_t cards_played = state.game.selected_hand.count;
-  remove_selected_cards();
-  state.game.hands.remaining--;
-
   if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_HOOK) {
-    for (uint8_t i = 0; i < 2; i++) discard_card(random_vector_index(state.game.hand.cards));
+    for (uint8_t i = 0; i < 2; i++)
+      discard_card(random_filtered_vector_pick(state.game.hand.cards, filter_selected_cards));
   }
 
   cvector_for_each(state.game.hand.cards, Card, card) {
@@ -358,6 +351,25 @@ void play_hand() {
         pow(floor((state.game.selected_hand.score_pair.chips + state.game.selected_hand.score_pair.mult) / 2), 2);
   else
     state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
+
+  for (uint8_t i = 0; i < 5; i++) {
+    Card *card = state.game.selected_hand.scoring_cards[i];
+    if (card == NULL || card->status & CARD_STATUS_DEBUFFED || card->enhancement != ENHANCEMENT_GLASS) continue;
+
+    if (random_chance(1, 4)) {
+      for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
+        Card *other = &state.game.full_deck[i];
+        if (compare_cards(card, other)) {
+          cvector_erase(state.game.full_deck, i);
+          break;
+        }
+      }
+    }
+  }
+
+  uint8_t cards_played = state.game.selected_hand.count;
+  remove_selected_cards();
+  state.game.hands.remaining--;
 
   double required_score = get_required_score(state.game.ante, state.game.current_blind->type);
 
