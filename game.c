@@ -1173,7 +1173,7 @@ uint8_t get_booster_pack_price(BoosterPackItem *booster_pack) {
 }
 uint8_t get_booster_pack_items_count(BoosterPackItem *booster_pack) {
   uint8_t count = booster_pack->size == BOOSTER_PACK_NORMAL ? 3 : 5;
-  if (booster_pack->type == BOOSTER_PACK_BUFFON) count--;
+  if (booster_pack->type == BOOSTER_PACK_BUFFOON) count--;
   return count;
 }
 
@@ -1340,7 +1340,7 @@ void open_booster_pack(BoosterPackItem *booster_pack) {
       case BOOSTER_PACK_STANDARD:
         content = (ShopItem){.type = SHOP_ITEM_CARD, .card = random_card()};
         break;
-      case BOOSTER_PACK_BUFFON:
+      case BOOSTER_PACK_BUFFOON:
         content = (ShopItem){.type = SHOP_ITEM_JOKER, .joker = random_available_joker()};
         break;
       case BOOSTER_PACK_CELESTIAL:
@@ -1523,7 +1523,7 @@ void restock_shop() {
 
   // First visit to the Shop in a run guarantees one normal Buffoon Pack
   if (state.game.round == 1) {
-    BoosterPackItem booster_pack = {.type = BOOSTER_PACK_BUFFON, .size = BOOSTER_PACK_NORMAL};
+    BoosterPackItem booster_pack = {.type = BOOSTER_PACK_BUFFOON, .size = BOOSTER_PACK_NORMAL};
     cvector_push_back(state.game.shop.booster_packs, booster_pack);
   }
 
@@ -1655,7 +1655,7 @@ void trigger_immediate_tags() {
         should_stop = 1;
         break;
       case TAG_BUFFOON:
-        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_BUFFON, BOOSTER_PACK_MEGA});
+        open_booster_pack(&(BoosterPackItem){.type = BOOSTER_PACK_BUFFOON, BOOSTER_PACK_MEGA});
         should_stop = 1;
         break;
       case TAG_HANDY:

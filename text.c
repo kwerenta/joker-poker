@@ -127,8 +127,8 @@ char *get_booster_pack_type_name(BoosterPackType type) {
   switch (type) {
     case BOOSTER_PACK_STANDARD:
       return "Standard";
-    case BOOSTER_PACK_BUFFON:
-      return "Buffon";
+    case BOOSTER_PACK_BUFFOON:
+      return "Buffoon";
     case BOOSTER_PACK_CELESTIAL:
       return "Celestial";
     case BOOSTER_PACK_ARCANA:
@@ -142,7 +142,7 @@ char *get_booster_pack_description_suffix(BoosterPackType type) {
   switch (type) {
     case BOOSTER_PACK_STANDARD:
       return "Playing cards to add to your deck";
-    case BOOSTER_PACK_BUFFON:
+    case BOOSTER_PACK_BUFFOON:
       return "Joker cards";
     case BOOSTER_PACK_CELESTIAL:
       return "Planet cards to be used immediately";
