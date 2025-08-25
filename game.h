@@ -468,6 +468,7 @@ void exit_shop();
 
 void select_blind();
 void skip_blind();
+Tag roll_tag();
 void trigger_immediate_tags();
 
 PokerHand get_most_played_poker_hand();
