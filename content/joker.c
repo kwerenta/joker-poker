@@ -1,8 +1,10 @@
+#include "joker.h"
+
 #include "../state.h"
 
-void activate_joker_1() { state.game.selected_hand.score_pair.mult += 4; }
+static void activate_joker_1() { state.game.selected_hand.score_pair.mult += 4; }
 
-void activate_joker_6() {
+static void activate_joker_6() {
   if (does_poker_hand_contain(state.game.selected_hand.hand_union, HAND_PAIR))
     state.game.selected_hand.score_pair.mult += 8;
 }
