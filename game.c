@@ -284,18 +284,19 @@ void play_hand() {
     if (card->seal == SEAL_RED) trigger_scoring_card(card);
   }
 
-  cvector_for_each(state.game.jokers.cards, Joker, joker) {
-    if (joker->status & CARD_STATUS_DEBUFFED) continue;
-
-    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
-    apply_scoring_edition(joker->edition);
-  }
-
   cvector_for_each(state.game.hand.cards, Card, card) {
     if (card->status & CARD_STATUS_DEBUFFED) continue;
 
     trigger_in_hand_card(card);
     if (card->seal == SEAL_RED) trigger_in_hand_card(card);
+  }
+
+  cvector_for_each(state.game.jokers.cards, Joker, joker) {
+    if (joker->status & CARD_STATUS_DEBUFFED) continue;
+
+    if (joker->edition != EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
+    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
+    if (joker->edition == EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
   }
 
   if (state.game.vouchers & VOUCHER_OBSERVATORY) {
