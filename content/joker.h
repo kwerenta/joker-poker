@@ -43,6 +43,12 @@ typedef struct Joker {
     void (*activate_joker)(struct Joker *self, struct Joker *other);
   };
 
+  ActivationType scaling_type;
+  union {
+    void (*scale)(struct Joker *self);
+    void (*scale_card)(struct Joker *self, struct Card *card);
+  };
+
   CardStatus status;
 } Joker;
 

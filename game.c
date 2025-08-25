@@ -215,6 +215,7 @@ void trigger_scoring_card(Card *card) {
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (joker->status & CARD_STATUS_DEBUFFED) continue;
+    if (joker->scaling_type == ACTIVATION_ON_SCORED && joker->scale_card != NULL) joker->scale_card(joker, card);
     if (joker->activation_type == ACTIVATION_ON_SCORED && joker->activate_card != NULL)
       joker->activate_card(joker, card);
   }
@@ -225,6 +226,7 @@ void trigger_in_hand_card(Card *card) {
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (joker->status & CARD_STATUS_DEBUFFED) continue;
+    if (joker->scaling_type == ACTIVATION_ON_HELD && joker->scale_card != NULL) joker->scale_card(joker, card);
     if (joker->activation_type == ACTIVATION_ON_HELD && joker->activate_card != NULL) joker->activate_card(joker, card);
   }
 }
@@ -286,6 +288,7 @@ void play_hand() {
 
     cvector_for_each(state.game.jokers.cards, Joker, joker) {
       if (joker->status & CARD_STATUS_DEBUFFED) continue;
+      if (joker->scaling_type == ACTIVATION_ON_PLAYED && joker->scale != NULL) joker->scale(joker);
       if (joker->activation_type == ACTIVATION_ON_PLAYED && joker->activate != NULL) joker->activate(joker);
     }
   }
@@ -311,6 +314,7 @@ void play_hand() {
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (!(joker->status & CARD_STATUS_DEBUFFED)) {
       if (joker->edition != EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
+      if (joker->scaling_type == ACTIVATION_INDEPENDENT && joker->scale != NULL) joker->scale(joker);
       if (joker->activation_type == ACTIVATION_INDEPENDENT && joker->activate != NULL) joker->activate(joker);
     }
 
@@ -571,6 +575,7 @@ void discard_card(uint8_t index) {
   if (!(card->status & CARD_STATUS_DEBUFFED)) {
     cvector_for_each(state.game.jokers.cards, Joker, joker) {
       if (joker->status & CARD_STATUS_DEBUFFED) continue;
+      if (joker->scaling_type == ACTIVATION_ON_DISCARD && joker->scale_card != NULL) joker->scale_card(joker, card);
       if (joker->activation_type == ACTIVATION_ON_DISCARD && joker->activate_card != NULL)
         joker->activate_card(joker, card);
     }
@@ -1665,6 +1670,7 @@ void select_blind() {
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (joker->status & CARD_STATUS_DEBUFFED) continue;
+    if (joker->scaling_type == ACTIVATION_ON_BLIND_SELECT && joker->scale != NULL) joker->scale(joker);
     if (joker->activation_type == ACTIVATION_ON_BLIND_SELECT && joker->activate != NULL) joker->activate(joker);
   }
 
