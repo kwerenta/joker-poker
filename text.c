@@ -127,8 +127,8 @@ char *get_booster_pack_type_name(BoosterPackType type) {
   switch (type) {
     case BOOSTER_PACK_STANDARD:
       return "Standard";
-    case BOOSTER_PACK_BUFFON:
-      return "Buffon";
+    case BOOSTER_PACK_BUFFOON:
+      return "Buffoon";
     case BOOSTER_PACK_CELESTIAL:
       return "Celestial";
     case BOOSTER_PACK_ARCANA:
@@ -142,7 +142,7 @@ char *get_booster_pack_description_suffix(BoosterPackType type) {
   switch (type) {
     case BOOSTER_PACK_STANDARD:
       return "Playing cards to add to your deck";
-    case BOOSTER_PACK_BUFFON:
+    case BOOSTER_PACK_BUFFOON:
       return "Joker cards";
     case BOOSTER_PACK_CELESTIAL:
       return "Planet cards to be used immediately";
@@ -171,8 +171,8 @@ char *get_voucher_name(Voucher voucher) {
       return "Hone";
     case VOUCHER_REROLL_SURPLUS:
       return "Reroll Surplus";
-    case VOUCHER_CRYSTALL_BALL:
-      return "Crystall Ball";
+    case VOUCHER_CRYSTAL_BALL:
+      return "Crystal Ball";
     case VOUCHER_TELESCOPE:
       return "Telescope";
     case VOUCHER_GRABBER:
@@ -241,7 +241,7 @@ char *get_voucher_description(Voucher voucher) {
       return "Foil, Holographic, and Polychrome cards appear 2x more often";
     case VOUCHER_REROLL_SURPLUS:
       return "Rerolls cost $2 less";
-    case VOUCHER_CRYSTALL_BALL:
+    case VOUCHER_CRYSTAL_BALL:
       return "+1 consumable slot";
     case VOUCHER_TELESCOPE:
       return "Celestial Packs always contain the Planet card for your most played poker hand";
