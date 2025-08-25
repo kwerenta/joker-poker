@@ -10,14 +10,14 @@ static void activate_joker_6() {
 }
 
 const Joker JOKERS[] = {
-    {.id = 1,
+    {.id = JOKER_JOKER,
      .name = "Joker",
      .description = "+4 mult when scored",
      .base_price = 3,
      .rarity = RARITY_COMMON,
      .activation_type = ACTIVATION_INDEPENDENT,
      .activate = activate_joker_1},
-    {.id = 6,
+    {.id = JOKER_JOLLY,
      .name = "Jolly Joker",
      .description = "+8 mult when scored hand contains pair",
      .base_price = 5,

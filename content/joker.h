@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+typedef enum {
+  JOKER_JOKER = 1,
+  JOKER_JOLLY = 6,
+} JokerId;
+
 typedef enum { EDITION_BASE, EDITION_FOIL, EDITION_HOLOGRAPHIC, EDITION_POLYCHROME, EDITION_NEGATIVE } Edition;
 
 typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } Rarity;
@@ -12,7 +17,7 @@ typedef enum { ACTIVATION_INDEPENDENT, ACTIVATION_ON_SCORED, ACTIVATION_ON_HELD 
 typedef enum { CARD_STATUS_NORMAL = 0, CARD_STATUS_FACE_DOWN = 1 << 0, CARD_STATUS_DEBUFFED = 1 << 1 } CardStatus;
 
 typedef struct {
-  uint16_t id;
+  JokerId id;
   const char *name;
   const char *description;
   uint8_t base_price;
