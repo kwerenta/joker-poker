@@ -230,6 +230,10 @@ void play_hand() {
 
   if (state.game.current_blind->is_active) {
     switch (state.game.current_blind->type) {
+      case BLIND_HOOK:
+        for (uint8_t i = 0; i < 2; i++)
+          discard_card(random_filtered_vector_pick(state.game.hand.cards, filter_selected_cards));
+        break;
       case BLIND_OX:
         if (get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) state.game.money = 0;
         break;
@@ -297,11 +301,6 @@ void play_hand() {
         }
       }
     }
-  }
-
-  if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_HOOK) {
-    for (uint8_t i = 0; i < 2; i++)
-      discard_card(random_filtered_vector_pick(state.game.hand.cards, filter_selected_cards));
   }
 
   cvector_for_each(state.game.hand.cards, Card, card) {
