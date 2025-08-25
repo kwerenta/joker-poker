@@ -49,6 +49,12 @@ typedef struct Joker {
     void (*scale_card)(struct Joker *self, struct Card *card);
   };
 
+  union {
+    double mult;
+    uint16_t chips;
+    uint8_t counter;
+  };
+
   CardStatus status;
 } Joker;
 
