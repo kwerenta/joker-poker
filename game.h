@@ -430,7 +430,8 @@ uint16_t evaluate_hand();
 uint8_t does_poker_hand_contain(uint16_t hand_union, PokerHand expected);
 PokerHand get_poker_hand(uint16_t hand_union);
 void update_scoring_hand();
-void update_scoring_edition(Edition edition);
+static void apply_scoring_enhancement(Enhancement enhancement);
+static void apply_scoring_edition(Edition edition);
 
 PokerHandStats *get_poker_hand_stats(uint16_t hand_union);
 ScorePair get_poker_hand_base_score(uint16_t hand_union);

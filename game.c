@@ -198,51 +198,19 @@ void fill_hand() {
   while (cvector_size(state.game.hand.cards) < state.game.hand.size) draw_card();
 }
 
+static bool filter_selected_cards(uint8_t i) {
+  if (state.game.hand.cards[i].selected > 0) return false;
+  return true;
+}
+
 void trigger_scoring_card(Card *card) {
   if (card->enhancement != ENHANCEMENT_STONE) state.game.selected_hand.score_pair.chips += card->chips;
 
-  update_scoring_edition(card->edition);
-
-  switch (card->enhancement) {
-    case ENHANCEMENT_NONE:
-    case ENHANCEMENT_GOLD:
-    case ENHANCEMENT_WILD:
-    case ENHANCEMENT_STEEL:
-      break;
-
-    case ENHANCEMENT_BONUS:
-      state.game.selected_hand.score_pair.chips += 30;
-      break;
-
-    case ENHANCEMENT_MULT:
-      state.game.selected_hand.score_pair.mult += 4;
-      break;
-
-    case ENHANCEMENT_GLASS:
-      state.game.selected_hand.score_pair.mult *= 2;
-
-      if (random_chance(1, 4)) {
-        for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
-          Card *other = &state.game.full_deck[i];
-          if (compare_cards(card, other)) {
-            cvector_erase(state.game.full_deck, i);
-            break;
-          }
-        }
-      }
-      break;
-
-    case ENHANCEMENT_STONE:
-      state.game.selected_hand.score_pair.chips += 50;
-      break;
-
-    case ENHANCEMENT_LUCKY:
-      if (random_chance(1, 5)) state.game.selected_hand.score_pair.mult += 20;
-      if (random_chance(1, 15)) state.game.money += 20;
-      break;
-  }
+  apply_scoring_enhancement(card->enhancement);
 
   if (card->seal == SEAL_GOLD) state.game.money += 3;
+
+  apply_scoring_edition(card->edition);
 }
 
 void trigger_in_hand_card(Card *card) {
@@ -262,6 +230,10 @@ void play_hand() {
 
   if (state.game.current_blind->is_active) {
     switch (state.game.current_blind->type) {
+      case BLIND_HOOK:
+        for (uint8_t i = 0; i < 2; i++)
+          discard_card(random_filtered_vector_pick(state.game.hand.cards, filter_selected_cards));
+        break;
       case BLIND_OX:
         if (get_poker_hand(state.game.selected_hand.hand_union) == get_most_played_poker_hand()) state.game.money = 0;
         break;
@@ -312,11 +284,48 @@ void play_hand() {
     if (card->seal == SEAL_RED) trigger_scoring_card(card);
   }
 
+  cvector_for_each(state.game.hand.cards, Card, card) {
+    if (card->status & CARD_STATUS_DEBUFFED) continue;
+
+    trigger_in_hand_card(card);
+    if (card->seal == SEAL_RED) trigger_in_hand_card(card);
+  }
+
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
     if (joker->status & CARD_STATUS_DEBUFFED) continue;
 
+    if (joker->edition != EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
     if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
-    update_scoring_edition(joker->edition);
+    if (joker->edition == EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
+  }
+
+  if (state.game.vouchers & VOUCHER_OBSERVATORY) {
+    cvector_for_each(state.game.consumables.items, Consumable, consumable) {
+      if (consumable->type == CONSUMABLE_PLANET && (1 << consumable->planet) == state.game.selected_hand.hand_union) {
+        state.game.selected_hand.score_pair.mult *= 1.5;
+      }
+    }
+  }
+
+  if (state.game.deck_type == DECK_PLASMA)
+    state.game.score +=
+        pow(floor((state.game.selected_hand.score_pair.chips + state.game.selected_hand.score_pair.mult) / 2), 2);
+  else
+    state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
+
+  for (uint8_t i = 0; i < 5; i++) {
+    Card *card = state.game.selected_hand.scoring_cards[i];
+    if (card == NULL || card->status & CARD_STATUS_DEBUFFED || card->enhancement != ENHANCEMENT_GLASS) continue;
+
+    if (random_chance(1, 4)) {
+      for (uint8_t i = 0; i < cvector_size(state.game.full_deck); i++) {
+        Card *other = &state.game.full_deck[i];
+        if (compare_cards(card, other)) {
+          cvector_erase(state.game.full_deck, i);
+          break;
+        }
+      }
+    }
   }
 
   if (state.game.current_blind->type <= BLIND_BIG) {
@@ -333,31 +342,6 @@ void play_hand() {
   uint8_t cards_played = state.game.selected_hand.count;
   remove_selected_cards();
   state.game.hands.remaining--;
-
-  if (state.game.current_blind->is_active && state.game.current_blind->type == BLIND_HOOK) {
-    for (uint8_t i = 0; i < 2; i++) discard_card(random_vector_index(state.game.hand.cards));
-  }
-
-  cvector_for_each(state.game.hand.cards, Card, card) {
-    if (card->status & CARD_STATUS_DEBUFFED) continue;
-
-    trigger_in_hand_card(card);
-    if (card->seal == SEAL_RED) trigger_in_hand_card(card);
-  }
-
-  if (state.game.vouchers & VOUCHER_OBSERVATORY) {
-    cvector_for_each(state.game.consumables.items, Consumable, consumable) {
-      if (consumable->type == CONSUMABLE_PLANET && (1 << consumable->planet) == state.game.selected_hand.hand_union) {
-        state.game.selected_hand.score_pair.mult *= 1.5;
-      }
-    }
-  }
-
-  if (state.game.deck_type == DECK_PLASMA)
-    state.game.score +=
-        pow(floor((state.game.selected_hand.score_pair.chips + state.game.selected_hand.score_pair.mult) / 2), 2);
-  else
-    state.game.score += state.game.selected_hand.score_pair.chips * state.game.selected_hand.score_pair.mult;
 
   double required_score = get_required_score(state.game.ante, state.game.current_blind->type);
 
@@ -458,7 +442,34 @@ void cash_out() {
   restock_shop();
 }
 
-void update_scoring_edition(Edition edition) {
+static void apply_scoring_enhancement(Enhancement enhancement) {
+  switch (enhancement) {
+    case ENHANCEMENT_NONE:
+    case ENHANCEMENT_GOLD:
+    case ENHANCEMENT_WILD:
+    case ENHANCEMENT_STEEL:
+      break;
+
+    case ENHANCEMENT_BONUS:
+      state.game.selected_hand.score_pair.chips += 30;
+      break;
+    case ENHANCEMENT_MULT:
+      state.game.selected_hand.score_pair.mult += 4;
+      break;
+    case ENHANCEMENT_GLASS:
+      state.game.selected_hand.score_pair.mult *= 2;
+      break;
+    case ENHANCEMENT_STONE:
+      state.game.selected_hand.score_pair.chips += 50;
+      break;
+    case ENHANCEMENT_LUCKY:
+      if (random_chance(1, 5)) state.game.selected_hand.score_pair.mult += 20;
+      if (random_chance(1, 15)) state.game.money += 20;
+      break;
+  }
+}
+
+static void apply_scoring_edition(Edition edition) {
   switch (edition) {
     case EDITION_BASE:
       break;
