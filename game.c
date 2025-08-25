@@ -23,8 +23,8 @@ void game_init(Deck deck, Stake stake) {
   state.game.ante = 1;
   state.game.round = 0;
 
-  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = random_max_value(23), .is_active = 1};
-  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = random_max_value(23), .is_active = 1};
+  state.game.blinds[0] = (Blind){.type = BLIND_SMALL, .tag = roll_tag(), .is_active = 1};
+  state.game.blinds[1] = (Blind){.type = BLIND_BIG, .tag = roll_tag(), .is_active = 1};
   state.game.blinds[2] = (Blind){.is_active = 1};
   roll_boss_blind();
 
@@ -440,7 +440,7 @@ void cash_out() {
     state.game.current_blind = &state.game.blinds[0];
     for (uint8_t i = 0; i < 3; i++) {
       state.game.blinds[i].is_active = 1;
-      if (i != 2) state.game.blinds[i].tag = random_max_value(23);
+      if (i != 2) state.game.blinds[i].tag = roll_tag();
     }
 
     roll_boss_blind();
@@ -1635,6 +1635,30 @@ void skip_blind() {
   set_nav_hovered(0);
 }
 
+uint8_t get_tag_min_ante(Tag tag) {
+  switch (tag) {
+    case TAG_NEGATIVE:
+    case TAG_STANDARD:
+    case TAG_METEOR:
+    case TAG_BUFFOON:
+    case TAG_HANDY:
+    case TAG_GARBAGE:
+    case TAG_ETHEREAL:
+    case TAG_TOPUP:
+    case TAG_ORBITAL:
+      return 2;
+
+    default:
+      return 1;
+  }
+}
+
+static bool filter_available_tags(uint8_t i) {
+  return (state.game.ante <= 0 ? 1 : state.game.ante) >= get_tag_min_ante(i);
+}
+
+Tag roll_tag() { return random_filtered_range_pick(0, 23, filter_available_tags); }
+
 void trigger_immediate_tags() {
   for (int8_t i = 0; i < cvector_size(state.game.tags); i++) {
     uint8_t should_stop = 0;
@@ -1760,8 +1784,8 @@ uint8_t get_blind_min_ante(BlindType blind) {
   }
 }
 
-bool filter_defeated_boss_blinds(uint8_t i) { return !(state.game.defeated_boss_blinds & 1 << i); }
-bool filter_available_boss_blinds(uint8_t i) {
+static bool filter_defeated_boss_blinds(uint8_t i) { return !(state.game.defeated_boss_blinds & 1 << i); }
+static bool filter_available_boss_blinds(uint8_t i) {
   return (state.game.ante <= 0 ? 1 : state.game.ante) >= get_blind_min_ante(i) && filter_defeated_boss_blinds(i);
 }
 
