@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "content/joker.h"
 #include "game.h"
 #include "renderer.h"
 #include "state.h"
@@ -254,7 +255,7 @@ void render_booster_pack(BoosterPackItem *booster_pack, Rect *dst) {
 void render_deck(Deck deck, Rect *dst) { render_card_atlas_sprite(&(Vector2){.x = 3, .y = 3}, dst); }
 
 void render_tooltip(Clay_String *title, Clay_String *description, float y_offset,
-                    Clay_FloatingAttachPoints *attach_points) {
+                    Clay_FloatingAttachPoints *attach_points, Clay_String *other_description) {
   CLAY({.id = CLAY_ID("Tooltip"),
         .floating = {
             .attachTo = CLAY_ATTACH_TO_PARENT,
@@ -271,6 +272,8 @@ void render_tooltip(Clay_String *title, Clay_String *description, float y_offset
           }}) {
       CLAY_TEXT(*title, WHITE_TEXT_CONFIG);
       CLAY_TEXT(*description, WHITE_TEXT_CONFIG);
+
+      if (other_description) CLAY_TEXT(*other_description, CLAY_TEXT_CONFIG({.textColor = COLOR_CARD_LIGHT_BG}));
     }
   }
 }
@@ -335,7 +338,14 @@ void render_spread_items(NavigationSection section, Clay_String parent_id) {
             attach_points.element = CLAY_ATTACH_POINT_CENTER_TOP;
           }
 
-          render_tooltip(&name, &description, y_offset, &attach_points);
+          Clay_String *other_description = NULL;
+          if (element->type == CUSTOM_ELEMENT_JOKER && element->joker.get_scaling_description) {
+            Clay_String scaling_description;
+            other_description = &scaling_description;
+            element->joker.get_scaling_description(&element->joker, other_description);
+          }
+
+          render_tooltip(&name, &description, y_offset, &attach_points, other_description);
         }
 
         if (!is_shop) continue;
@@ -784,7 +794,8 @@ void render_blind_element(uint8_t blind_index) {
 
         render_tooltip(&blind_name, &blind_description, -4,
                        &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
-                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
+                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM},
+                       NULL);
       }
     }
 
@@ -818,7 +829,8 @@ void render_blind_element(uint8_t blind_index) {
       if (is_skip_button_hovered)
         render_tooltip(&tag_name, &tag_description, -4,
                        &(Clay_FloatingAttachPoints){.parent = CLAY_ATTACH_POINT_CENTER_TOP,
-                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM});
+                                                    .element = CLAY_ATTACH_POINT_CENTER_BOTTOM},
+                       NULL);
     }
 
     CLAY_TEXT(tag_name, WHITE_TEXT_CONFIG);

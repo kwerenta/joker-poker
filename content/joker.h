@@ -1,6 +1,7 @@
 #ifndef JOKER_H
 #define JOKER_H
 
+#include <clay.h>
 #include <stdint.h>
 
 struct Card;
@@ -28,10 +29,12 @@ typedef struct Joker {
   JokerId id;
   const char *name;
   const char *description;
+  void (*get_scaling_description)(struct Joker *self, Clay_String *dest);
   uint8_t base_price;
 
   Rarity rarity;
   Edition edition;
+  CardStatus status;
 
   void (*activate_on_played)(struct Joker *self);
   void (*activate_on_scored)(struct Joker *self, struct Card *card);
@@ -56,8 +59,6 @@ typedef struct Joker {
     uint16_t chips;
     uint8_t counter;
   };
-
-  CardStatus status;
 } Joker;
 
 extern const Joker JOKERS[];
