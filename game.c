@@ -122,7 +122,7 @@ void apply_deck_settings() {
       state.game.hands.total--;
       break;
     case DECK_MAGIC:
-      add_voucher_to_player(VOUCHER_CRYSTALL_BALL);
+      add_voucher_to_player(VOUCHER_CRYSTAL_BALL);
       ShopItem fool = {.type = SHOP_ITEM_TAROT, .tarot = TAROT_FOOL};
       add_item_to_player(&fool);
       add_item_to_player(&fool);
@@ -1134,7 +1134,7 @@ void add_voucher_to_player(Voucher voucher) {
       state.game.shop.size++;
       fill_shop_items();
       break;
-    case VOUCHER_CRYSTALL_BALL:
+    case VOUCHER_CRYSTAL_BALL:
       state.game.consumables.size++;
       break;
     case VOUCHER_GRABBER:

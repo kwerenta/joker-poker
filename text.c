@@ -171,8 +171,8 @@ char *get_voucher_name(Voucher voucher) {
       return "Hone";
     case VOUCHER_REROLL_SURPLUS:
       return "Reroll Surplus";
-    case VOUCHER_CRYSTALL_BALL:
-      return "Crystall Ball";
+    case VOUCHER_CRYSTAL_BALL:
+      return "Crystal Ball";
     case VOUCHER_TELESCOPE:
       return "Telescope";
     case VOUCHER_GRABBER:
@@ -241,7 +241,7 @@ char *get_voucher_description(Voucher voucher) {
       return "Foil, Holographic, and Polychrome cards appear 2x more often";
     case VOUCHER_REROLL_SURPLUS:
       return "Rerolls cost $2 less";
-    case VOUCHER_CRYSTALL_BALL:
+    case VOUCHER_CRYSTAL_BALL:
       return "+1 consumable slot";
     case VOUCHER_TELESCOPE:
       return "Celestial Packs always contain the Planet card for your most played poker hand";
