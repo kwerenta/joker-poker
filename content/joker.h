@@ -5,6 +5,14 @@
 
 struct Card;
 
+#define TRIGGER_JOKER(joker, TYPE, ...)                                         \
+  do {                                                                          \
+    if (!(joker->status & CARD_STATUS_DEBUFFED)) {                              \
+      if (joker->scale_##TYPE) joker->scale_##TYPE(joker, ##__VA_ARGS__);       \
+      if (joker->activate_##TYPE) joker->activate_##TYPE(joker, ##__VA_ARGS__); \
+    }                                                                           \
+  } while (0)
+
 typedef enum {
   JOKER_JOKER = 1,
   JOKER_JOLLY = 6,
