@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+struct Card;
+
 typedef enum {
   JOKER_JOKER = 1,
   JOKER_JOLLY = 6,
@@ -25,7 +27,7 @@ typedef enum {
 
 typedef enum { CARD_STATUS_NORMAL = 0, CARD_STATUS_FACE_DOWN = 1 << 0, CARD_STATUS_DEBUFFED = 1 << 1 } CardStatus;
 
-typedef struct {
+typedef struct Joker {
   JokerId id;
   const char *name;
   const char *description;
@@ -35,7 +37,12 @@ typedef struct {
   Edition edition;
 
   ActivationType activation_type;
-  void (*activate)();
+  union {
+    void (*activate)(struct Joker *self);
+    void (*activate_card)(struct Joker *self, struct Card *card);
+    void (*activate_joker)(struct Joker *self, struct Joker *other);
+  };
+
   CardStatus status;
 } Joker;
 

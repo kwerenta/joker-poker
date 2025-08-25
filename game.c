@@ -295,7 +295,7 @@ void play_hand() {
     if (joker->status & CARD_STATUS_DEBUFFED) continue;
 
     if (joker->edition != EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
-    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
+    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate(joker);
     if (joker->edition == EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
   }
 
