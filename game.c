@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdint.h>
 
+#include "content/joker.h"
 #include "content/spectral.h"
 #include "content/tarot.h"
 #include "debug.h"
@@ -211,10 +212,14 @@ void trigger_scoring_card(Card *card) {
   if (card->seal == SEAL_GOLD) state.game.money += 3;
 
   apply_scoring_edition(card->edition);
+
+  cvector_for_each(state.game.jokers.cards, Joker, joker) TRIGGER_JOKER(joker, on_scored, card);
 }
 
 void trigger_in_hand_card(Card *card) {
   if (card->enhancement == ENHANCEMENT_STEEL) state.game.selected_hand.score_pair.mult *= 1.5;
+
+  cvector_for_each(state.game.jokers.cards, Joker, joker) TRIGGER_JOKER(joker, on_held, card);
 }
 
 void trigger_end_of_round_card(Card *card) {
@@ -271,6 +276,8 @@ void play_hand() {
       default:
         break;
     }
+
+    cvector_for_each(state.game.jokers.cards, Joker, joker) TRIGGER_JOKER(joker, on_played);
   }
 
   get_poker_hand_stats(state.game.selected_hand.hand_union)->played++;
@@ -280,23 +287,39 @@ void play_hand() {
     Card *card = state.game.selected_hand.scoring_cards[i];
     if (card == NULL || card->status & CARD_STATUS_DEBUFFED) continue;
 
-    trigger_scoring_card(card);
-    if (card->seal == SEAL_RED) trigger_scoring_card(card);
+    card->trigger_count = card->seal == SEAL_RED ? 2 : 1;
+    card->is_first_trigger = true;
+
+    for (; card->trigger_count > 0; card->trigger_count--) {
+      trigger_scoring_card(card);
+      card->is_first_trigger = false;
+    }
   }
 
   cvector_for_each(state.game.hand.cards, Card, card) {
     if (card->status & CARD_STATUS_DEBUFFED) continue;
 
-    trigger_in_hand_card(card);
-    if (card->seal == SEAL_RED) trigger_in_hand_card(card);
+    card->trigger_count = card->seal == SEAL_RED ? 2 : 1;
+    card->is_first_trigger = true;
+
+    for (; card->trigger_count > 0; card->trigger_count--) {
+      trigger_in_hand_card(card);
+      card->is_first_trigger = false;
+    }
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
-    if (joker->status & CARD_STATUS_DEBUFFED) continue;
+    if (!(joker->status & CARD_STATUS_DEBUFFED) && joker->edition != EDITION_POLYCHROME)
+      apply_scoring_edition(joker->edition);
 
-    if (joker->edition != EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
-    if (joker->activation_type == ACTIVATION_INDEPENDENT) joker->activate();
-    if (joker->edition == EDITION_POLYCHROME) apply_scoring_edition(joker->edition);
+    TRIGGER_JOKER(joker, independent);
+
+    cvector_for_each(state.game.jokers.cards, Joker, other_joker) {
+      if (joker != other_joker) TRIGGER_JOKER(other_joker, on_other_jokers, joker);
+    }
+
+    if (!(joker->status & CARD_STATUS_DEBUFFED) && joker->edition == EDITION_POLYCHROME)
+      apply_scoring_edition(joker->edition);
   }
 
   if (state.game.vouchers & VOUCHER_OBSERVATORY) {
@@ -541,8 +564,14 @@ void replace_selected_cards() {
 void discard_card(uint8_t index) {
   if (index >= cvector_size(state.game.hand.cards)) return;
 
-  if (!(state.game.hand.cards[index].status & CARD_STATUS_DEBUFFED) && state.game.hand.cards[index].seal == SEAL_PURPLE)
-    add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = random_max_value(21)});
+  Card *card = &state.game.hand.cards[index];
+
+  if (!(card->status & CARD_STATUS_DEBUFFED)) {
+    cvector_for_each(state.game.jokers.cards, Joker, joker) TRIGGER_JOKER(joker, on_discard, card);
+
+    if (card->seal == SEAL_PURPLE)
+      add_item_to_player(&(ShopItem){.type = SHOP_ITEM_TAROT, .tarot = random_max_value(21)});
+  }
 
   cvector_erase(state.game.hand.cards, index);
 }
@@ -1627,6 +1656,8 @@ void select_blind() {
     cvector_for_each(state.game.hand.cards, Card, card) card->status |= CARD_STATUS_FACE_DOWN;
   else if (state.game.current_blind->type == BLIND_CERULEAN_BELL)
     force_card_select(random_vector_index(state.game.hand.cards));
+
+  cvector_for_each(state.game.jokers.cards, Joker, joker) TRIGGER_JOKER(joker, on_blind_select);
 
   change_stage(STAGE_GAME);
 }
