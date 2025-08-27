@@ -195,6 +195,9 @@ struct Card {
 
   uint8_t was_played;
   CardStatus status;
+
+  uint8_t trigger_count;
+  bool is_first_trigger;
 };
 typedef struct Card Card;
 

@@ -287,15 +287,25 @@ void play_hand() {
     Card *card = state.game.selected_hand.scoring_cards[i];
     if (card == NULL || card->status & CARD_STATUS_DEBUFFED) continue;
 
-    trigger_scoring_card(card);
-    if (card->seal == SEAL_RED) trigger_scoring_card(card);
+    card->trigger_count = card->seal == SEAL_RED ? 2 : 1;
+    card->is_first_trigger = true;
+
+    for (; card->trigger_count > 0; card->trigger_count--) {
+      trigger_scoring_card(card);
+      card->is_first_trigger = false;
+    }
   }
 
   cvector_for_each(state.game.hand.cards, Card, card) {
     if (card->status & CARD_STATUS_DEBUFFED) continue;
 
-    trigger_in_hand_card(card);
-    if (card->seal == SEAL_RED) trigger_in_hand_card(card);
+    card->trigger_count = card->seal == SEAL_RED ? 2 : 1;
+    card->is_first_trigger = true;
+
+    for (; card->trigger_count > 0; card->trigger_count--) {
+      trigger_in_hand_card(card);
+      card->is_first_trigger = false;
+    }
   }
 
   cvector_for_each(state.game.jokers.cards, Joker, joker) {
