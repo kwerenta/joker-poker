@@ -198,11 +198,11 @@ void render_card(Card *card, Rect *dst) {
   if (card->enhancement != ENHANCEMENT_NONE) {
     uint8_t enhancement_offset = card->enhancement - 1;
     background.x = 5 + enhancement_offset % 4;
-    background.y = 5 + 2 * floor(enhancement_offset / 4.0);
+    background.y = 5 + 2 * floorf(enhancement_offset / 4.0f);
   }
   render_card_atlas_sprite(&background, dst);
 
-  Vector2 face = {.x = card->rank % 10, .y = 2 * card->suit + floor(card->rank / 10.0)};
+  Vector2 face = {.x = card->rank % 10, .y = 2 * card->suit + floorf(card->rank / 10.0f)};
   if (card->enhancement != ENHANCEMENT_STONE) render_card_atlas_sprite(&face, dst);
 
   Vector2 edition = {.x = 5 + card->edition - 1, .y = 3};
@@ -222,10 +222,15 @@ void render_joker(Joker *joker, Rect *dst) {
     return;
   }
 
-  Vector2 src = {.x = 9, .y = 1};
-  if (joker->id == 6) src.y += 2;
+  // Lowest Joker ID is 1
+  uint8_t index = (joker->id - 1) % 80;
+  Vector2 sprite = {.x = index % 10, .y = floorf(index / 10.0f)};
+  Rect src = {.x = sprite.x * CARD_WIDTH, .y = sprite.y * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
 
-  render_card_atlas_sprite(&src, dst);
+  if (joker->id <= 80)
+    draw_texture(state.jokers_atlas1, &src, dst, 0xFFFFFFFF, 0.0f);
+  else
+    draw_texture(state.jokers_atlas2, &src, dst, 0xFFFFFFFF, 0.0f);
 }
 
 void render_consumable(Consumable *consumable, Rect *dst) {

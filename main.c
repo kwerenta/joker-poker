@@ -29,6 +29,8 @@ void init() {
   renderer_init();
 
   state.cards_atlas = load_texture("res/cards.png");
+  state.jokers_atlas1 = load_texture("res/jokers1.png");
+  state.jokers_atlas2 = load_texture("res/jokers2.png");
   state.font = load_texture("res/font.png");
   state.logo = load_texture("res/logo.png");
 
@@ -49,6 +51,11 @@ void destroy() {
 
   stbi_image_free(state.cards_atlas->data);
   free(state.cards_atlas);
+
+  stbi_image_free(state.jokers_atlas1->data);
+  free(state.jokers_atlas1);
+  stbi_image_free(state.jokers_atlas2->data);
+  free(state.jokers_atlas2);
 
   stbi_image_free(state.font->data);
   free(state.font);
