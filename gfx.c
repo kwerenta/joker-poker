@@ -188,6 +188,11 @@ void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
   render_atlas_sprite(state.cards_atlas, sprite_index, dst);
 }
 
+void render_edition(Edition edition, Rect *dst) {
+  Vector2 src = {.x = 5 + edition - 1, .y = 3};
+  if (edition != EDITION_BASE) render_card_atlas_sprite(&src, dst);
+}
+
 void render_card(Card *card, Rect *dst) {
   if (card->status & CARD_STATUS_FACE_DOWN) {
     render_card_atlas_sprite(&(Vector2){3, 7}, dst);
@@ -209,8 +214,7 @@ void render_card(Card *card, Rect *dst) {
   Vector2 face = {.x = card->rank % 10, .y = 2 * card->suit + floorf(card->rank / 10.0f)};
   if (card->enhancement != ENHANCEMENT_STONE) render_card_atlas_sprite(&face, dst);
 
-  Vector2 edition = {.x = 5 + card->edition - 1, .y = 3};
-  if (card->edition != EDITION_BASE) render_card_atlas_sprite(&edition, dst);
+  render_edition(card->edition, dst);
 
   Vector2 seal = {.x = 5 + card->seal - 1, .y = 1};
   if (card->seal != SEAL_NONE) render_card_atlas_sprite(&seal, dst);
@@ -232,6 +236,7 @@ void render_joker(Joker *joker, Rect *dst) {
   Texture *atlas = joker->id <= 80 ? state.jokers_atlas1 : state.jokers_atlas2;
 
   render_atlas_sprite(atlas, &sprite, dst);
+  render_edition(joker->edition, dst);
 }
 
 void render_consumable(Consumable *consumable, Rect *dst) {
