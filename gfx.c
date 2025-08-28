@@ -177,11 +177,15 @@ void render_credits() {
   }
 }
 
-void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
+void render_atlas_sprite(Texture *atlas, Vector2 *sprite_index, Rect *dst) {
   float angle = 3.0f * sinf(state.time * 0.75f - dst->x / SCREEN_WIDTH * M_PI * 3);
   Rect src = {.x = sprite_index->x * CARD_WIDTH, .y = sprite_index->y * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
 
-  draw_texture(state.cards_atlas, &src, dst, 0xFFFFFFFF, angle);
+  draw_texture(atlas, &src, dst, 0xFFFFFFFF, angle);
+}
+
+void render_card_atlas_sprite(Vector2 *sprite_index, Rect *dst) {
+  render_atlas_sprite(state.cards_atlas, sprite_index, dst);
 }
 
 void render_card(Card *card, Rect *dst) {
@@ -225,12 +229,9 @@ void render_joker(Joker *joker, Rect *dst) {
   // Lowest Joker ID is 1
   uint8_t index = (joker->id - 1) % 80;
   Vector2 sprite = {.x = index % 10, .y = floorf(index / 10.0f)};
-  Rect src = {.x = sprite.x * CARD_WIDTH, .y = sprite.y * CARD_HEIGHT, .w = CARD_WIDTH, .h = CARD_HEIGHT};
+  Texture *atlas = joker->id <= 80 ? state.jokers_atlas1 : state.jokers_atlas2;
 
-  if (joker->id <= 80)
-    draw_texture(state.jokers_atlas1, &src, dst, 0xFFFFFFFF, 0.0f);
-  else
-    draw_texture(state.jokers_atlas2, &src, dst, 0xFFFFFFFF, 0.0f);
+  render_atlas_sprite(atlas, &sprite, dst);
 }
 
 void render_consumable(Consumable *consumable, Rect *dst) {
