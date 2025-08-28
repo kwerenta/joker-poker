@@ -98,6 +98,8 @@ typedef struct {
   Clay_RenderCommandArray render_commands;
 
   Texture *cards_atlas;
+  Texture *jokers_atlas1;
+  Texture *jokers_atlas2;
   Texture *font;
   Texture *bg;
   Texture *logo;
