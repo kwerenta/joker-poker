@@ -29,6 +29,27 @@ static void activate_basic_hand_plus_mult(Joker *self) {
   state.game.selected_hand.score_pair.mult += mult;
 }
 
+static void activate_basic_hand_plus_chips(Joker *self) {
+  if (!does_poker_hand_contain(state.game.selected_hand.hand_union, self->hand)) return;
+
+  uint8_t chips = 0;
+  switch (self->hand) {
+    case HAND_PAIR:
+      chips = 50;
+      break;
+    case HAND_TWO_PAIR:
+    case HAND_FLUSH:
+      chips = 80;
+      break;
+    case HAND_THREE_OF_KIND:
+    case HAND_STRAIGHT:
+      chips = 100;
+      break;
+  }
+
+  state.game.selected_hand.score_pair.chips += chips;
+}
+
 const Joker JOKERS[] = {
     {
         .id = JOKER_JOKER,
@@ -118,6 +139,51 @@ const Joker JOKERS[] = {
         .rarity = RARITY_COMMON,
         .hand = HAND_FLUSH,
         .activate_independent = activate_basic_hand_plus_mult,
+    },
+    {
+        .id = JOKER_SLY,
+        .name = "Sly Joker",
+        .description = "+50 Chips if played hand contains a Pair",
+        .base_price = 3,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_PAIR,
+        .activate_independent = activate_basic_hand_plus_chips,
+    },
+    {
+        .id = JOKER_WILY,
+        .name = "Wily Joker",
+        .description = "+100 Chips if played hand contains a Three of a Kind",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_THREE_OF_KIND,
+        .activate_independent = activate_basic_hand_plus_chips,
+    },
+    {
+        .id = JOKER_CLEVER,
+        .name = "Clever Joker",
+        .description = "+80 Chips if played hand contains a Two Pair",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_TWO_PAIR,
+        .activate_independent = activate_basic_hand_plus_chips,
+    },
+    {
+        .id = JOKER_DEVIOUS,
+        .name = "Devious Joker",
+        .description = "+100 Chips if played hand contains a Straight",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_STRAIGHT,
+        .activate_independent = activate_basic_hand_plus_chips,
+    },
+    {
+        .id = JOKER_CRAFTY,
+        .name = "Craft Joker",
+        .description = "+80 Chips if played hand contains a Flush",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_FLUSH,
+        .activate_independent = activate_basic_hand_plus_chips,
     },
 };
 
