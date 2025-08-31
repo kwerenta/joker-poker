@@ -98,7 +98,7 @@ const Joker JOKERS[] = {
     {
         .id = JOKER_JOLLY,
         .name = "Jolly Joker",
-        .description = "+8 mult when scored hand contains a Pair",
+        .description = "+8 Mult if played hand contains a Pair",
         .base_price = 3,
         .rarity = RARITY_COMMON,
         .hand = HAND_PAIR,
@@ -107,7 +107,7 @@ const Joker JOKERS[] = {
     {
         .id = JOKER_ZANY,
         .name = "Zany Joker",
-        .description = "+12 mult when scored hand contains a Three of a Kind",
+        .description = "+12 Mult if played hand contains a Three of a Kind",
         .base_price = 4,
         .rarity = RARITY_COMMON,
         .hand = HAND_THREE_OF_KIND,
@@ -116,7 +116,7 @@ const Joker JOKERS[] = {
     {
         .id = JOKER_MAD,
         .name = "Mad Joker",
-        .description = "+10 mult when scored hand contains a Two Pair",
+        .description = "+10 Mult if played hand contains a Two Pair",
         .base_price = 4,
         .rarity = RARITY_COMMON,
         .hand = HAND_TWO_PAIR,
@@ -125,7 +125,7 @@ const Joker JOKERS[] = {
     {
         .id = JOKER_CRAZY,
         .name = "Crazy Joker",
-        .description = "+12 mult when scored hand contains a Straight",
+        .description = "+12 Mult if played hand contains a Straight",
         .base_price = 4,
         .rarity = RARITY_COMMON,
         .hand = HAND_STRAIGHT,
@@ -134,7 +134,7 @@ const Joker JOKERS[] = {
     {
         .id = JOKER_DROLL,
         .name = "Droll Joker",
-        .description = "+10 mult when scored hand contains a Flush",
+        .description = "+10 Mult if played hand contains a Flush",
         .base_price = 4,
         .rarity = RARITY_COMMON,
         .hand = HAND_FLUSH,
