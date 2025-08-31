@@ -21,6 +21,10 @@ typedef enum {
   JOKER_WRATHFUL,
   JOKER_GLUTTONOUS,
   JOKER_JOLLY,
+  JOKER_ZANY,
+  JOKER_MAD,
+  JOKER_CRAZY,
+  JOKER_DROLL
 } JokerId;
 
 typedef enum { EDITION_BASE, EDITION_FOIL, EDITION_HOLOGRAPHIC, EDITION_POLYCHROME, EDITION_NEGATIVE } Edition;
@@ -65,6 +69,8 @@ typedef struct Joker {
     uint8_t counter;
     // Suit enum
     uint8_t suit;
+    // PokerHand enum
+    uint16_t hand;
   };
 } Joker;
 

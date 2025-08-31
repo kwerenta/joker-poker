@@ -4,13 +4,29 @@
 
 static void activate_joker_joker(Joker *self) { state.game.selected_hand.score_pair.mult += 4; }
 
-static void activate_joker_jolly(Joker *self) {
-  if (does_poker_hand_contain(state.game.selected_hand.hand_union, HAND_PAIR))
-    state.game.selected_hand.score_pair.mult += 8;
-}
-
 static void activate_basic_suit_plus_mult(Joker *self, Card *card) {
   if (card->suit == self->suit) state.game.selected_hand.score_pair.mult += 3;
+}
+
+static void activate_basic_hand_plus_mult(Joker *self) {
+  if (!does_poker_hand_contain(state.game.selected_hand.hand_union, self->hand)) return;
+
+  uint8_t mult = 0;
+  switch (self->hand) {
+    case HAND_PAIR:
+      mult = 8;
+      break;
+    case HAND_TWO_PAIR:
+    case HAND_FLUSH:
+      mult = 10;
+      break;
+    case HAND_THREE_OF_KIND:
+    case HAND_STRAIGHT:
+      mult = 12;
+      break;
+  }
+
+  state.game.selected_hand.score_pair.mult += mult;
 }
 
 const Joker JOKERS[] = {
@@ -61,10 +77,47 @@ const Joker JOKERS[] = {
     {
         .id = JOKER_JOLLY,
         .name = "Jolly Joker",
-        .description = "+8 mult when scored hand contains pair",
-        .base_price = 5,
+        .description = "+8 mult when scored hand contains a Pair",
+        .base_price = 3,
         .rarity = RARITY_COMMON,
-        .activate_independent = activate_joker_jolly,
+        .hand = HAND_PAIR,
+        .activate_independent = activate_basic_hand_plus_mult,
+    },
+    {
+        .id = JOKER_ZANY,
+        .name = "Zany Joker",
+        .description = "+12 mult when scored hand contains a Three of a Kind",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_THREE_OF_KIND,
+        .activate_independent = activate_basic_hand_plus_mult,
+    },
+    {
+        .id = JOKER_MAD,
+        .name = "Mad Joker",
+        .description = "+10 mult when scored hand contains a Two Pair",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_TWO_PAIR,
+        .activate_independent = activate_basic_hand_plus_mult,
+    },
+    {
+        .id = JOKER_CRAZY,
+        .name = "Crazy Joker",
+        .description = "+12 mult when scored hand contains a Straight",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_STRAIGHT,
+        .activate_independent = activate_basic_hand_plus_mult,
+    },
+    {
+        .id = JOKER_DROLL,
+        .name = "Droll Joker",
+        .description = "+10 mult when scored hand contains a Flush",
+        .base_price = 4,
+        .rarity = RARITY_COMMON,
+        .hand = HAND_FLUSH,
+        .activate_independent = activate_basic_hand_plus_mult,
     },
 };
 
