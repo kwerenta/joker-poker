@@ -63,6 +63,8 @@ typedef struct Joker {
     double mult;
     uint16_t chips;
     uint8_t counter;
+    // Suit enum
+    uint8_t suit;
   };
 } Joker;
 

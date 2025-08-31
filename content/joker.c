@@ -9,20 +9,8 @@ static void activate_joker_jolly(Joker *self) {
     state.game.selected_hand.score_pair.mult += 8;
 }
 
-static void activate_greedy_joker(Joker *self, Card *card) {
-  if (card->suit == SUIT_DIAMONDS) state.game.selected_hand.score_pair.mult += 3;
-}
-
-static void activate_lusty_joker(Joker *self, Card *card) {
-  if (card->suit == SUIT_HEARTS) state.game.selected_hand.score_pair.mult += 3;
-}
-
-static void activate_wrathful_joker(Joker *self, Card *card) {
-  if (card->suit == SUIT_SPADES) state.game.selected_hand.score_pair.mult += 3;
-}
-
-static void activate_gluttonous_joker(Joker *self, Card *card) {
-  if (card->suit == SUIT_CLUBS) state.game.selected_hand.score_pair.mult += 3;
+static void activate_basic_suit_plus_mult(Joker *self, Card *card) {
+  if (card->suit == self->suit) state.game.selected_hand.score_pair.mult += 3;
 }
 
 const Joker JOKERS[] = {
@@ -40,7 +28,8 @@ const Joker JOKERS[] = {
         .description = "Played cards with Diamond suit give +3 Mult when scored",
         .base_price = 5,
         .rarity = RARITY_COMMON,
-        .activate_on_scored = activate_greedy_joker,
+        .suit = SUIT_DIAMONDS,
+        .activate_on_scored = activate_basic_suit_plus_mult,
     },
     {
         .id = JOKER_LUSTY,
@@ -48,7 +37,8 @@ const Joker JOKERS[] = {
         .description = "Played cards with Heart suit give +3 Mult when scored",
         .base_price = 5,
         .rarity = RARITY_COMMON,
-        .activate_on_scored = activate_lusty_joker,
+        .suit = SUIT_HEARTS,
+        .activate_on_scored = activate_basic_suit_plus_mult,
     },
     {
         .id = JOKER_WRATHFUL,
@@ -56,7 +46,8 @@ const Joker JOKERS[] = {
         .description = "Played cards with Spade suit give +3 Mult when scored",
         .base_price = 5,
         .rarity = RARITY_COMMON,
-        .activate_on_scored = activate_wrathful_joker,
+        .suit = SUIT_SPADES,
+        .activate_on_scored = activate_basic_suit_plus_mult,
     },
     {
         .id = JOKER_GLUTTONOUS,
@@ -64,7 +55,8 @@ const Joker JOKERS[] = {
         .description = "Played cards with Club suit give +3 Mult when scored",
         .base_price = 5,
         .rarity = RARITY_COMMON,
-        .activate_on_scored = activate_gluttonous_joker,
+        .suit = SUIT_CLUBS,
+        .activate_on_scored = activate_basic_suit_plus_mult,
     },
     {
         .id = JOKER_JOLLY,
