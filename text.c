@@ -386,7 +386,7 @@ char *get_stake_name(Stake stake) {
     case STAKE_PURPLE:
       return "Purple Stake";
     case STAKE_ORANGE:
-      return "Orange Stake NOT IMPLEMENTED";
+      return "Orange Stake";
     case STAKE_GOLD:
       return "Gold Stake NOT IMPLEMENTED";
   }
@@ -407,7 +407,6 @@ char *get_stake_description(Stake stake) {
     case STAKE_PURPLE:
       return "Required score scales even faster for each Ante";
     case STAKE_ORANGE:
-      // TODO Implement when stickers will be added
       return "30% chance for Jokers in shops or booster packs to have a Perishable sticker (Debuffed after 5 rounds)";
     case STAKE_GOLD:
       // TODO Implement when stickers will be added

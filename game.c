@@ -386,6 +386,13 @@ void play_hand() {
             : state.game.discards.total;
     state.game.stats.discards.remaining += state.game.discards.remaining;
 
+    cvector_for_each(state.game.jokers.cards, Joker, joker) {
+      if (joker->sticker & STICKER_PERISHABLE) {
+        joker->perishable_count--;
+        if (joker->perishable_count == 0) joker->status |= CARD_STATUS_DEBUFFED;
+      }
+    }
+
     change_stage(STAGE_CASH_OUT);
   } else if (state.game.hands.remaining == 0) {
     change_stage(STAGE_GAME_OVER);
@@ -1077,6 +1084,7 @@ uint8_t add_item_to_player(ShopItem *item) {
   switch (item->type) {
     case SHOP_ITEM_JOKER:
       if (cvector_size(state.game.jokers.cards) >= state.game.jokers.size) return 0;
+      if (item->joker.sticker & STICKER_PERISHABLE) item->joker.perishable_count = 5;
 
       cvector_push_back(state.game.jokers.cards, item->joker);
       break;
@@ -1932,5 +1940,7 @@ void disable_boss_blind() {
 
   cvector_for_each(state.game.hand.cards, Card, card) card->status = CARD_STATUS_NORMAL;
   cvector_for_each(state.game.deck, Card, card) card->status = CARD_STATUS_NORMAL;
-  cvector_for_each(state.game.jokers.cards, Joker, joker) joker->status = CARD_STATUS_NORMAL;
+  cvector_for_each(state.game.jokers.cards, Joker, joker) {
+    if (!(joker->sticker & STICKER_PERISHABLE) || joker->perishable_count > 0) joker->status = CARD_STATUS_NORMAL;
+  }
 }
