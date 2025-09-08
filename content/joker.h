@@ -38,6 +38,13 @@ typedef enum { RARITY_COMMON, RARITY_UNCOMMON, RARITY_RARE, RARITY_LEGENDARY } R
 
 typedef enum { CARD_STATUS_NORMAL = 0, CARD_STATUS_FACE_DOWN = 1 << 0, CARD_STATUS_DEBUFFED = 1 << 1 } CardStatus;
 
+typedef enum {
+  STICKER_NONE = 0,
+  STICKER_ETERNAL = 1 << 0,
+  STICKER_PERISHABLE = 1 << 1,
+  STICKER_RENTAL = 1 << 2
+} JokerSticker;
+
 typedef struct Joker {
   JokerId id;
   const char *name;
@@ -48,6 +55,8 @@ typedef struct Joker {
   Rarity rarity;
   Edition edition;
   CardStatus status;
+  JokerSticker sticker;
+  uint8_t perishable_count;
   bool is_non_copyable;
 
   void (*activate_on_played)(struct Joker *self);
