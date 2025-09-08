@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "content/joker.h"
 #include "cvector.h"
 #include "game.h"
 #include "state.h"
@@ -102,7 +103,7 @@ Joker random_weighted_joker(uint16_t rarity_weights[4]) {
   Joker joker = JOKERS[random_weighted(weights, JOKER_COUNT)];
 
   // Base, Foil, Holographic, Polychrome, Negative
-  uint16_t edition_weights[5] = {960, 20, 14, 3, 3};
+  uint16_t edition_weights[] = {960, 20, 14, 3, 3};
   for (uint8_t i = 1; i < 4; i++) {
     uint8_t multiplier = 1;
     if (state.game.vouchers & VOUCHER_GLOW_UP)
@@ -114,6 +115,20 @@ Joker random_weighted_joker(uint16_t rarity_weights[4]) {
     edition_weights[i] *= multiplier;
   }
   joker.edition = random_weighted(edition_weights, 5);
+
+  // None, Eternal, Perishable
+  uint16_t sticker_weights[] = {100, 0, 0};
+  if (state.game.stake >= STAKE_BLACK) {
+    sticker_weights[0] -= 30;
+    sticker_weights[1] += 30;
+  }
+  if (state.game.stake >= STAKE_ORANGE) {
+    sticker_weights[0] -= 30;
+    sticker_weights[2] += 30;
+  }
+  joker.sticker = random_weighted(sticker_weights, 3);
+
+  if (state.game.stake >= STAKE_GOLD && random_percent(0.3)) joker.sticker |= STICKER_RENTAL;
 
   return joker;
 }
