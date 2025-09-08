@@ -388,7 +388,7 @@ char *get_stake_name(Stake stake) {
     case STAKE_ORANGE:
       return "Orange Stake";
     case STAKE_GOLD:
-      return "Gold Stake NOT IMPLEMENTED";
+      return "Gold Stake";
   }
 }
 
@@ -409,7 +409,6 @@ char *get_stake_description(Stake stake) {
     case STAKE_ORANGE:
       return "30% chance for Jokers in shops or booster packs to have a Perishable sticker (Debuffed after 5 rounds)";
     case STAKE_GOLD:
-      // TODO Implement when stickers will be added
       return "30% chance for Jokers in shops or booster packs to have a Rental sticker (Costs $3 per round, can be "
              "bought for $1)";
   }

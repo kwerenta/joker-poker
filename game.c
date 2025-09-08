@@ -387,6 +387,7 @@ void play_hand() {
     state.game.stats.discards.remaining += state.game.discards.remaining;
 
     cvector_for_each(state.game.jokers.cards, Joker, joker) {
+      if (joker->sticker & STICKER_RENTAL) state.game.money -= 3;
       if (joker->sticker & STICKER_PERISHABLE) {
         joker->perishable_count--;
         if (joker->perishable_count == 0) joker->status |= CARD_STATUS_DEBUFFED;
@@ -1162,6 +1163,7 @@ uint8_t get_shop_item_price(ShopItem *item) {
       price = 4;
       break;
     case SHOP_ITEM_JOKER:
+      if (item->joker.sticker & STICKER_RENTAL) return 1;
       price = item->joker.base_price + get_edition_cost(item->joker.edition);
       break;
   }
