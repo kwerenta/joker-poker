@@ -237,6 +237,20 @@ void render_joker(Joker *joker, Rect *dst) {
 
   render_atlas_sprite(atlas, &sprite, dst);
   render_edition(joker->edition, dst);
+
+  if (joker->sticker == STICKER_NONE) return;
+
+  Rect sticker_dst = {.x = dst->x + dst->w - 16, .y = dst->y + 8, .w = 8, .h = 8};
+  if (joker->sticker & STICKER_ETERNAL) {
+    draw_rectangle(&sticker_dst, RGBA(209, 148, 248, 200));
+  } else if (joker->sticker & STICKER_PERISHABLE) {
+    draw_rectangle(&sticker_dst, RGBA(106, 163, 234, 200));
+  }
+
+  if (joker->sticker & STICKER_RENTAL) {
+    sticker_dst.y += 16;
+    draw_rectangle(&sticker_dst, RGBA(219, 140, 38, 200));
+  }
 }
 
 void render_consumable(Consumable *consumable, Rect *dst) {
