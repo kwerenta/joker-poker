@@ -380,7 +380,7 @@ char *get_stake_name(Stake stake) {
     case STAKE_GREEN:
       return "Green Stake";
     case STAKE_BLACK:
-      return "Black Stake NOT IMPLEMENTED";
+      return "Black Stake";
     case STAKE_BLUE:
       return "Blue Stake";
     case STAKE_PURPLE:
@@ -401,7 +401,6 @@ char *get_stake_description(Stake stake) {
     case STAKE_GREEN:
       return "Required score scales faster for each Ante";
     case STAKE_BLACK:
-      // TODO Implement when stickers will be added
       return "30% chance for Jokers in shops or booster packs to have an Eternal sticker (Can't be sold or destroyed)";
     case STAKE_BLUE:
       return "-1 Discard";

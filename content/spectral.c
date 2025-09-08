@@ -3,6 +3,7 @@
 #include "../random.h"
 #include "../state.h"
 #include "cvector.h"
+#include "joker.h"
 
 const char *get_spectral_card_name(Spectral spectral) {
   switch (spectral) {
@@ -220,11 +221,18 @@ uint8_t use_spectral_card(Spectral spectral) {
       break;
 
     case SPECTRAL_ANKH: {
+      // TODO Ignore negative edition
       uint8_t joker_to_copy = random_vector_index(state.game.jokers.cards);
-      Joker joker = state.game.jokers.cards[joker_to_copy];
-      // TODO Don't remove eternal jokers when they will be added
-      cvector_clear(state.game.jokers.cards);
-      for (uint8_t i = 0; i < 2; i++) cvector_push_back(state.game.jokers.cards, joker);
+      cvector_vector_type(Joker) jokers = NULL;
+
+      for (uint8_t i = 0; i < cvector_size(state.game.jokers.cards); i++) {
+        if (i == joker_to_copy || state.game.jokers.cards[i].sticker & STICKER_ETERNAL)
+          cvector_push_back(jokers, state.game.jokers.cards[i]);
+      }
+      cvector_push_back(jokers, state.game.jokers.cards[joker_to_copy]);
+
+      cvector_swap(state.game.jokers.cards, jokers, Joker);
+      cvector_destroy(jokers);
       break;
     }
 
@@ -235,12 +243,16 @@ uint8_t use_spectral_card(Spectral spectral) {
     case SPECTRAL_HEX: {
       // TODO Ignore jokers with editions
       uint8_t joker_to_upgrade = random_vector_index(state.game.jokers.cards);
-      Joker joker = state.game.jokers.cards[joker_to_upgrade];
-      // TODO Don't remove eternal jokers when they will be added
-      cvector_clear(state.game.jokers.cards);
+      state.game.jokers.cards[joker_to_upgrade].edition = EDITION_POLYCHROME;
+      cvector_vector_type(Joker) jokers = NULL;
 
-      joker.edition = EDITION_POLYCHROME;
-      cvector_push_back(state.game.jokers.cards, joker);
+      for (uint8_t i = 0; i < cvector_size(state.game.jokers.cards); i++) {
+        if (i == joker_to_upgrade || state.game.jokers.cards[i].sticker & STICKER_ETERNAL)
+          cvector_push_back(jokers, state.game.jokers.cards[i]);
+      }
+
+      cvector_swap(state.game.jokers.cards, jokers, Joker);
+      cvector_destroy(jokers);
       break;
     }
 

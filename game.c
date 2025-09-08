@@ -1332,6 +1332,8 @@ void sell_shop_item() {
   } else {
     item.type = SHOP_ITEM_JOKER;
     item.joker = state.game.jokers.cards[item_index];
+
+    if (item.joker.sticker & STICKER_ETERNAL) return;
     cvector_erase(state.game.jokers.cards, item_index);
 
     if (state.stage == STAGE_GAME && state.game.current_blind->is_active &&
