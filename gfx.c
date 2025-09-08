@@ -240,7 +240,7 @@ void render_joker(Joker *joker, Rect *dst) {
 
   if (joker->sticker == STICKER_NONE) return;
 
-  Rect sticker_dst = {.x = dst->x + dst->w - 16, .y = dst->y + 8, .w = 8, .h = 8};
+  Rect sticker_dst = {.x = dst->x + 8, .y = dst->y + 8, .w = 8, .h = 8};
   if (joker->sticker & STICKER_ETERNAL) {
     draw_rectangle(&sticker_dst, RGBA(209, 148, 248, 200));
   } else if (joker->sticker & STICKER_PERISHABLE) {
