@@ -728,7 +728,7 @@ uint16_t evaluate_hand() {
   }
 
   if (x_of_kind[2 - 2] >= 2) result |= HAND_TWO_PAIR;
-  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1) result |= HAND_FULL_HOUSE;
+  if (x_of_kind[3 - 2] == 1 && x_of_kind[2 - 2] == 1) result |= HAND_TWO_PAIR | HAND_FULL_HOUSE;
 
   if ((result & HAND_FLUSH) != 0 && (result & HAND_STRAIGHT) != 0) result |= HAND_STRAIGHT_FLUSH;
   if ((result & HAND_FLUSH) != 0 && (result & HAND_FULL_HOUSE) != 0) result |= HAND_FLUSH_HOUSE;

@@ -16,7 +16,20 @@ struct Card;
 
 typedef enum {
   JOKER_JOKER = 1,
-  JOKER_JOLLY = 6,
+  JOKER_GREEDY,
+  JOKER_LUSTY,
+  JOKER_WRATHFUL,
+  JOKER_GLUTTONOUS,
+  JOKER_JOLLY,
+  JOKER_ZANY,
+  JOKER_MAD,
+  JOKER_CRAZY,
+  JOKER_DROLL,
+  JOKER_SLY,
+  JOKER_WILY,
+  JOKER_CLEVER,
+  JOKER_DEVIOUS,
+  JOKER_CRAFTY,
 } JokerId;
 
 typedef enum { EDITION_BASE, EDITION_FOIL, EDITION_HOLOGRAPHIC, EDITION_POLYCHROME, EDITION_NEGATIVE } Edition;
@@ -59,6 +72,10 @@ typedef struct Joker {
     double mult;
     uint16_t chips;
     uint8_t counter;
+    // Suit enum
+    uint8_t suit;
+    // PokerHand enum
+    uint16_t hand;
   };
 } Joker;
 
