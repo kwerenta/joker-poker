@@ -380,15 +380,15 @@ char *get_stake_name(Stake stake) {
     case STAKE_GREEN:
       return "Green Stake";
     case STAKE_BLACK:
-      return "Black Stake NOT IMPLEMENTED";
+      return "Black Stake";
     case STAKE_BLUE:
       return "Blue Stake";
     case STAKE_PURPLE:
       return "Purple Stake";
     case STAKE_ORANGE:
-      return "Orange Stake NOT IMPLEMENTED";
+      return "Orange Stake";
     case STAKE_GOLD:
-      return "Gold Stake NOT IMPLEMENTED";
+      return "Gold Stake";
   }
 }
 
@@ -401,17 +401,14 @@ char *get_stake_description(Stake stake) {
     case STAKE_GREEN:
       return "Required score scales faster for each Ante";
     case STAKE_BLACK:
-      // TODO Implement when stickers will be added
       return "30% chance for Jokers in shops or booster packs to have an Eternal sticker (Can't be sold or destroyed)";
     case STAKE_BLUE:
       return "-1 Discard";
     case STAKE_PURPLE:
       return "Required score scales even faster for each Ante";
     case STAKE_ORANGE:
-      // TODO Implement when stickers will be added
       return "30% chance for Jokers in shops or booster packs to have a Perishable sticker (Debuffed after 5 rounds)";
     case STAKE_GOLD:
-      // TODO Implement when stickers will be added
       return "30% chance for Jokers in shops or booster packs to have a Rental sticker (Costs $3 per round, can be "
              "bought for $1)";
   }
